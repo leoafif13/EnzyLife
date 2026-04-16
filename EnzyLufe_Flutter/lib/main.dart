@@ -26,9 +26,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════
-//  MainScreen: shell dengan header + navbar
-// ══════════════════════════════════════════════
+//  MainScreen
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -96,9 +94,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// ══════════════════════════════════════════════
 //  HomeScreen
-// ══════════════════════════════════════════════
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -115,9 +111,9 @@ class HomeScreen extends StatelessWidget {
 
   static const _favorites = [
     _FavoriteData(label: 'Artikel', icon: Icons.article_outlined),
-    _FavoriteData(label: 'Video',   icon: Icons.play_circle_outline_rounded),
+    _FavoriteData(label: 'Kalkulator',   icon: Icons.play_circle_outline_rounded),
     _FavoriteData(label: 'Produk',  icon: Icons.eco_outlined),
-    _FavoriteData(label: 'Forum',   icon: Icons.forum_outlined),
+    _FavoriteData(label: 'Profil',   icon: Icons.person_outline),
   ];
 
   @override
@@ -376,10 +372,8 @@ class _ArticleCard extends StatelessWidget {
                   child: Icon(Icons.image_outlined, size: 36,
                       color: _green500.withOpacity(0.4)),
                 ),
-                // TODO: ganti dengan Image.network(url) / Image.asset(path)
               ),
             ),
-            // Teks
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(10),
