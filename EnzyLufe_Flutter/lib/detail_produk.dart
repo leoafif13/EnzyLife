@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'app_color.dart';
 import 'belanja_page.dart';
 import 'shopping_cart.dart';
+import 'widgets/sub_page_appbar.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -14,11 +16,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _carouselIndex = 0;
   final _pageController = PageController();
   int _qty = 1;
-
-  static const _green500 = Color(0xFF4CAF50);
-  static const _green900 = Color(0xFF1B5E20);
-  static const _green50  = Color(0xFFE8F5E9);
-  static const _grey600  = Color(0xFF757575);
 
   // Dummy gambar carousel (placeholder)
   static const _imageCount = 3;
@@ -50,7 +47,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       SnackBar(
         content: Text('$_qty ${widget.product.name} ditambahkan ke keranjang'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: _green500,
+        backgroundColor: AppColors.green500,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
@@ -68,7 +65,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final cartQty = CartState.instance.qty(p.id);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -95,7 +92,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   top: 6, right: 6,
                   child: Container(
                     width: 15, height: 15,
-                    decoration: const BoxDecoration(color: _green500, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: AppColors.green500, shape: BoxShape.circle),
                     child: Center(
                       child: Text('$cartQty',
                           style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700)),
@@ -127,12 +124,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             onPageChanged: (i) => setState(() => _carouselIndex = i),
                             itemBuilder: (_, i) => Container(
                               margin: const EdgeInsets.all(0),
-                              color: _green50,
+                              color: AppColors.green50,
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
                                   // TODO: ganti dengan Image.network/asset per indeks
-                                  Icon(Icons.image_outlined, size: 64, color: _green500.withOpacity(0.2)),
+                                  Icon(Icons.image_outlined, size: 64, color: AppColors.green500.withOpacity(0.2)),
                                   Positioned(
                                     top: 12, right: 12,
                                     child: Container(
@@ -161,7 +158,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               width: _carouselIndex == i ? 20 : 7,
                               height: 7,
                               decoration: BoxDecoration(
-                                color: _carouselIndex == i ? _green500 : const Color(0xFFDDDDDD),
+                                color: _carouselIndex == i ? AppColors.green500 : const Color(0xFFDDDDDD),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             )),
@@ -180,14 +177,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 width: 48, height: 48,
                                 margin: const EdgeInsets.only(right: 8),
                                 decoration: BoxDecoration(
-                                  color: _green50,
+                                  color: AppColors.green50,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: _carouselIndex == i ? _green500 : Colors.transparent,
+                                    color: _carouselIndex == i ? AppColors.green500 : Colors.transparent,
                                     width: 2,
                                   ),
                                 ),
-                                child: Icon(Icons.image_outlined, size: 20, color: _green500.withOpacity(0.3)),
+                                child: Icon(Icons.image_outlined, size: 20, color: AppColors.green500.withOpacity(0.3)),
                               ),
                             ),
                           ),
@@ -216,17 +213,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: _green50,
+                                  color: AppColors.green50,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: const Text('Populer',
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _green500)),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.green500)),
                               ),
                           ],
                         ),
                         const SizedBox(height: 10),
                         Text(_fmt(p.price),
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: _green500)),
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500)),
                         const SizedBox(height: 12),
                         // Rating ringkasan
                         Row(
@@ -276,7 +273,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         const Spacer(),
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: _green500),
+                            border: Border.all(color: AppColors.green500),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
@@ -286,15 +283,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   child: Icon(Icons.remove, size: 16,
-                                      color: _qty > 1 ? _green500 : Colors.grey[300]),
+                                      color: _qty > 1 ? AppColors.green500 : Colors.grey[300]),
                                 ),
                               ),
-                              Text('$_qty', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _green500)),
+                              Text('$_qty', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.green500)),
                               GestureDetector(
                                 onTap: () => setState(() => _qty++),
                                 child: const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  child: Icon(Icons.add, size: 16, color: _green500),
+                                  child: Icon(Icons.add, size: 16, color: AppColors.green500),
                                 ),
                               ),
                             ],
@@ -320,7 +317,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
                             TextButton(
                               onPressed: () {},
-                              style: TextButton.styleFrom(foregroundColor: _green500, padding: EdgeInsets.zero,
+                              style: TextButton.styleFrom(foregroundColor: AppColors.green500, padding: EdgeInsets.zero,
                                   minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                               child: const Text('Lihat semua', style: TextStyle(fontSize: 13)),
                             ),
@@ -333,7 +330,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             Column(
                               children: [
                                 Text(_avgRating.toStringAsFixed(1),
-                                    style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w800, color: _green500)),
+                                    style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w800, color: AppColors.green500)),
                                 Row(
                                   children: List.generate(5, (i) => Icon(
                                     i < _avgRating.round() ? Icons.star_rounded : Icons.star_outline_rounded,
@@ -366,7 +363,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             child: LinearProgressIndicator(
                                               value: pct,
                                               backgroundColor: const Color(0xFFF0F0F0),
-                                              valueColor: const AlwaysStoppedAnimation(_green500),
+                                              valueColor: const AlwaysStoppedAnimation(AppColors.green500),
                                               minHeight: 6,
                                             ),
                                           ),
@@ -419,7 +416,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     icon: const Icon(Icons.shopping_cart_outlined, size: 18),
                     label: const Text('Tambah ke Keranjang', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _green500,
+                      backgroundColor: AppColors.green500,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),

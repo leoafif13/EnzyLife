@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_color.dart';
 import 'widgets/app_header.dart';
 import 'widgets/bottom_navbar.dart';
 import 'login_page.dart';
@@ -80,7 +81,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final config = _pageConfigs[_selectedIndex];
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgPage,
       appBar: AppHeader(
         action: config.action,
         onActionTap: () => _handleAction(config.action),
@@ -98,10 +99,6 @@ class _MainScreenState extends State<MainScreen> {
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const _green500 = Color(0xFF4CAF50);
-  static const _green900 = Color(0xFF1B5E20);
-  static const _green50  = Color(0xFFE8F5E9);
-
   static const _articles = [
     _ArticleData(title: 'Kegiatan Membuat Eco Enzim di SDN 010 Batam', author: 'Admin'),
     _ArticleData(title: 'Kegiatan Membuat Eco Enzim di SDN 010 Batam', author: 'Admin'),
@@ -111,7 +108,7 @@ class HomeScreen extends StatelessWidget {
 
   static const _favorites = [
     _FavoriteData(label: 'Artikel', icon: Icons.article_outlined),
-    _FavoriteData(label: 'Kalkulator',   icon: Icons.play_circle_outline_rounded),
+    _FavoriteData(label: 'Kalkulator',   icon: Icons.calculate_outlined),
     _FavoriteData(label: 'Produk',  icon: Icons.eco_outlined),
     _FavoriteData(label: 'Profil',   icon: Icons.person_outline),
   ];
@@ -154,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: _green500,
+                          color: AppColors.green500,
                           letterSpacing: -0.3,
                         ),
                       ),
@@ -162,14 +159,14 @@ class HomeScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: _green50,
+                          color: AppColors.green50,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
                           '🌿  Hidup sehat dimulai dari sini',
                           style: TextStyle(
                             fontSize: 11,
-                            color: _green900,
+                            color: AppColors.green900,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -181,7 +178,7 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   width: 56,
                   height: 56,
-                  decoration: const BoxDecoration(color: _green50, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
                   padding: const EdgeInsets.all(12),
                   child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
                 ),
@@ -222,7 +219,7 @@ class HomeScreen extends StatelessWidget {
                     TextButton(
                       onPressed: () {},
                       style: TextButton.styleFrom(
-                        foregroundColor: _green500,
+                        foregroundColor: AppColors.green500,
                         padding: EdgeInsets.zero,
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -286,9 +283,6 @@ class _FavoriteItem extends StatelessWidget {
   final _FavoriteData data;
   const _FavoriteItem({super.key, required this.data});
 
-  static const _green500 = Color(0xFF4CAF50);
-  static const _green50  = Color(0xFFE8F5E9);
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -297,7 +291,7 @@ class _FavoriteItem extends StatelessWidget {
         width: 72,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -313,8 +307,8 @@ class _FavoriteItem extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: const BoxDecoration(color: _green50, shape: BoxShape.circle),
-              child: Icon(data.icon, color: _green500, size: 22),
+              decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+              child: Icon(data.icon, color: AppColors.green500, size: 22),
             ),
             const SizedBox(height: 8),
             Text(
@@ -340,16 +334,13 @@ class _ArticleCard extends StatelessWidget {
   final _ArticleData data;
   const _ArticleCard({super.key, required this.data});
 
-  static const _green500 = Color(0xFF4CAF50);
-  static const _green50  = Color(0xFFE8F5E9);
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {},
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -367,10 +358,10 @@ class _ArticleCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: Container(
                 height: 100,
-                color: _green50,
+                color: AppColors.green50,
                 child: Center(
                   child: Icon(Icons.image_outlined, size: 36,
-                      color: _green500.withOpacity(0.4)),
+                      color: AppColors.green500.withOpacity(0.4)),
                 ),
               ),
             ),
@@ -404,7 +395,7 @@ class _ArticleCard extends StatelessWidget {
                     const Text(
                       'Baca selengkapnya →',
                       style: TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w600, color: _green500),
+                          fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.green500),
                     ),
                   ],
                 ),
