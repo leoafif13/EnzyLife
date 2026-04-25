@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_color.dart';
 import 'shopping_cart.dart';
 import 'detail_produk.dart';
+import 'checkout_page.dart';
 
 // ══════════════════════════════════════════════
 //  Model produk
@@ -33,12 +34,18 @@ class CartState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void remove(String id) {
+  void removeOne(String id) {
     if (_items.containsKey(id)) {
       _items[id] = _items[id]! - 1;
       if (_items[id]! <= 0) _items.remove(id);
       notifyListeners();
     }
+  }
+
+  // Hapus seluruh produk dari keranjang (untuk swipe delete)
+  void removeAll(String id) {
+    _items.remove(id);
+    notifyListeners();
   }
 
   void clear() { _items.clear(); notifyListeners(); }
@@ -99,8 +106,9 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final popular   = _products.where((p) => p.isPopular).isNotEmpty
-                      ? _products.firstWhere((p) => p.isPopular) : null;
+    final cart     = CartState.instance;
+    final popular  = _products.where((p) => p.isPopular).isNotEmpty
+                     ? _products.firstWhere((p) => p.isPopular) : null;
     final listProds = _filtered.where((p) => _query.isNotEmpty || !p.isPopular).toList();
 
     return Scaffold(
@@ -152,7 +160,7 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
             if (popular != null && _query.isEmpty) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _FeaturedCard(product: popular, onChanged: _refresh),
+                child: _FeaturedCard(product: popular, onChanged: _refresh, fmt: _fmt),
               ),
               const SizedBox(height: 16),
             ],
@@ -177,84 +185,94 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
 class _FeaturedCard extends StatelessWidget {
   final Product product;
   final VoidCallback onChanged;
-  const _FeaturedCard({required this.product, required this.onChanged});
+  final String Function(int) fmt;
+  const _FeaturedCard({required this.product, required this.onChanged, required this.fmt});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.green900, AppColors.green700],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AppColors.heroShadow,
-      ),
-      child: Stack(
-        children: [
-          Positioned(right: -20, top: -20,
-              child: Container(width: 120, height: 120,
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.07), shape: BoxShape.circle))),
-          Positioned(right: 20, bottom: -30,
-              child: Container(width: 80, height: 80,
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), shape: BoxShape.circle))),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20)),
-                        child: const Text('Populer',
-                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(product.name,
-                          style: const TextStyle(color: Colors.white, fontSize: 20,
-                              fontWeight: FontWeight.w800, letterSpacing: -0.3)),
-                      const SizedBox(height: 4),
-                      Text(product.description,
-                          style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 12, height: 1.4)),
-                      const SizedBox(height: 14),
-                      ElevatedButton(
-                        onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product))),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.green900,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: const Text('Lihat Detail',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    width: 90, height: 90,
-                    color: Colors.white.withOpacity(0.15),
-                    child: const Icon(Icons.image_outlined, size: 36, color: Colors.white38),
-                    // TODO: ganti dengan Image.network(url) / Image.asset(path)
-                  ),
-                ),
-              ],
-            ),
+    return GestureDetector(
+      // Tap card → detail produk
+      onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product))),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.green900, AppColors.green700],
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
           ),
-        ],
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: AppColors.heroShadow,
+        ),
+        child: Stack(
+          children: [
+            Positioned(right: -20, top: -20, child: Container(width: 120, height: 120,
+                decoration: BoxDecoration(color: Colors.white.withOpacity(0.07), shape: BoxShape.circle))),
+            Positioned(right: 20, bottom: -30, child: Container(width: 80, height: 80,
+                decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), shape: BoxShape.circle))),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20)),
+                          child: const Text('Populer',
+                              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(product.name,
+                            style: const TextStyle(color: Colors.white, fontSize: 20,
+                                fontWeight: FontWeight.w800, letterSpacing: -0.3)),
+                        const SizedBox(height: 4),
+                        Text(product.description,
+                            style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 12, height: 1.4)),
+                        const SizedBox(height: 14),
+                        // Tombol Beli → checkout langsung
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => CheckoutPage(
+                                items: {product.id: 1},
+                                allProducts: const [
+                                  Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
+                                  Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
+                                  Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
+                                  Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
+                                  Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
+                                ],
+                              ))),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white, foregroundColor: AppColors.green900,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Beli Sekarang',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: 90, height: 90,
+                      color: Colors.white.withOpacity(0.15),
+                      child: const Icon(Icons.image_outlined, size: 36, color: Colors.white38),
+                      // TODO: ganti dengan Image.network(url) / Image.asset(path)
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -267,133 +285,147 @@ class _ProductCard extends StatelessWidget {
   final VoidCallback onChanged;
   const _ProductCard({required this.product, required this.fmtPrice, required this.onChanged});
 
+  static const _allProducts = [
+    Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
+    Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
+    Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
+    Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
+    Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final cart = CartState.instance;
     final qty  = cart.qty(product.id);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: 80, height: 80, color: AppColors.green50,
-                child: Icon(Icons.image_outlined, size: 28,
-                    color: AppColors.green500.withOpacity(0.3)),
-                // TODO: ganti dengan Image.network(url) / Image.asset(path)
+    return GestureDetector(
+      // Tap card → detail produk
+      onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product))),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: AppColors.bgCard,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppColors.cardShadow,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              // Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 80, height: 80, color: AppColors.green50,
+                  child: Icon(Icons.image_outlined, size: 28,
+                      color: AppColors.green500.withOpacity(0.3)),
+                  // TODO: ganti dengan Image.network(url) / Image.asset(path)
+                ),
               ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(product.name,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
-                          color: AppColors.text1)),
-                  const SizedBox(height: 4),
-                  Text(product.description,
-                      maxLines: 2, overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500], height: 1.4)),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(product.name,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
+                            color: AppColors.text1)),
+                    const SizedBox(height: 4),
+                    Text(product.description,
+                        maxLines: 2, overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500], height: 1.4)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(fmtPrice(product.price),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                                color: AppColors.text1)),
+                        Row(
+                          children: [
+                            // Tombol keranjang
+                            _IconBtn(
+                              icon: Icons.shopping_cart_outlined,
+                              onTap: () { cart.add(product.id); onChanged(); },
+                            ),
+                            const SizedBox(width: 8),
+                            // Tombol Beli → checkout langsung
+                            _SmallBtn(
+                              label: 'Beli',
+                              onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => CheckoutPage(
+                                    items: {product.id: 1},
+                                    allProducts: _allProducts,
+                                  ))),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    // Badge qty di keranjang
+                    if (qty > 0) ...[
+                      const SizedBox(height: 4),
                       Row(
                         children: [
                           const Icon(Icons.shopping_cart_outlined,
-                              size: 13, color: AppColors.green500),
-                          const SizedBox(width: 4),
-                          Text(fmtPrice(product.price),
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                                  color: AppColors.text1)),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          _Btn(
-                            label: 'Detail', outlined: true,
-                            onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product))),
-                          ),
-                          const SizedBox(width: 6),
-                          if (qty == 0)
-                            _Btn(label: 'Beli',
-                                onTap: () { cart.add(product.id); onChanged(); })
-                          else
-                            _QtyRow(qty: qty,
-                                onAdd:    () { cart.add(product.id); onChanged(); },
-                                onRemove: () { cart.remove(product.id); onChanged(); }),
+                              size: 11, color: AppColors.green500),
+                          const SizedBox(width: 3),
+                          Text('$qty item di keranjang',
+                              style: const TextStyle(fontSize: 10,
+                                  color: AppColors.green500, fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// ── Small button ──────────────────────────────
-class _Btn extends StatelessWidget {
-  final String label;
-  final bool outlined;
+// ── Icon button keranjang ─────────────────────
+class _IconBtn extends StatelessWidget {
+  final IconData icon;
   final VoidCallback onTap;
-  const _Btn({required this.label, required this.onTap, this.outlined = false});
+  const _IconBtn({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      width: 34, height: 34,
       decoration: BoxDecoration(
-        color: outlined ? Colors.transparent : AppColors.green500,
+        color: AppColors.green50,
         borderRadius: BorderRadius.circular(8),
-        border: outlined ? Border.all(color: AppColors.green500) : null,
+        border: Border.all(color: AppColors.green200),
       ),
-      child: Text(label,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-              color: outlined ? AppColors.green500 : Colors.white)),
+      child: const Icon(Icons.shopping_cart_outlined, size: 16, color: AppColors.green500),
     ),
   );
 }
 
-// ── Qty row ───────────────────────────────────
-class _QtyRow extends StatelessWidget {
-  final int qty;
-  final VoidCallback onAdd, onRemove;
-  const _QtyRow({required this.qty, required this.onAdd, required this.onRemove});
+// ── Small button ──────────────────────────────
+class _SmallBtn extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _SmallBtn({required this.label, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(
-        border: Border.all(color: AppColors.green500),
-        borderRadius: BorderRadius.circular(8)),
-    child: Row(
-      children: [
-        GestureDetector(onTap: onRemove,
-            child: const Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                child: Icon(Icons.remove, size: 14, color: AppColors.green500))),
-        Text('$qty',
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                color: AppColors.green500)),
-        GestureDetector(onTap: onAdd,
-            child: const Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                child: Icon(Icons.add, size: 14, color: AppColors.green500))),
-      ],
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      decoration: BoxDecoration(
+        color: AppColors.green500,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
     ),
   );
 }

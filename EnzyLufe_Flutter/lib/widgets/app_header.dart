@@ -1,26 +1,18 @@
 import 'package:flutter/material.dart';
+import '../belanja_page.dart';
 
+// ─────────────────────────────────────────────
+//  Enum action untuk header
+// ─────────────────────────────────────────────
 enum HeaderAction {
-  logout,
-  list,
-  cart,
-  notification,
-  edit,
-  search,
-  none, // kalau tidak mau ada icon kanan
+  logout, list, cart, notification, edit, search, none,
 }
 
 // ─────────────────────────────────────────────
-//  Widget utama: AppHeader
-//
-//  Cara pakai di tiap halaman:
-//
-//    AppHeader(action: HeaderAction.logout, onActionTap: () { ... })
-//    AppHeader(action: HeaderAction.list,   onActionTap: () { ... })
-//    AppHeader(action: HeaderAction.cart,   onActionTap: () { ... })
-//    AppHeader(action: HeaderAction.none)   // tanpa tombol kanan
+//  AppHeader — StatefulWidget supaya bisa
+//  menampilkan badge keranjang secara realtime
 // ─────────────────────────────────────────────
-class AppHeader extends StatelessWidget implements PreferredSizeWidget {
+class AppHeader extends StatefulWidget implements PreferredSizeWidget {
   final HeaderAction action;
   final VoidCallback? onActionTap;
 
@@ -30,7 +22,29 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onActionTap,
   });
 
-  // ── Mapping enum → IconData ──────────────────
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  State<AppHeader> createState() => _AppHeaderState();
+}
+
+class _AppHeaderState extends State<AppHeader> {
+  @override
+  void initState() {
+    super.initState();
+    // Dengarkan perubahan cart supaya badge update otomatis
+    CartState.instance.addListener(_refresh);
+  }
+
+  void _refresh() => setState(() {});
+
+  @override
+  void dispose() {
+    CartState.instance.removeListener(_refresh);
+    super.dispose();
+  }
+
   static IconData _iconFor(HeaderAction action) {
     switch (action) {
       case HeaderAction.logout:       return Icons.logout_rounded;
@@ -39,22 +53,19 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       case HeaderAction.notification: return Icons.notifications_outlined;
       case HeaderAction.edit:         return Icons.edit_outlined;
       case HeaderAction.search:       return Icons.search_rounded;
-      case HeaderAction.none:         return Icons.close; // tidak ditampilkan
+      case HeaderAction.none:         return Icons.close;
     }
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
   Widget build(BuildContext context) {
+    final cartTotal = CartState.instance.totalItems;
+
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
       scrolledUnderElevation: 1,
       shadowColor: Colors.black12,
-
-      // ── Kiri: logo + nama aplikasi ─────────────
       titleSpacing: 16,
       title: Row(
         mainAxisSize: MainAxisSize.min,
@@ -72,21 +83,46 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-
-      // ── Kanan: action icon dinamis ──────────────
       actions: [
-        if (action != HeaderAction.none)
+        if (widget.action != HeaderAction.none)
           Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: IconButton(
-              onPressed: onActionTap,
-              icon: Icon(
-                _iconFor(action),
-                color: const Color(0xFF1A1A1A),
-                size: 24,
-              ),
-              splashRadius: 22,
-              tooltip: action.name,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                IconButton(
+                  onPressed: widget.onActionTap,
+                  icon: Icon(
+                    _iconFor(widget.action),
+                    color: const Color(0xFF1A1A1A),
+                    size: 24,
+                  ),
+                  splashRadius: 22,
+                  tooltip: widget.action.name,
+                ),
+                // Badge jumlah item keranjang — hanya tampil di tab Belanja
+                if (widget.action == HeaderAction.cart && cartTotal > 0)
+                  Positioned(
+                    top: 6, right: 6,
+                    child: Container(
+                      width: 16, height: 16,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4CAF50),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          cartTotal > 9 ? '9+' : '$cartTotal',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
       ],

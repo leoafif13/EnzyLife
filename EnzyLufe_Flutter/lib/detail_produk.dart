@@ -3,6 +3,7 @@ import 'app_color.dart';
 import 'belanja_page.dart';
 import 'shopping_cart.dart';
 import 'widgets/sub_page_appbar.dart';
+import 'checkout_page.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -16,6 +17,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _carouselIndex = 0;
   final _pageController = PageController();
   int _qty = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    CartState.instance.addListener(_refreshBadge);
+  }
+
+  void _refreshBadge() => setState(() {});
 
   // Dummy gambar carousel (placeholder)
   static const _imageCount = 3;
@@ -55,6 +64,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   void dispose() {
+    CartState.instance.removeListener(_refreshBadge);
     _pageController.dispose();
     super.dispose();
   }
@@ -62,7 +72,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
-    final cartQty = CartState.instance.qty(p.id);
+    final cartQty = CartState.instance.totalItems;
 
     return Scaffold(
       backgroundColor: AppColors.bgPage,
@@ -410,11 +420,36 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ],
                 ),
                 const SizedBox(width: 16),
+                // Tombol keranjang
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: _addToCart,
-                    icon: const Icon(Icons.shopping_cart_outlined, size: 18),
-                    label: const Text('Tambah ke Keranjang', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    icon: const Icon(Icons.shopping_cart_outlined, size: 16),
+                    label: const Text('Keranjang', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.green500, width: 1.5),
+                      foregroundColor: AppColors.green500,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Tombol beli sekarang → langsung checkout
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => CheckoutPage(
+                        items: {p.id: _qty},
+                        allProducts: const [
+                          Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
+                          Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
+                          Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
+                          Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
+                          Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
+                        ],
+                      )),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.green500,
                       foregroundColor: Colors.white,
@@ -422,6 +457,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
+                    child: const Text('Beli Sekarang', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ],
