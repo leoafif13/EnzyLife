@@ -191,6 +191,55 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                               ),
                               const SizedBox(height: 20),
 
+                              // ── Divider atau ──────────────
+                              Row(
+                                children: [
+                                  Expanded(child: Divider(color: Colors.grey[300], height: 1)),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    child: Text('atau',
+                                        style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+                                  ),
+                                  Expanded(child: Divider(color: Colors.grey[300], height: 1)),
+                                ],
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              // ── Lanjutkan dengan Google ────
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    // TODO: implementasi Google Sign-In
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                                    foregroundColor: AppColors.text1,
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 20, height: 20,
+                                        child: CustomPaint(painter: _GoogleLogoPainter()),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Text('Lanjutkan dengan Google',
+                                          style: TextStyle(fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.text1)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -335,4 +384,28 @@ class _InputField extends StatelessWidget {
       ],
     );
   }
+}
+
+// ── Google logo painter ───────────────────────
+class _GoogleLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double c = size.width / 2;
+    final double r = size.width * 0.38;
+    final rect = Rect.fromCircle(center: Offset(c, c), radius: r);
+
+    Paint stroke(Color color) => Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.18
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(rect, 3.93, 1.57, false, stroke(const Color(0xFF4285F4)));
+    canvas.drawArc(rect, 5.50, 0.79, false, stroke(const Color(0xFFFBBC05)));
+    canvas.drawArc(rect, 0.00, 1.57, false, stroke(const Color(0xFF34A853)));
+    canvas.drawArc(rect, 1.57, 2.36, false, stroke(const Color(0xFFEA4335)));
+  }
+
+  @override
+  bool shouldRepaint(_GoogleLogoPainter _) => false;
 }

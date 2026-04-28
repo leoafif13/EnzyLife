@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             child: Column(
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 3,
                   child: FadeTransition(
                     opacity: _fadeIn,
                     child: SlideTransition(position: _slideUp, child: const _LogoSection()),
@@ -194,10 +194,11 @@ class _FormCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
       ),
-      padding: const EdgeInsets.fromLTRB(28, 36, 28, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           const Text('Masuk',
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
                   color: AppColors.green900, letterSpacing: -0.5)),
@@ -255,7 +256,57 @@ class _FormCard extends StatelessWidget {
             ),
           ),
 
-          const Spacer(),
+
+          const SizedBox(height: 16),
+
+          // ── Divider OR ──────────────────────
+          Row(
+            children: [
+              Expanded(child: Divider(color: Colors.grey[300], height: 1)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text('atau', style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+              ),
+              Expanded(child: Divider(color: Colors.grey[300], height: 1)),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Login dengan Google ──────────────
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: OutlinedButton(
+              onPressed: () {
+                // TODO: implementasi Google Sign-In
+                // Tambahkan package: google_sign_in: ^6.x.x di pubspec.yaml
+                // lalu panggil GoogleSignIn().signIn()
+              },
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.grey[300]!),
+                foregroundColor: AppColors.text1,
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Ikon Google — pakai CustomPaint sederhana
+                  _GoogleIcon(),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Masuk dengan Google',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+                        color: AppColors.text1),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -269,7 +320,8 @@ class _FormCard extends StatelessWidget {
               ),
             ],
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -320,4 +372,46 @@ class _InputField extends StatelessWidget {
       ],
     );
   }
+}
+
+// ── Google icon widget ────────────────────────
+class _GoogleIcon extends StatelessWidget {
+  const _GoogleIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: CustomPaint(painter: _GoogleLogoPainter()),
+    );
+  }
+}
+
+class _GoogleLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double c = size.width / 2;
+    final double r = size.width * 0.38;
+
+    final rect = Rect.fromCircle(center: Offset(c, c), radius: r);
+
+    Paint stroke(Color color) => Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.18
+      ..strokeCap = StrokeCap.round;
+
+    // Biru — kiri atas ke kanan bawah
+    canvas.drawArc(rect, 3.93, 1.57, false, stroke(const Color(0xFF4285F4)));
+    // Kuning — kanan atas
+    canvas.drawArc(rect, 5.50, 0.79, false, stroke(const Color(0xFFFBBC05)));
+    // Hijau — kanan bawah
+    canvas.drawArc(rect, 0.00, 1.57, false, stroke(const Color(0xFF34A853)));
+    // Merah — kiri bawah ke kiri atas
+    canvas.drawArc(rect, 1.57, 2.36, false, stroke(const Color(0xFFEA4335)));
+  }
+
+  @override
+  bool shouldRepaint(_GoogleLogoPainter _) => false;
 }

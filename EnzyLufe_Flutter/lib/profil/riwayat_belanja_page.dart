@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
+import '../ulasan_screen.dart';
 
 // ── Status pesanan ────────────────────────────
 enum OrderStatus { dipesan, dikirim, selesai }
@@ -372,7 +373,12 @@ class _OrderActions extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {}, // TODO: navigasi ke halaman ulasan
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => UlasanScreen(
+                    productName: order.productName,
+                    orderId: order.id,
+                  )),
+                ), // navigasi ke halaman ulasan
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green500,
                   foregroundColor: Colors.white,
