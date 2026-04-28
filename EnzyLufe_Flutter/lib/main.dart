@@ -38,13 +38,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const _pageConfigs = [
-    _PageConfig(label: 'Beranda', action: HeaderAction.logout),
-    _PageConfig(label: 'Edukasi', action: HeaderAction.list),
-    _PageConfig(label: 'Belanja', action: HeaderAction.cart),
-    _PageConfig(label: 'Akun',    action: HeaderAction.none),
-  ];
-
   final _pages = <Widget>[
     HomeScreen(),
     EducationScreen(),
@@ -52,39 +45,25 @@ class _MainScreenState extends State<MainScreen> {
     ProfilScreen(),
   ];
 
-  void _handleAction(HeaderAction action) {
-    if (action == HeaderAction.logout) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-      return;
-    }
-    if (action == HeaderAction.list && _selectedIndex == 1) {
-      showEducationMenu(context);
-      return;
-    }
-    if (action == HeaderAction.cart && _selectedIndex == 2) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CartScreen()));
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Tombol ${action.name} ditekan'),
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  // Buka keranjang dari mana saja
+  void _openCart() {
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const CartScreen()));
+  }
+
+  // Titik 3 — menu kontekstual per tab
+  void _openMenu() {
+    // Semua tab pakai modal yang sama seperti edukasi
+    showEducationMenu(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final config = _pageConfigs[_selectedIndex];
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: AppHeader(
-        action: config.action,
-        onActionTap: () => _handleAction(config.action),
+        onCartTap: _openCart,
+        onMenuTap: _openMenu,
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: AppBottomNavBar(
@@ -424,9 +403,108 @@ class _PlaceholderPage extends StatelessWidget {
   }
 }
 
-// ── Page config helper ────────────────────────
-class _PageConfig {
+// ── Global menu bottom sheet ──────────────────
+class _GlobalMenu extends StatelessWidget {
+  final int selectedIndex;
+  final VoidCallback onLogout;
+  const _GlobalMenu({required this.selectedIndex, required this.onLogout});
+
+  static const _tabLabels = ['Beranda', 'Edukasi', 'Belanja', 'Akun'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0E0E0),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Menu — ${_tabLabels[selectedIndex]}',
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.text1,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: AppColors.divider),
+          const SizedBox(height: 12),
+          _MenuRow(
+            icon: Icons.notifications_outlined,
+            label: 'Notifikasi',
+            onTap: () => Navigator.pop(context),
+          ),
+          _MenuRow(
+            icon: Icons.help_outline_rounded,
+            label: 'Bantuan',
+            onTap: () => Navigator.pop(context),
+          ),
+          _MenuRow(
+            icon: Icons.info_outline_rounded,
+            label: 'Tentang Aplikasi',
+            onTap: () => Navigator.pop(context),
+          ),
+          const SizedBox(height: 8),
+          const Divider(height: 1, color: AppColors.divider),
+          const SizedBox(height: 8),
+          _MenuRow(
+            icon: Icons.logout_rounded,
+            label: 'Keluar',
+            color: Colors.red,
+            onTap: onLogout,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MenuRow extends StatelessWidget {
+  final IconData icon;
   final String label;
-  final HeaderAction action;
-  const _PageConfig({required this.label, required this.action});
+  final Color? color;
+  final VoidCallback onTap;
+
+  const _MenuRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? AppColors.text1;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: c),
+            const SizedBox(width: 14),
+            Text(label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: c,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
 }

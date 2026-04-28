@@ -12,6 +12,9 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  // Set id produk yang dicentang
+  final Set<String> _checked = {};
+
   static const _products = [
     Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
     Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
@@ -37,15 +40,53 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    CartState.instance.addListener(_refresh);
+    CartState.instance.addListener(_onCartChanged);
+    // Centang semua item saat buka keranjang
+    _checked.addAll(CartState.instance.items.keys);
   }
 
-  void _refresh() => setState(() {});
+  void _onCartChanged() {
+    setState(() {
+      // Hapus checked item yang sudah tidak ada di cart
+      _checked.retainAll(CartState.instance.items.keys);
+      // Tambah item baru otomatis tercentang
+      for (final id in CartState.instance.items.keys) {
+        _checked.add(id);
+      }
+    });
+  }
 
   @override
   void dispose() {
-    CartState.instance.removeListener(_refresh);
+    CartState.instance.removeListener(_onCartChanged);
     super.dispose();
+  }
+
+  // Apakah semua item tercentang?
+  bool get _allChecked {
+    final keys = CartState.instance.items.keys.toList();
+    return keys.isNotEmpty && keys.every(_checked.contains);
+  }
+
+  // Total harga item yang dicentang saja
+  int get _checkedTotal {
+    int total = 0;
+    for (final id in _checked) {
+      final p = _find(id);
+      final qty = CartState.instance.qty(id);
+      if (p != null) total += p.price * qty;
+    }
+    return total;
+  }
+
+  void _toggleAll(bool? val) {
+    setState(() {
+      if (val == true) {
+        _checked.addAll(CartState.instance.items.keys);
+      } else {
+        _checked.clear();
+      }
+    });
   }
 
   @override
@@ -53,41 +94,11 @@ class _CartScreenState extends State<CartScreen> {
     final cart  = CartState.instance;
     final items = cart.items;
 
-    int total = 0;
-    for (final e in items.entries) {
-      final p = _find(e.key);
-      if (p != null) total += p.price * e.value;
-    }
-
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: SubPageAppBar(
         title: 'Keranjang',
         actions: [
-          // ── Badge icon keranjang ──────────────
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Icon(Icons.shopping_cart_outlined, color: AppColors.text1, size: 24),
-                if (cart.totalItems > 0)
-                  Positioned(
-                    top: -4, right: -4,
-                    child: Container(
-                      width: 16, height: 16,
-                      decoration: const BoxDecoration(
-                          color: AppColors.green500, shape: BoxShape.circle),
-                      child: Center(
-                        child: Text('${cart.totalItems}',
-                            style: const TextStyle(color: Colors.white, fontSize: 10,
-                                fontWeight: FontWeight.w700)),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
           if (items.isNotEmpty)
             TextButton(
               onPressed: () => showDialog(
@@ -108,7 +119,8 @@ class _CartScreenState extends State<CartScreen> {
                   ],
                 ),
               ),
-              child: const Text('Hapus semua', style: TextStyle(color: Colors.red, fontSize: 13)),
+              child: const Text('Hapus semua',
+                  style: TextStyle(color: Colors.red, fontSize: 13)),
             ),
         ],
       ),
@@ -116,77 +128,120 @@ class _CartScreenState extends State<CartScreen> {
           ? const _EmptyCart()
           : Column(
               children: [
-                // Hint swipe
+                // ── Select all + hint swipe ──────────
                 Container(
                   color: AppColors.bgCard,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: Row(
                     children: [
+                      // Checkbox pilih semua
+                      SizedBox(
+                        width: 24, height: 24,
+                        child: Checkbox(
+                          value: _allChecked,
+                          onChanged: _toggleAll,
+                          activeColor: AppColors.green500,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text('Pilih Semua (${items.length} produk)',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
+                              color: AppColors.text1)),
+                      const Spacer(),
                       Icon(Icons.swipe_left_outlined, size: 14, color: Colors.grey[400]),
-                      const SizedBox(width: 6),
-                      Text('Geser produk ke kiri untuk menghapus',
+                      const SizedBox(width: 4),
+                      Text('Geser untuk hapus',
                           style: TextStyle(fontSize: 11, color: Colors.grey[400])),
                     ],
                   ),
                 ),
+                const Divider(height: 1, color: AppColors.divider),
 
+                // ── List produk ─────────────────────
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                     children: items.entries.map((e) {
                       final p = _find(e.key);
                       if (p == null) return const SizedBox.shrink();
-                      return _SwipeToDeleteItem(
+                      return _CartItem(
                         key: ValueKey(e.key),
                         product: p,
                         qty: e.value,
+                        checked: _checked.contains(e.key),
                         fmtPrice: _fmt,
+                        onToggleCheck: (val) => setState(() {
+                          if (val == true) _checked.add(e.key);
+                          else _checked.remove(e.key);
+                        }),
                         onAdd:    () => cart.add(p.id),
                         onRemove: () => cart.removeOne(p.id),
-                        onDelete: () => cart.removeAll(p.id),
+                        onDelete: () {
+                          cart.removeAll(p.id);
+                          _checked.remove(p.id);
+                        },
                       );
                     }).toList(),
                   ),
                 ),
 
-                // Summary + checkout
+                // ── Summary + tombol checkout ────────
                 Container(
                   decoration: BoxDecoration(
                     color: AppColors.bgCard,
                     boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08),
                         blurRadius: 12, offset: const Offset(0, -2))],
                   ),
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
                   child: Column(
                     children: [
+                      // Info item dipilih
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('${cart.totalItems} produk',
-                              style: TextStyle(fontSize: 13, color: Colors.grey[600])),
-                          Text(_fmt(total),
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
-                                  color: AppColors.text1)),
+                          Text('${_checked.length} produk dipilih',
+                              style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                          const Spacer(),
+                          const Text('Total: ',
+                              style: TextStyle(fontSize: 13, color: AppColors.text2)),
+                          Text(_fmt(_checkedTotal),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800,
+                                  color: AppColors.green500)),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
                       SizedBox(
-                        width: double.infinity, height: 52,
+                        width: double.infinity, height: 50,
                         child: ElevatedButton(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => CheckoutPage(
-                              items: Map<String, int>.from(cart.items),
-                              allProducts: _products,
-                            )),
-                          ),
+                          onPressed: _checked.isEmpty ? null : () {
+                            // Kirim hanya item yang dicentang ke checkout
+                            final selectedItems = {
+                              for (final id in _checked)
+                                id: cart.qty(id),
+                            };
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => CheckoutPage(
+                                items: selectedItems,
+                                allProducts: _products,
+                              )),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.green500,
                             foregroundColor: Colors.white,
+                            disabledBackgroundColor: AppColors.green500.withOpacity(0.4),
                             elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: const Text('Checkout',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          child: Text(
+                            _checked.isEmpty
+                                ? 'Pilih produk dulu'
+                                : 'Checkout (${_checked.length})',
+                            style: const TextStyle(fontSize: 15,
+                                fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
                     ],
@@ -198,27 +253,30 @@ class _CartScreenState extends State<CartScreen> {
   }
 }
 
-// ── Swipe to delete item ──────────────────────
-class _SwipeToDeleteItem extends StatelessWidget {
+// ── Cart item dengan checkbox + swipe ─────────
+class _CartItem extends StatelessWidget {
   final Product product;
   final int qty;
+  final bool checked;
   final String Function(int) fmtPrice;
+  final ValueChanged<bool?> onToggleCheck;
   final VoidCallback onAdd, onRemove, onDelete;
 
-  const _SwipeToDeleteItem({
+  const _CartItem({
     super.key,
-    required this.product, required this.qty, required this.fmtPrice,
+    required this.product, required this.qty, required this.checked,
+    required this.fmtPrice, required this.onToggleCheck,
     required this.onAdd, required this.onRemove, required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: ValueKey(product.id),
+      key: ValueKey('dismiss_${product.id}'),
       direction: DismissDirection.endToStart,
       onDismissed: (_) => onDelete(),
       background: Container(
-        margin: const EdgeInsets.only(bottom: 14),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.red[400],
           borderRadius: BorderRadius.circular(16),
@@ -230,32 +288,52 @@ class _SwipeToDeleteItem extends StatelessWidget {
           children: [
             Icon(Icons.delete_outline_rounded, color: Colors.white, size: 26),
             SizedBox(height: 4),
-            Text('Hapus', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+            Text('Hapus', style: TextStyle(color: Colors.white, fontSize: 11,
+                fontWeight: FontWeight.w600)),
           ],
         ),
       ),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(16),
           boxShadow: AppColors.cardShadow,
+          border: checked
+              ? Border.all(color: AppColors.green500.withOpacity(0.4), width: 1.5)
+              : null,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 68, height: 68, color: AppColors.green50,
-                  child: Icon(Icons.image_outlined, size: 24,
-                      color: AppColors.green500.withOpacity(0.3)),
-                  // TODO: ganti dengan Image.network(url) / Image.asset(path)
+              // Checkbox
+              SizedBox(
+                width: 24, height: 24,
+                child: Checkbox(
+                  value: checked,
+                  onChanged: onToggleCheck,
+                  activeColor: AppColors.green500,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 10),
+
+              // Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: 64, height: 64, color: AppColors.green50,
+                  child: Icon(Icons.image_outlined, size: 24,
+                      color: AppColors.green500.withOpacity(0.3)),
+                  // TODO: ganti dengan Image.network/asset
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Info produk
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,8 +349,10 @@ class _SwipeToDeleteItem extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Subtotal
                         Text('Subtotal: ${fmtPrice(product.price * qty)}',
                             style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                        // Qty control
                         _QtyControl(qty: qty, onAdd: onAdd, onRemove: onRemove),
                       ],
                     ),
@@ -303,9 +383,8 @@ class _QtyControl extends StatelessWidget {
         GestureDetector(onTap: onRemove,
             child: const Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                 child: Icon(Icons.remove, size: 14, color: AppColors.green500))),
-        Text('$qty',
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                color: AppColors.green500)),
+        Text('$qty', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+            color: AppColors.green500)),
         GestureDetector(onTap: onAdd,
             child: const Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                 child: Icon(Icons.add, size: 14, color: AppColors.green500))),

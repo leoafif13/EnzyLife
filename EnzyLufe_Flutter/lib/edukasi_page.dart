@@ -46,7 +46,6 @@ class _EducationMenuModal extends StatelessWidget {
   const _EducationMenuModal();
 
   static const _menuItems = [
-    _MenuItem(label: 'Tentang Eco Enzim',    icon: Icons.info_outline_rounded),
     _MenuItem(label: 'Artikel & Infografik', icon: Icons.article_outlined),
     _MenuItem(label: 'Kalkulator Eco Enzim', icon: Icons.calculate_outlined),
     _MenuItem(label: 'FAQ',                  icon: Icons.help_outline_rounded),
@@ -120,7 +119,6 @@ class _EducationMenuModal extends StatelessWidget {
                 // Routes: index 0 = Tentang (scroll ke atas edukasi_page),
                 // 1 = Artikel, 2 = Kalkulator, 3 = FAQ
                 final routes = <Widget>[
-                  const ArtikelScreen(), // TODO: ganti dengan TentangScreen jika dibuat terpisah
                   const ArtikelScreen(),
                   const KalkulatorScreen(),
                   const FaqScreen(),
@@ -335,7 +333,6 @@ class _IntroCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            // TODO: ganti dengan penjelasan singkat eco enzim (2-3 kalimat)
             'Eco Enzim adalah cairan serbaguna hasil fermentasi limbah organik seperti kulit buah dan sayuran, gula merah, dan air. Dapat digunakan sebagai pupuk, pembersih alami, hingga pestisida organik.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
@@ -461,7 +458,7 @@ class _EduItemCard extends StatelessWidget {
                         fontSize: 13, color: AppColors.text2, height: 1.6),
                   )
                 : Text(
-                    '📝 TODO: isi caption untuk item ${index + 1}',
+                    'Caption',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.orange[700],

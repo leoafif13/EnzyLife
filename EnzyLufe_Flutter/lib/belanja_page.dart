@@ -50,6 +50,9 @@ class CartState extends ChangeNotifier {
 
   void clear() { _items.clear(); notifyListeners(); }
   int qty(String id) => _items[id] ?? 0;
+
+  // Jumlah ID unik (untuk badge — kaya Shopee)
+  int get uniqueItems => _items.length;
 }
 
 // ══════════════════════════════════════════════
