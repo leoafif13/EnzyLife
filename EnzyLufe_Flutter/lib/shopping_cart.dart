@@ -3,6 +3,7 @@ import 'app_color.dart';
 import 'widgets/sub_page_appbar.dart';
 import 'belanja_page.dart';
 import 'checkout_page.dart';
+import 'detail_produk.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -293,7 +294,11 @@ class _CartItem extends StatelessWidget {
           ],
         ),
       ),
-      child: Container(
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+        ),
+        child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: AppColors.bgCard,
@@ -363,7 +368,7 @@ class _CartItem extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
