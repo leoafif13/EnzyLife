@@ -8,7 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Table;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 
 class ProductsTable
 {
@@ -16,24 +16,29 @@ class ProductsTable
     {
         return $table
             ->columns([
-                TextColumn::make('nama')
+                Tables\Columns\TextColumn::make('nama')
                     ->searchable(),
-
-                TextColumn::make('harga')
+                Tables\Columns\TextColumn::make('harga')
                     ->money('IDR'),
-                
-                TextColumn::make('deskripsi')
+                Tables\Columns\TextColumn::make('deskripsi')
                     ->searchable(),
-                
-                TextColumn::make('stok')
+                Tables\Columns\TextColumn::make('stok')
                     ->searchable(),
-
-                TextColumn::make('gambar')
+                Tables\Columns\ImageColumn::make('gambar')
+                    ->disk('public')
                     ->searchable(),
             ])
-            ->actions([
+            ->filters([
+                //
+            ])
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }
