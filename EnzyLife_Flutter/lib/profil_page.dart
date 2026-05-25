@@ -10,6 +10,7 @@ import 'profil/riwayat_kalkulator_page.dart';
 import 'profil/bantuan_page.dart';
 import 'profil/tentang_aplikasi_page.dart';
 import 'profil/kebijakan_privasi_page.dart';
+import 'services/api_service.dart';
 
 class ProfilScreen extends StatelessWidget {
   const ProfilScreen({super.key});
@@ -63,15 +64,36 @@ class ProfilScreen extends StatelessWidget {
                           onPressed: () => Navigator.of(context).pop(),
                           child: const Text('Batal')),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.of(context).pop();
+
+                          await ApiService.logout();
+
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Berhasil logout'),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          );
+
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(builder: (_) => const LoginScreen()),
                             (r) => false,
                           );
                         },
-                        child: const Text('Keluar',
-                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                        child: const Text(
+                          'Keluar',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
