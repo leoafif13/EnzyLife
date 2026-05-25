@@ -7,7 +7,7 @@ import 'edukasi_page.dart';
 import 'belanja_page.dart';
 import 'profil_page.dart';
 import 'shopping_cart.dart';
-import 'services/api_service.dart';
+import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

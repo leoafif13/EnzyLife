@@ -10,7 +10,7 @@ import 'profil/riwayat_kalkulator_page.dart';
 import 'profil/bantuan_page.dart';
 import 'profil/tentang_aplikasi_page.dart';
 import 'profil/kebijakan_privasi_page.dart';
-import 'services/api_service.dart';
+import 'services/auth_service.dart';
 
 class ProfilScreen extends StatelessWidget {
   const ProfilScreen({super.key});

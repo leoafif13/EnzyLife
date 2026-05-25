@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'app_color.dart';
 import 'login_page.dart';
 import 'main.dart';
-import 'services/api_service.dart';
+import 'services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
