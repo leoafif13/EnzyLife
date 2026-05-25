@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Filament\Forms;
 
 class ProductForm
 {
@@ -11,32 +11,35 @@ class ProductForm
     {
         return $schema
             ->components([
-                TextInput::make('nama')
+                Forms\Components\TextInput::make('nama')
                     ->label('Nama Produk')
                     ->required()
                     ->maxLength(255),
 
-                TextInput::make('harga')
+                Forms\Components\TextInput::make('harga')
+
                     ->label('Harga')
                     ->numeric()
                     ->prefix('Rp')
                     ->required(),
 
-                TextInput::make('deskripsi')
+                Forms\Components\Textarea::make('deskripsi')
                     ->label('Deskripsi Produk')
                     ->required()
                     ->maxLength(255),
 
-                TextInput::make('stok')
+                Forms\Components\TextInput::make('stok')
                     ->label('Jumlah Stok')
                     ->numeric()
                     ->required(),
 
-                TextInput::make('gambar')
+                Forms\Components\FileUpload::make('gambar')
+                    ->image()
                     ->label('Gambar')
                     ->required()
-                    ->maxLength(255),
-
+                    ->disk('public')
+                    ->visibility('public')
+                    ->directory('produk'),
             ]);
     }
 }
