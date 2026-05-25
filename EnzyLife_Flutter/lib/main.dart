@@ -7,11 +7,26 @@ import 'edukasi_page.dart';
 import 'belanja_page.dart';
 import 'profil_page.dart';
 import 'shopping_cart.dart';
+import 'services/auth_service.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Ambil token dari local storage
+  final token = await ApiService.getToken();
+
+  runApp(MyApp(
+    isLoggedIn: token != null,
+  ));
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({
+    super.key,
+    required this.isLoggedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +37,15 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: const Color(0xFF4CAF50),
         useMaterial3: true,
       ),
-      home: const MainScreen(),
+
+      // Kalau token ada → langsung masuk app
+      // Kalau tidak ada → login dulu
+      home: isLoggedIn
+          ? const MainScreen()
+          : const LoginScreen(),
     );
   }
 }
-
 //  MainScreen
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -75,8 +94,31 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 //  HomeScreen
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String userName = 'Pengguna';
+
+  @override
+  void initState() {
+    super.initState();
+    loadUser();
+  }
+
+  Future<void> loadUser() async {
+    final user = await ApiService.getUser();
+
+    if (user != null) {
+      setState(() {
+        userName = user['name'];
+      });
+    }
+  }
 
   static const _articles = [
     _ArticleData(title: 'Kegiatan Membuat Eco Enzim di SDN 010 Batam', author: 'Admin'),
@@ -125,8 +167,8 @@ class HomeScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Rafi Akhbar!', // TODO: dari session/auth
+                      Text(
+                        '$userName!', 
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -267,7 +309,7 @@ class _FavoriteItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {},
       child: Container(
-        width: 72,
+        width: 80,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
         decoration: BoxDecoration(
           color: AppColors.bgCard,

@@ -3,6 +3,7 @@ import 'app_color.dart';
 import 'edukasi/artikel_page.dart';
 import 'edukasi/kalkulator_page.dart';
 import 'edukasi/faq_page.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 // ══════════════════════════════════════════════
 //  showEducationMenu — dipanggil dari main.dart
@@ -193,8 +194,7 @@ class EducationScreen extends StatelessWidget {
     _EduSection(
       title: 'Mengenal Eco Enzim lebih jauh',
       items: [
-        _EduItem(hasVideo: true,  caption: ''), // TODO: isi caption
-        _EduItem(hasVideo: true,  caption: ''), // TODO: isi caption
+        _EduItem(hasVideo: true,  caption: 'Video Edukasi Eco Enzyme', videoId:'EwvJbebrlbk'),
       ],
     ),
     _EduSection(
@@ -205,7 +205,7 @@ class EducationScreen extends StatelessWidget {
       ],
     ),
     _EduSection(
-      title: 'Cara Membuat Eco Enzim',
+      title: 'Cara Penggunaan Eco Enzim',
       items: [
         _EduItem(hasVideo: false, caption: ''), // TODO: isi caption
         _EduItem(hasVideo: false, caption: ''), // TODO: isi caption
@@ -353,7 +353,13 @@ class _EduSection {
 class _EduItem {
   final bool hasVideo;
   final String caption;
-  const _EduItem({required this.hasVideo, required this.caption});
+  final String? videoId;
+
+  const _EduItem({
+    required this.hasVideo,
+    required this.caption,
+    this.videoId,
+  });
 }
 
 // ── Section block ─────────────────────────────
@@ -421,30 +427,25 @@ class _EduItemCard extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: AspectRatio(
               aspectRatio: 16 / 9,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // TODO: ganti Container dengan:
-                  // Image.network('url', fit: BoxFit.cover, width: double.infinity)
-                  // atau Image.asset('assets/images/nama.jpg', fit: BoxFit.cover)
-                  Container(color: AppColors.green50),
-                  if (item.hasVideo)
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: AppColors.green500.withOpacity(0.88),
-                        shape: BoxShape.circle,
+              child: item.hasVideo
+                ? YoutubePlayer(
+                    controller: YoutubePlayerController.fromVideoId(
+                      videoId: item.videoId!,
+                      autoPlay: false,
+                      params: const YoutubePlayerParams(
+                        showFullscreenButton: true,
+                        showControls: true,
                       ),
-                      child: const Icon(Icons.play_arrow_rounded,
-                          color: Colors.white, size: 30),
-                    )
-                  else
-                    Icon(Icons.image_outlined,
-                        size: 40,
-                        color: AppColors.green500.withOpacity(0.3)),
-                ],
-              ),
+                    ),
+                  )
+                : Container(
+                    color: AppColors.green50,
+                    child: Icon(
+                      Icons.image_outlined,
+                      size: 40,
+                      color: AppColors.green500.withOpacity(0.3),
+                    ),
+                  ),
             ),
           ),
 
