@@ -21,8 +21,6 @@ class ProductResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Daftar Produk';
-
     protected static ?string $label = 'Produk';
     
     protected static ?string $pluralLabel = 'Produk';

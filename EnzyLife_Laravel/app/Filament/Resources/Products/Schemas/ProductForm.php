@@ -39,7 +39,11 @@ class ProductForm
                     ->required()
                     ->disk('public')
                     ->visibility('public')
-                    ->directory('produk'),
+                    ->directory('produk')
+                    ->acceptedFileTypes([
+                        'image/jpeg',
+                        'image/png',
+                    ]),
             ]);
     }
 }
