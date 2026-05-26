@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_color.dart';
 import 'belanja_page.dart';
 import 'shopping_cart.dart';
-import 'widgets/sub_page_appbar.dart';
+// import 'widgets/sub_page_appbar.dart';
 import 'checkout_page.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _refreshBadge() => setState(() {});
 
   // Dummy gambar carousel (placeholder)
-  static const _imageCount = 3;
+  static const _imageCount = 1;
 
   // Dummy ulasan
   static const _reviews = [
@@ -132,28 +132,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             controller: _pageController,
                             itemCount: _imageCount,
                             onPageChanged: (i) => setState(() => _carouselIndex = i),
-                            itemBuilder: (_, i) => Container(
-                              margin: const EdgeInsets.all(0),
-                              color: AppColors.green50,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  // TODO: ganti dengan Image.network/asset per indeks
-                                  Icon(Icons.image_outlined, size: 64, color: AppColors.green500.withOpacity(0.2)),
-                                  Positioned(
-                                    top: 12, right: 12,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.85),
-                                        borderRadius: BorderRadius.circular(8),
+                            itemBuilder: (_, i) => Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  color: AppColors.green50,
+                                  child: Image.network(
+                                    'http://localhost:8000/gambar/${p.image.split('/').last}',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) {
+                                      return const Icon(Icons.image_not_supported);
+                                    },
+                                  )
+                                ),
+
+                                Positioned(
+                                  top: 12,
+                                  right: 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.85),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      '${i + 1}/$_imageCount',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      child: Text('${i + 1}/$_imageCount',
-                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -194,7 +209,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     width: 2,
                                   ),
                                 ),
-                                child: Icon(Icons.image_outlined, size: 20, color: AppColors.green500.withOpacity(0.3)),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    'http://localhost:8000/gambar/${p.image.split('/').last}',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) {
+                                      return const Icon(Icons.image_not_supported);
+                                    },
+                                  )
+                                ),
                               ),
                             ),
                           ),
@@ -449,13 +473,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => CheckoutPage(
                         items: {p.id: _qty},
-                        allProducts: const [
-                          Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
-                          Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
-                          Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
-                          Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
-                          Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
-                        ],
+                        allProducts: [p],
                       )),
                     ),
                     style: ElevatedButton.styleFrom(

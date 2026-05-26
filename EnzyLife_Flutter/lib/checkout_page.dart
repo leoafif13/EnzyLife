@@ -4,7 +4,7 @@ import 'widgets/sub_page_appbar.dart';
 import 'belanja_page.dart';
 
 class CheckoutPage extends StatefulWidget {
-  final Map<String, int> items;
+  final Map<int, int> items;
   final List<Product> allProducts;
 
   const CheckoutPage({

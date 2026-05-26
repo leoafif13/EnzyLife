@@ -3,6 +3,7 @@ import 'app_color.dart';
 import 'widgets/sub_page_appbar.dart';
 import 'belanja_page.dart';
 import 'checkout_page.dart';
+import 'services/product_services.dart';
 import 'detail_produk.dart';
 
 class CartScreen extends StatefulWidget {
@@ -13,20 +14,10 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  // Set id produk yang dicentang
-  final Set<String> _checked = {};
+  List<Product> get _products => ProductService.cachedProducts;
+  final Set<int> _checked = {};
 
-  static const _products = [
-    Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
-    Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
-    Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
-    Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
-    Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
-  ];
-
-  static Product? _find(String id) {
-    try { return _products.firstWhere((p) => p.id == id); } catch (_) { return null; }
-  }
+  
 
   static String _fmt(int price) {
     final s = price.toString();
@@ -72,11 +63,17 @@ class _CartScreenState extends State<CartScreen> {
   // Total harga item yang dicentang saja
   int get _checkedTotal {
     int total = 0;
+
     for (final id in _checked) {
-      final p = _find(id);
+      final p = _products.firstWhere(
+        (x) => x.id == id,
+      );
+
       final qty = CartState.instance.qty(id);
-      if (p != null) total += p.price * qty;
+
+      total += p.price * qty;
     }
+
     return total;
   }
 
@@ -165,8 +162,10 @@ class _CartScreenState extends State<CartScreen> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                     children: items.entries.map((e) {
-                      final p = _find(e.key);
-                      if (p == null) return const SizedBox.shrink();
+                      final p = _products.firstWhere(
+                        (x) => x.id == e.key,
+                      );
+
                       return _CartItem(
                         key: ValueKey(e.key),
                         product: p,
@@ -174,10 +173,13 @@ class _CartScreenState extends State<CartScreen> {
                         checked: _checked.contains(e.key),
                         fmtPrice: _fmt,
                         onToggleCheck: (val) => setState(() {
-                          if (val == true) _checked.add(e.key);
-                          else _checked.remove(e.key);
+                          if (val == true) {
+                            _checked.add(e.key);
+                          } else {
+                            _checked.remove(e.key);
+                          }
                         }),
-                        onAdd:    () => cart.add(p.id),
+                        onAdd: () => cart.add(p.id),
                         onRemove: () => cart.removeOne(p.id),
                         onDelete: () {
                           cart.removeAll(p.id);
@@ -329,13 +331,22 @@ class _CartItem extends StatelessWidget {
               // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  width: 64, height: 64, color: AppColors.green50,
-                  child: Icon(Icons.image_outlined, size: 24,
-                      color: AppColors.green500.withOpacity(0.3)),
-                  // TODO: ganti dengan Image.network/asset
+                child: Image.network(
+                  'http://127.0.0.1:8000/storage/${product.image}',
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) {
+                    return Container(
+                      width: 64,
+                      height: 64,
+                      color: AppColors.green50,
+                      child: const Icon(Icons.image_not_supported),
+                    );
+                  },
                 ),
               ),
+
               const SizedBox(width: 12),
 
               // Info produk

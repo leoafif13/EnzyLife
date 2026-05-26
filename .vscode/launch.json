@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "EnzyLufe_Flutter",
+            "cwd": "EnzyLufe_Flutter",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "EnzyLufe_Flutter (profile mode)",
+            "cwd": "EnzyLufe_Flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "EnzyLufe_Flutter (release mode)",
+            "cwd": "EnzyLufe_Flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

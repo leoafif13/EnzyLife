@@ -2,22 +2,42 @@ import 'package:flutter/material.dart';
 import 'app_color.dart';
 import 'shopping_cart.dart';
 import 'detail_produk.dart';
+import 'services/product_services.dart';
 import 'checkout_page.dart';
 
 // ══════════════════════════════════════════════
 //  Model produk
 // ══════════════════════════════════════════════
 class Product {
-  final String id, name, description;
+  final int id;
+  final String name;
+  final String description;
   final int price;
+  final int stock;
+  final String image;
   final bool isPopular;
+
   const Product({
-    required this.id, required this.name,
-    required this.description, required this.price,
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.stock,
+    required this.image,
     this.isPopular = false,
   });
-}
 
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'],
+      name: json['nama'] ?? '',
+      description: json['deskripsi'] ?? '',
+      price: int.parse(json['harga'].toString()),
+      stock: int.parse(json['stok'].toString()),
+      image: json['gambar'] ?? '',
+    );
+  }
+}
 // ══════════════════════════════════════════════
 //  CartState — singleton ChangeNotifier
 // ══════════════════════════════════════════════
@@ -25,16 +45,16 @@ class CartState extends ChangeNotifier {
   static final CartState instance = CartState._();
   CartState._();
 
-  final Map<String, int> _items = {};
-  Map<String, int> get items     => Map.unmodifiable(_items);
+  final Map<int, int> _items = {};
+  Map<int, int> get items     => Map.unmodifiable(_items);
   int get totalItems             => _items.values.fold(0, (a, b) => a + b);
 
-  void add(String id) {
+  void add(int id) {
     _items[id] = (_items[id] ?? 0) + 1;
     notifyListeners();
   }
 
-  void removeOne(String id) {
+  void removeOne(int id) {
     if (_items.containsKey(id)) {
       _items[id] = _items[id]! - 1;
       if (_items[id]! <= 0) _items.remove(id);
@@ -43,13 +63,13 @@ class CartState extends ChangeNotifier {
   }
 
   // Hapus seluruh produk dari keranjang (untuk swipe delete)
-  void removeAll(String id) {
+  void removeAll(int id) {
     _items.remove(id);
     notifyListeners();
   }
 
   void clear() { _items.clear(); notifyListeners(); }
-  int qty(String id) => _items[id] ?? 0;
+  int qty(int id) => _items[id] ?? 0;
 
   // Jumlah ID unik (untuk badge — kaya Shopee)
   int get uniqueItems => _items.length;
@@ -69,14 +89,8 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
   final _searchController = TextEditingController();
   String _query = '';
 
-  // TODO: ganti dengan data dari API/database
-  static const _products = [
-    Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
-    Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
-    Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
-    Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
-    Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
-  ];
+  List<Product> _products = [];
+  bool _isLoading = true;
 
   List<Product> get _filtered => _products.where((p) =>
     p.name.toLowerCase().contains(_query.toLowerCase()) ||
@@ -95,10 +109,28 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
   @override
   void initState() {
     super.initState();
+
     CartState.instance.addListener(_refresh);
+
+    fetchProducts();
   }
 
   void _refresh() => setState(() {});
+
+  Future<void> fetchProducts() async {
+    try {
+      final products = await ProductService.getProducts();
+
+      setState(() {
+        _products = products;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -109,10 +141,33 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cart     = CartState.instance;
-    final popular  = _products.where((p) => p.isPopular).isNotEmpty
-                     ? _products.firstWhere((p) => p.isPopular) : null;
-    final listProds = _filtered.where((p) => _query.isNotEmpty || !p.isPopular).toList();
+
+    // loading dulu sebelum data muncul
+    if (_isLoading) {
+      if (_products.isEmpty) {
+        return const Scaffold(
+          body: Center(
+            child: Text('Produk tidak tersedia'),
+          ),
+        );
+      }
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    final cart = CartState.instance;
+
+    // ambil produk pertama jadi featured
+    final popular = _products.isNotEmpty
+        ? _products.first
+        : null;
+
+    final listProds = _filtered.where(
+      (p) => _query.isNotEmpty || !p.isPopular,
+    ).toList();
 
     return Scaffold(
       backgroundColor: AppColors.bgPage,
@@ -240,13 +295,7 @@ class _FeaturedCard extends StatelessWidget {
                           onPressed: () => Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => CheckoutPage(
                                 items: {product.id: 1},
-                                allProducts: const [
-                                  Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
-                                  Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
-                                  Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
-                                  Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
-                                  Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
-                                ],
+                                allProducts: [product],
                               ))),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white, foregroundColor: AppColors.green900,
@@ -267,8 +316,13 @@ class _FeaturedCard extends StatelessWidget {
                     child: Container(
                       width: 90, height: 90,
                       color: Colors.white.withOpacity(0.15),
-                      child: const Icon(Icons.image_outlined, size: 36, color: Colors.white38),
-                      // TODO: ganti dengan Image.network(url) / Image.asset(path)
+                      child: Image.network(
+                        'http://localhost:8000/gambar/${product.image.split('/').last}',
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) {
+                          return const Icon(Icons.image_not_supported);
+                        },
+                      )
                     ),
                   ),
                 ],
@@ -287,14 +341,6 @@ class _ProductCard extends StatelessWidget {
   final String Function(int) fmtPrice;
   final VoidCallback onChanged;
   const _ProductCard({required this.product, required this.fmtPrice, required this.onChanged});
-
-  static const _allProducts = [
-    Product(id: 'p1', name: 'Eco Enzim Tipe A',      description: 'Penjelasan singkat produk eco enzim tipe A', price: 300000, isPopular: true),
-    Product(id: 'p2', name: 'Eco Enzim Tipe B',      description: 'Penjelasan singkat produk eco enzim tipe B', price: 250000),
-    Product(id: 'p3', name: 'Eco Enzim Tipe C',      description: 'Penjelasan singkat produk eco enzim tipe C', price: 350000),
-    Product(id: 'p4', name: 'Eco Enzim Starter Kit', description: 'Paket lengkap untuk pemula membuat eco enzim', price: 450000),
-    Product(id: 'p5', name: 'Eco Enzim Premium',     description: 'Produk unggulan kualitas terjamin premium',   price: 500000),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -319,12 +365,13 @@ class _ProductCard extends StatelessWidget {
               // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 80, height: 80, color: AppColors.green50,
-                  child: Icon(Icons.image_outlined, size: 28,
-                      color: AppColors.green500.withOpacity(0.3)),
-                  // TODO: ganti dengan Image.network(url) / Image.asset(path)
-                ),
+                child: Image.network(
+                  'http://localhost:8000/gambar/${product.image.split('/').last}',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) {
+                    return const Icon(Icons.image_not_supported);
+                  },
+                )
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -359,7 +406,7 @@ class _ProductCard extends StatelessWidget {
                               onTap: () => Navigator.of(context).push(
                                   MaterialPageRoute(builder: (_) => CheckoutPage(
                                     items: {product.id: 1},
-                                    allProducts: _allProducts,
+                                    allProducts: [product],
                                   ))),
                             ),
                           ],
