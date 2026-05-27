@@ -1,43 +1,11 @@
 import 'package:flutter/material.dart';
 import 'app_color.dart';
-import 'shopping_cart.dart';
+// import 'shopping_cart.dart';
 import 'detail_produk.dart';
-import 'services/product_services.dart';
+import 'services/api_service.dart';
 import 'checkout_page.dart';
+import 'models/product.dart';
 
-// ══════════════════════════════════════════════
-//  Model produk
-// ══════════════════════════════════════════════
-class Product {
-  final int id;
-  final String name;
-  final String description;
-  final int price;
-  final int stock;
-  final String image;
-  final bool isPopular;
-
-  const Product({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.stock,
-    required this.image,
-    this.isPopular = false,
-  });
-
-  factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      id: json['id'],
-      name: json['nama'] ?? '',
-      description: json['deskripsi'] ?? '',
-      price: int.parse(json['harga'].toString()),
-      stock: int.parse(json['stok'].toString()),
-      image: json['gambar'] ?? '',
-    );
-  }
-}
 // ══════════════════════════════════════════════
 //  CartState — singleton ChangeNotifier
 // ══════════════════════════════════════════════
@@ -119,7 +87,7 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
 
   Future<void> fetchProducts() async {
     try {
-      final products = await ProductService.getProducts();
+      final products = await ApiService.getProducts();
 
       setState(() {
         _products = products;
@@ -144,16 +112,17 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
 
     // loading dulu sebelum data muncul
     if (_isLoading) {
-      if (_products.isEmpty) {
-        return const Scaffold(
-          body: Center(
-            child: Text('Produk tidak tersedia'),
-          ),
-        );
-      }
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_products.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Produk tidak tersedia'),
         ),
       );
     }
@@ -317,7 +286,7 @@ class _FeaturedCard extends StatelessWidget {
                       width: 90, height: 90,
                       color: Colors.white.withOpacity(0.15),
                       child: Image.network(
-                        'http://localhost:8000/gambar/${product.image.split('/').last}',
+                        'http://localhost:8000/gambar/produk/${product.image.split('/').last}',
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) {
                           return const Icon(Icons.image_not_supported);
@@ -365,13 +334,20 @@ class _ProductCard extends StatelessWidget {
               // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  'http://localhost:8000/gambar/${product.image.split('/').last}',
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
-                    return const Icon(Icons.image_not_supported);
-                  },
-                )
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: Image.network(
+                    'http://localhost:8000/gambar/produk/${product.image.split('/').last}',
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) {
+                      return Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image_not_supported),
+                      );
+                    },
+                  ),
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(

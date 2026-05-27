@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'app_color.dart';
+import 'models/product.dart';
 import 'widgets/sub_page_appbar.dart';
 import 'belanja_page.dart';
 import 'checkout_page.dart';
-import 'services/product_services.dart';
+import 'services/api_service.dart';
 import 'detail_produk.dart';
 
 class CartScreen extends StatefulWidget {
@@ -14,7 +15,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  List<Product> get _products => ProductService.cachedProducts;
+  List<Product> get _products => ApiService.cachedProducts;
   final Set<int> _checked = {};
 
   
@@ -332,7 +333,7 @@ class _CartItem extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  'http://127.0.0.1:8000/storage/${product.image}',
+                  'http://localhost:8000/gambar/${product.image.split('/').last}',
                   width: 64,
                   height: 64,
                   fit: BoxFit.cover,

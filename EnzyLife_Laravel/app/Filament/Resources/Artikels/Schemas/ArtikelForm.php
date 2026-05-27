@@ -11,18 +11,26 @@ class ArtikelForm
     {
         return $schema
             ->components([
+
                 Forms\Components\TextInput::make('judul')
                     ->label('Judul Artikel')
                     ->required()
                     ->maxLength(255),
 
+                Forms\Components\Textarea::make('ringkasan')
+                    ->label('Ringkasan Artikel')
+                    ->rows(3)
+                    ->maxLength(500)
+                    ->helperText('Ringkasan singkat untuk preview artikel'),
+
                 Forms\Components\Textarea::make('isi_konten')
                     ->label('Isi Konten')
+                    ->rows(15)
                     ->required(),
 
                 Forms\Components\FileUpload::make('gambar')
-                    ->image()
                     ->label('Gambar Artikel')
+                    ->image()
                     ->required()
                     ->disk('public')
                     ->visibility('public')
@@ -30,12 +38,13 @@ class ArtikelForm
                     ->acceptedFileTypes([
                         'image/jpeg',
                         'image/png',
+                        'image/webp',
                     ]),
-                
-                Forms\Components\DatePicker::make('tanggal_unggah')
-                    ->label('Tanggal Unggah')
-                    ->default(now())
-                    ->required(),
+
+                Forms\Components\TextInput::make('kategori')
+                    ->label('Kategori')
+                    ->placeholder('Contoh: Tips, Pertanian, Pengenalan')
+                    ->maxLength(100),
             ]);
     }
 }

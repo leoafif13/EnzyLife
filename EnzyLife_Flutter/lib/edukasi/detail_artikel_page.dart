@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/artikel.dart';
 import '/app_color.dart';
 import '/widgets/sub_page_appbar.dart';
 import 'artikel_page.dart';
+import '../models/artikel.dart';
 
 class DetailArtikelPage extends StatelessWidget {
-  final ArtikelItem item;
+  final ArtikelModel item;
   const DetailArtikelPage({super.key, required this.item});
 
   // Konten artikel per id
@@ -146,7 +148,7 @@ Eco enzim butuh minimal 3 bulan. Banyak yang membuka di bulan kedua karena tidak
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: SubPageAppBar(
-        title: item.category,
+        title: item.kategori,
         actions: [
           IconButton(
             icon: const Icon(Icons.bookmark_outline_rounded,
@@ -182,7 +184,7 @@ Eco enzim butuh minimal 3 bulan. Banyak yang membuka di bulan kedua karena tidak
                         color: AppColors.green500,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(item.category,
+                      child: Text(item.kategori,
                           style: const TextStyle(color: Colors.white, fontSize: 11,
                               fontWeight: FontWeight.w600)),
                     ),
@@ -198,7 +200,7 @@ Eco enzim butuh minimal 3 bulan. Banyak yang membuka di bulan kedua karena tidak
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Judul
-                  Text(item.title,
+                  Text(item.judul,
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800,
                           color: AppColors.text1, height: 1.3)),
                   const SizedBox(height: 12),
@@ -208,9 +210,7 @@ Eco enzim butuh minimal 3 bulan. Banyak yang membuka di bulan kedua karena tidak
                     children: [
                       _MetaBadge(icon: Icons.person_outline, label: item.author),
                       const SizedBox(width: 12),
-                      _MetaBadge(icon: Icons.schedule_outlined, label: item.readTime),
-                      const SizedBox(width: 12),
-                      _MetaBadge(icon: Icons.calendar_today_outlined, label: item.date),
+                      _MetaBadge(icon: Icons.calendar_today_outlined, label: item.createdAt),
                     ],
                   ),
 
@@ -233,7 +233,7 @@ Eco enzim butuh minimal 3 bulan. Banyak yang membuka di bulan kedua karena tidak
                             color: AppColors.green500, size: 20),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(item.excerpt,
+                          child: Text(item.ringkasan,
                               style: const TextStyle(fontSize: 13, color: AppColors.green900,
                                   height: 1.6, fontStyle: FontStyle.italic)),
                         ),
@@ -256,7 +256,7 @@ Eco enzim butuh minimal 3 bulan. Banyak yang membuka di bulan kedua karena tidak
                   // Tags
                   Wrap(
                     spacing: 8, runSpacing: 8,
-                    children: ['Eco Enzim', item.category, 'EnzyLife']
+                    children: ['Eco Enzim', item.kategori, 'EnzyLife']
                         .map((tag) => Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                               decoration: BoxDecoration(

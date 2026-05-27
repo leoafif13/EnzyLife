@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import 'artikel_page.dart';
+import '../models/artikel.dart';
+import '../services/api_service.dart';
 
 // ══════════════════════════════════════════════
 //  Model slide infografik
@@ -15,7 +17,7 @@ class _Slide {
 //  Data per infografik
 // ══════════════════════════════════════════════
 const _data = {
-  'i1': [
+  1: [
     _Slide(
       judul: 'Perbandingan Bahan: 1 : 3 : 10',
       imageAsset: 'assets/images/infografik/pembuatan_rasio.png',
@@ -32,7 +34,7 @@ const _data = {
       caption: 'Bulan 1: buka tutup setiap hari untuk melepas gas. Bulan 2: cukup 3x seminggu. Bulan 3: seminggu sekali. Setelah 3 bulan, saring dan simpan di botol gelap.',
     ),
   ],
-  'i2': [
+  2: [
     _Slide(
       judul: 'Eco Enzim sebagai Pupuk Cair Organik',
       imageAsset: 'assets/images/infografik/manfaat_pupuk.png',
@@ -49,7 +51,7 @@ const _data = {
       caption: 'Semprotkan langsung ke tanaman yang terkena hama. Senyawa ozon (O3) dalam eco enzim efektif mengusir kutu daun, ulat, dan serangga pengganggu tanpa merusak ekosistem.',
     ),
   ],
-  'i3': [
+  3: [
     _Slide(
       judul: 'Kulit Sitrus — Bahan Terbaik ⭐⭐⭐',
       imageAsset: 'assets/images/infografik/bahan_sitrus.png',
@@ -69,33 +71,39 @@ const _data = {
 };
 
 // Semua infografik untuk rekomendasi
-const _allItems = [
-  ArtikelItem(
-    id: 'i1', title: 'Infografik: Proses Pembuatan Eco Enzim',
-    author: 'Admin', date: '07 Apr 2026', category: 'Infografik', readTime: '1 menit',
-    excerpt: 'Panduan visual langkah demi langkah membuat eco enzim dari kulit buah, gula merah, dan air dengan rasio 1:3:10.',
-    isInfografik: true,
-  ),
-  ArtikelItem(
-    id: 'i2', title: 'Infografik: Manfaat Eco Enzim dalam 1 Halaman',
-    author: 'Admin', date: '03 Apr 2026', category: 'Infografik', readTime: '1 menit',
-    excerpt: 'Rangkuman lengkap semua manfaat eco enzim disajikan dalam satu infografik menarik.',
-    isInfografik: true,
-  ),
-  ArtikelItem(
-    id: 'i3', title: 'Infografik: Perbandingan Bahan Organik untuk Eco Enzim',
-    author: 'Admin', date: '25 Mar 2026', category: 'Infografik', readTime: '1 menit',
-    excerpt: 'Tidak semua sampah dapur cocok untuk eco enzim. Infografik ini membandingkan kualitas dari berbagai bahan organik.',
-    isInfografik: true,
-  ),
-];
+// const _allItems = [
+//   ArtikelItem(
+//     id: 'i1', title: 'Infografik: Proses Pembuatan Eco Enzim',
+//     author: 'Admin', date: '07 Apr 2026', category: 'Infografik', readTime: '1 menit',
+//     excerpt: 'Panduan visual langkah demi langkah membuat eco enzim dari kulit buah, gula merah, dan air dengan rasio 1:3:10.',
+//     isInfografik: true,
+//   ),
+//   ArtikelItem(
+//     id: 'i2', title: 'Infografik: Manfaat Eco Enzim dalam 1 Halaman',
+//     author: 'Admin', date: '03 Apr 2026', category: 'Infografik', readTime: '1 menit',
+//     excerpt: 'Rangkuman lengkap semua manfaat eco enzim disajikan dalam satu infografik menarik.',
+//     isInfografik: true,
+//   ),
+//   ArtikelItem(
+//     id: 'i3', title: 'Infografik: Perbandingan Bahan Organik untuk Eco Enzim',
+//     author: 'Admin', date: '25 Mar 2026', category: 'Infografik', readTime: '1 menit',
+//     excerpt: 'Tidak semua sampah dapur cocok untuk eco enzim. Infografik ini membandingkan kualitas dari berbagai bahan organik.',
+//     isInfografik: true,
+//   ),
+// ];
 
 // ══════════════════════════════════════════════
 //  DetailInfografikPage
 // ══════════════════════════════════════════════
 class DetailInfografikPage extends StatelessWidget {
-  final ArtikelItem item;
+  final ArtikelModel item;
   const DetailInfografikPage({super.key, required this.item});
+
+  List<ArtikelModel> get _allItems {
+    return ApiService.cachedArtikel
+        .where((x) => x.kategori.toLowerCase() == 'infografik')
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +153,7 @@ class DetailInfografikPage extends StatelessWidget {
                             color: Color(0xFF1565C0))),
                   ),
                   const SizedBox(height: 10),
-                  Text(item.title,
+                  Text(item.judul,
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
                           color: AppColors.text1, height: 1.3)),
                   const SizedBox(height: 10),
@@ -160,7 +168,7 @@ class DetailInfografikPage extends StatelessWidget {
                       const Icon(Icons.calendar_today_outlined,
                           size: 13, color: AppColors.green500),
                       const SizedBox(width: 4),
-                      Text(item.date,
+                      Text(item.createdAt,
                           style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                       const SizedBox(width: 16),
                       const Icon(Icons.image_outlined,
@@ -352,7 +360,7 @@ class _SlideCard extends StatelessWidget {
 
 // ── Card rekomendasi infografik lain ──────────
 class _RekomendasiCard extends StatelessWidget {
-  final ArtikelItem item;
+  final ArtikelModel item;
   const _RekomendasiCard({required this.item});
 
   @override
@@ -413,7 +421,7 @@ class _RekomendasiCard extends StatelessWidget {
                               color: Color(0xFF1565C0))),
                     ),
                     const SizedBox(height: 6),
-                    Text(item.title,
+                    Text(item.judul,
                         maxLines: 2, overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
                             color: AppColors.text1, height: 1.3)),
@@ -423,7 +431,7 @@ class _RekomendasiCard extends StatelessWidget {
                         Icon(Icons.calendar_today_outlined,
                             size: 11, color: Colors.grey[400]),
                         const SizedBox(width: 3),
-                        Text(item.date,
+                        Text(item.createdAt,
                             style: TextStyle(fontSize: 11, color: Colors.grey[400])),
                         const Spacer(),
                         const Text('Lihat →',

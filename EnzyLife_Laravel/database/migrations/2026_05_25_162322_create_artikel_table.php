@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('artikel', function (Blueprint $table) {
             $table->id('id_artikel');
             $table->string('judul');
-            $table->text('isi_konten');
+            $table->text('ringkasan')->nullable();
+            $table->longText('isi_konten');
             $table->string('gambar')->nullable();
-            $table->date('tanggal_unggah');
+            $table->string('kategori')->nullable();
+            $table->string('author')->default('Admin');
             $table->timestamps();
         });
     }

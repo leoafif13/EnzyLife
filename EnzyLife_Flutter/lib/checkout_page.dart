@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'models/product.dart';
 import 'app_color.dart';
 import 'widgets/sub_page_appbar.dart';
 import 'belanja_page.dart';

@@ -6,9 +6,9 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+
 use Filament\Tables\Table;
 use Filament\Tables;
-use Filament\Tables\Columns\ImageColumn;
 
 class ArtikelsTable
 {
@@ -16,21 +16,41 @@ class ArtikelsTable
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('judul')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('isi_konten')
-                    ->searchable(),
+
                 Tables\Columns\ImageColumn::make('gambar')
+                    ->label('Gambar')
                     ->disk('public')
-                    ->searchable(),
+                    ->square(),
+
+                Tables\Columns\TextColumn::make('judul')
+                    ->label('Judul')
+                    ->searchable()
+                    ->limit(40)
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('kategori')
+                    ->label('Kategori')
+                    ->badge()
+                    ->color('success'),
+
+                Tables\Columns\TextColumn::make('author')
+                    ->label('Author')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->since(),
             ])
+
             ->filters([
                 //
             ])
+
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
+
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

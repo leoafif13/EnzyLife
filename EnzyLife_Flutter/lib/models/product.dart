@@ -1,28 +1,31 @@
 class Product {
   final int id;
-  final String nama;
-  final String deskripsi;
-  final int harga;
-  final String gambar;
-  final int stok;
+  final String name;
+  final String description;
+  final int price;
+  final int stock;
+  final String image;
+  final bool isPopular;
 
-  Product({
+  const Product({
     required this.id,
-    required this.nama,
-    required this.deskripsi,
-    required this.harga,
-    required this.gambar,
-    required this.stok,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.stock,
+    required this.image,
+    this.isPopular = false,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'],
-      nama: json['nama'],
-      deskripsi: json['deskripsi'] ?? '',
-      harga: json['harga'],
-      gambar: json['gambar'] ?? '',
-      stok: json['stok'] ?? 0,
+      name: json['nama'] ?? '',
+      description: json['deskripsi'] ?? '',
+      price: int.parse(json['harga'].toString()),
+      stock: int.parse(json['stok'].toString()),
+      image: json['gambar'] ?? '',
+      isPopular: json['is_popular'] ?? false,
     );
   }
 }

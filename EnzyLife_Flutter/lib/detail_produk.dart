@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/product.dart';
 import 'app_color.dart';
 import 'belanja_page.dart';
 import 'shopping_cart.dart';
@@ -139,7 +140,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   width: double.infinity,
                                   color: AppColors.green50,
                                   child: Image.network(
-                                    'http://localhost:8000/gambar/${p.image.split('/').last}',
+                                    'http://localhost:8000/gambar/produk/${p.image.split('/').last}',
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) {
                                       return const Icon(Icons.image_not_supported);
@@ -212,7 +213,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    'http://localhost:8000/gambar/${p.image.split('/').last}',
+                                    'http://localhost:8000/gambar/produk/${p.image.split('/').last}',
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) {
                                       return const Icon(Icons.image_not_supported);
