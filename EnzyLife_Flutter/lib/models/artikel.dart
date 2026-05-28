@@ -6,7 +6,6 @@ class ArtikelModel {
   final String isiKonten;
   final String gambar;
   final String kategori;
-  final String author;
   final String createdAt;
 
   ArtikelModel({
@@ -16,7 +15,6 @@ class ArtikelModel {
     required this.isiKonten,
     required this.gambar,
     required this.kategori,
-    required this.author,
     required this.createdAt,
   });
 
@@ -34,8 +32,6 @@ class ArtikelModel {
       gambar: json['gambar'] ?? '',
 
       kategori: json['kategori'] ?? '',
-
-      author: json['author'] ?? 'Admin',
 
       createdAt: json['created_at'] ?? '',
     );

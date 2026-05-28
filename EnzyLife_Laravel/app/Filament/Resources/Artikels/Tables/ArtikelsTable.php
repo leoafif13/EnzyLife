@@ -33,10 +33,6 @@ class ArtikelsTable
                     ->badge()
                     ->color('success'),
 
-                Tables\Columns\TextColumn::make('author')
-                    ->label('Author')
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->since(),

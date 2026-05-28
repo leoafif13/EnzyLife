@@ -302,7 +302,7 @@ class _ArtikelCard extends StatelessWidget {
                     children: [
                       Icon(Icons.person_outline, size: 13, color: Colors.grey[400]),
                       const SizedBox(width: 4),
-                      Text(item.author,
+                      Text('Admin',
                           style: TextStyle(fontSize: 11, color: Colors.grey[400])),
                       const Spacer(),
                       Text(item.createdAt.split('T')[0],

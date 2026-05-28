@@ -16,6 +16,5 @@ class Artikel extends Model
         'isi_konten',
         'gambar',
         'kategori',
-        'author',
     ];
 }

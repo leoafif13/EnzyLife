@@ -70,28 +70,6 @@ const _data = {
   ],
 };
 
-// Semua infografik untuk rekomendasi
-// const _allItems = [
-//   ArtikelItem(
-//     id: 'i1', title: 'Infografik: Proses Pembuatan Eco Enzim',
-//     author: 'Admin', date: '07 Apr 2026', category: 'Infografik', readTime: '1 menit',
-//     excerpt: 'Panduan visual langkah demi langkah membuat eco enzim dari kulit buah, gula merah, dan air dengan rasio 1:3:10.',
-//     isInfografik: true,
-//   ),
-//   ArtikelItem(
-//     id: 'i2', title: 'Infografik: Manfaat Eco Enzim dalam 1 Halaman',
-//     author: 'Admin', date: '03 Apr 2026', category: 'Infografik', readTime: '1 menit',
-//     excerpt: 'Rangkuman lengkap semua manfaat eco enzim disajikan dalam satu infografik menarik.',
-//     isInfografik: true,
-//   ),
-//   ArtikelItem(
-//     id: 'i3', title: 'Infografik: Perbandingan Bahan Organik untuk Eco Enzim',
-//     author: 'Admin', date: '25 Mar 2026', category: 'Infografik', readTime: '1 menit',
-//     excerpt: 'Tidak semua sampah dapur cocok untuk eco enzim. Infografik ini membandingkan kualitas dari berbagai bahan organik.',
-//     isInfografik: true,
-//   ),
-// ];
-
 // ══════════════════════════════════════════════
 //  DetailInfografikPage
 // ══════════════════════════════════════════════
@@ -162,7 +140,7 @@ class DetailInfografikPage extends StatelessWidget {
                     children: [
                       const Icon(Icons.person_outline, size: 14, color: AppColors.green500),
                       const SizedBox(width: 4),
-                      Text(item.author,
+                      Text('Admin',
                           style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                       const SizedBox(width: 16),
                       const Icon(Icons.calendar_today_outlined,

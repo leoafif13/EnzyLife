@@ -18,7 +18,6 @@ return new class extends Migration
             $table->longText('isi_konten');
             $table->string('gambar')->nullable();
             $table->string('kategori')->nullable();
-            $table->string('author')->default('Admin');
             $table->timestamps();
         });
     }
