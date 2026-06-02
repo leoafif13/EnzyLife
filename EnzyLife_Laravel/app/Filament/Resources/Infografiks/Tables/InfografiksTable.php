@@ -20,8 +20,7 @@ class InfografiksTable
                 TextColumn::make('deskripsi')
                     ->searchable(),
                 ImageColumn::make('gambar')
-                    ->disk('public')
-                    ->searchable(),
+                    ->disk('public'),
             ])
             ->filters([
                 //

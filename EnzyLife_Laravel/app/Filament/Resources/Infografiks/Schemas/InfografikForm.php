@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\Infografiks\Schemas;
 
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms;
 use Filament\Schemas\Schema;
 
 class InfografikForm
