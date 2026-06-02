@@ -4,6 +4,7 @@ import '/widgets/sub_page_appbar.dart';
 import 'detail_artikel_page.dart';
 import 'detail_infografik_page.dart';
 import '../models/artikel.dart';
+import '../models/infografik.dart';
 import '../services/api_service.dart';
 
 // ══════════════════════════════════════════════
@@ -27,34 +28,8 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
   final _search = TextEditingController();
 
   List<ArtikelModel> _artikel = [];
+  List<InfografikModel> _infografik = [];
   bool _isLoading = true;
-
-  List<ArtikelModel> get _filtered {
-    return _artikel.where((item) {
-
-      if (_filter == _Filter.artikel &&
-          item.kategori.toLowerCase() == 'infografik') {
-        return false;
-      }
-
-      if (_filter == _Filter.infografik &&
-          item.kategori.toLowerCase() != 'infografik') {
-        return false;
-      }
-
-      if (_query.isNotEmpty) {
-
-        final q = _query.toLowerCase();
-
-        return item.judul.toLowerCase().contains(q) ||
-            item.ringkasan.toLowerCase().contains(q) ||
-            item.kategori.toLowerCase().contains(q);
-      }
-
-      return true;
-
-      }).toList();
-    }
 
   @override
     void dispose() {
@@ -70,25 +45,47 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
 
   Future<void> fetchArtikel() async {
 
-    final result = await ApiService.getArtikel();
+    final artikel = await ApiService.getArtikel();
+    final infografik = await ApiService.getInfografik();
+
 
     setState(() {
-      _artikel = result;
+      _artikel = artikel;
+      _infografik = infografik;
       _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-      if (_isLoading) {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-  }
-  
-    final items = _filtered;
+
+    final filteredArtikel = _artikel.where((item) {
+      if (_query.isEmpty) return true;
+
+      return item.judul.toLowerCase().contains(_query.toLowerCase()) ||
+          item.ringkasan.toLowerCase().contains(_query.toLowerCase());
+    }).toList();
+
+    final filteredInfografik = _infografik.where((item) {
+      if (_query.isEmpty) return true;
+
+      return item.judul.toLowerCase().contains(_query.toLowerCase()) ||
+          item.deskripsi.toLowerCase().contains(_query.toLowerCase());
+    }).toList();
+
+    final List<Widget> content = [];
+
+    if (_filter != _Filter.infografik) {
+      content.addAll(
+        filteredArtikel.map((item) => _ArtikelCard(item: item)),
+      );
+    }
+
+    if (_filter != _Filter.artikel) {
+      content.addAll(
+        filteredInfografik.map((item) => _InfografikCard(item: item)),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.bgPage,
@@ -195,22 +192,19 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
 
           // ── List konten ──────────────────────
           Expanded(
-            child: items.isEmpty
-                ? _EmptyState(query: _query, filter: _filter)
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                    itemCount: items.length,
-                    itemBuilder: (_, i) {
-                      final item = items[i];
-
-                      final isInfografik =
-                          item.kategori.toLowerCase() == 'infografik';
-
-                      return isInfografik
-                          ? _InfografikCard(item: item)
-                          : _ArtikelCard(item: item);
-                    },
-                  ),
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : content.isEmpty
+                    ? _EmptyState(
+                        query: _query,
+                        filter: _filter,
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                        children: content,
+                      ),
           ),
         ],
       ),
@@ -321,7 +315,7 @@ class _ArtikelCard extends StatelessWidget {
 
 // ── Infografik card (landscape, lebih tinggi) ─
 class _InfografikCard extends StatelessWidget {
-  final ArtikelModel item;
+  final InfografikModel item;
   const _InfografikCard({required this.item});
   
   @override
@@ -345,7 +339,7 @@ class _InfografikCard extends StatelessWidget {
                 width: 100, height: 120,
                 color: const Color(0xFFE8F5E9),
                 child: Image.network(
-                        'http://localhost:8000/gambar/artikels/${item.gambar}',
+                        'http://localhost:8000/gambar/${item.gambar}',
                         width: double.infinity,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) {
@@ -384,7 +378,7 @@ class _InfografikCard extends StatelessWidget {
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
                             color: AppColors.text1, height: 1.4)),
                     const SizedBox(height: 6),
-                    Text(item.ringkasan,
+                    Text(item.deskripsi,
                         maxLines: 2, overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 11, color: Colors.grey[500], height: 1.4)),
                     const SizedBox(height: 8),
@@ -432,7 +426,11 @@ class _EmptyState extends StatelessWidget {
           Text(
             query.isNotEmpty
                 ? 'Tidak ada hasil untuk "$query"'
-                : 'Belum ada konten tersedia',
+                : filter == _Filter.artikel
+                    ? 'Belum ada artikel tersedia'
+                    : filter == _Filter.infografik
+                        ? 'Belum ada infografik tersedia'
+                        : 'Belum ada konten tersedia',
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
                 color: AppColors.text1),
             textAlign: TextAlign.center,

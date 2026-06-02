@@ -57,16 +57,6 @@ Program seperti ini dinilai efektif membangun kebiasaan peduli lingkungan sejak 
                 'updated_at' => now(),
             ],
 
-            [
-                'judul' => 'Infografik Manfaat Eco Enzyme',
-                'ringkasan' => 'Ringkasan visual manfaat eco enzyme dalam kehidupan sehari-hari.',
-                'isi_konten' => 'Infografik ini menjelaskan berbagai manfaat eco enzyme mulai dari penggunaan rumah tangga, perawatan tanaman, hingga pengurangan limbah organik.',
-                'gambar' => 'infografik1.jpg',
-                'kategori' => 'Infografik',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-
         ]);
     }
 }

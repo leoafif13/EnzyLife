@@ -115,6 +115,7 @@ class _TabPembuatanState extends State<_TabPembuatan> {
 
   void _hitung() {
     final jumlah = double.tryParse(_jumlahController.text);
+
     if (jumlah == null || jumlah <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -124,18 +125,70 @@ class _TabPembuatanState extends State<_TabPembuatan> {
       );
       return;
     }
-    final jumlahLiter = _satuan == 'Mililiter' ? jumlah / 1000 : jumlah;
-    final air          = jumlahLiter;
-    final bahanOrganik = (air / 10) * 3;
-    final gula         = air / 10;
-    final wadah        = air * 1.2;
+
+    double gula;
+    double organik;
+    double air;
+
+    switch (_kategori) {
+
+      case 'Gula':
+        gula = jumlah;
+        organik = gula * 3;
+        air = gula * 10;
+        break;
+
+      case 'Bahan Organik':
+        organik = jumlah;
+        gula = organik / 3;
+        air = gula * 10;
+        break;
+
+      case 'Air':
+        air = _satuan == 'Mililiter'
+            ? jumlah / 1000
+            : jumlah;
+
+        gula = air / 10;
+        organik = gula * 3;
+        break;
+
+      case 'Wadah':
+        final volumeWadah =
+            _satuan == 'Mililiter'
+                ? jumlah / 1000
+                : jumlah;
+
+        air = volumeWadah / 1.2;
+        gula = air / 10;
+        organik = gula * 3;
+        break;
+
+      default:
+        return;
+    }
+
+    final wadah = air * 1.2;
+
+    final pakaiMl = _satuan == 'Mililiter';
 
     setState(() {
       _hasil = {
-        'Wadah Minimal':          '${wadah.toStringAsFixed(2)} Liter\n(+20% ruang fermentasi)',
-        'Gula Merah':             '${(gula * 1.3).toStringAsFixed(2)} Kilogram',
-        'Bahan Organik (Sampah)': '${(bahanOrganik * 1.3).toStringAsFixed(2)} Kilogram',
-        'Air':                    '${air.toStringAsFixed(2)} Liter',
+        'Wadah Minimal': pakaiMl
+            ? '${(wadah * 1000).toStringAsFixed(0)} mL\n(+20% ruang fermentasi)'
+            : '${wadah.toStringAsFixed(2)} Liter\n(+20% ruang fermentasi)',
+
+        'Gula Merah': pakaiMl
+            ? '${(gula * 1000).toStringAsFixed(0)} gram'
+            : '${gula.toStringAsFixed(2)} Kg',
+
+        'Bahan Organik': pakaiMl
+            ? '${(organik * 1000).toStringAsFixed(0)} gram'
+            : '${organik.toStringAsFixed(2)} Kg',
+
+        'Air': pakaiMl
+            ? '${(air * 1000).toStringAsFixed(0)} mL'
+            : '${air.toStringAsFixed(2)} Liter',
       };
     });
   }
@@ -183,7 +236,18 @@ class _TabPembuatanState extends State<_TabPembuatan> {
           _DropdownField(
             value: _kategori,
             items: const ['Wadah', 'Air', 'Bahan Organik', 'Gula'],
-            onChanged: (v) => setState(() => _kategori = v ?? _kategori),
+            onChanged: (v) {
+              setState(() {
+                _kategori = v ?? _kategori;
+
+                if (_kategori == 'Gula' ||
+                    _kategori == 'Bahan Organik') {
+                  _satuan = 'Kilogram';
+                } else {
+                  _satuan = 'Liter';
+                }
+              });
+            },
           ),
 
           const SizedBox(height: 16),
@@ -195,7 +259,10 @@ class _TabPembuatanState extends State<_TabPembuatan> {
           const SizedBox(height: 8),
           _DropdownField(
             value: _satuan,
-            items: const ['Liter', 'Mililiter'],
+            items: _kategori == 'Gula' ||
+                    _kategori == 'Bahan Organik'
+                ? const ['Kilogram']
+                : const ['Liter', 'Mililiter'],
             onChanged: (v) => setState(() => _satuan = v ?? _satuan),
           ),
 
@@ -233,10 +300,85 @@ class _TabPenggunaanState extends State<_TabPenggunaan> {
   Map<String, String>? _hasil;
 
   static const _rasio = {
-    'Pupuk Organik':    {'enzim': 1, 'air': 500,  'label': 'Eco Enzim : Air = 1 : 500'},
-    'Pembersih Lantai': {'enzim': 1, 'air': 1000, 'label': 'Eco Enzim : Air = 1 : 1000'},
-    'Pestisida':        {'enzim': 1, 'air': 1000, 'label': 'Eco Enzim : Air = 1 : 1000'},
-    'Pengharum':        {'enzim': 1, 'air': 200,  'label': 'Eco Enzim : Air = 1 : 200'},
+    // Rumah Tangga
+    'Kompor & Area Dapur': {
+      'enzim': 1,
+      'campuran': 10,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 10',
+    },
+
+    'Cuci Piring': {
+      'enzim': 1,
+      'campuran': 1,
+      'bahan': 'Sabun Cuci Piring',
+      'label': 'Eco Enzim : Sabun Cuci Piring = 1 : 1',
+    },
+
+    'Cuci Pakaian': {
+      'enzim': 1,
+      'campuran': 10,
+      'bahan': 'Deterjen',
+      'label': 'Eco Enzim : Deterjen = 1 : 10',
+    },
+
+    'Pel Lantai': {
+      'enzim': 1,
+      'campuran': 50,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 50',
+    },
+
+    'Kamar Mandi': {
+      'enzim': 1,
+      'campuran': 10,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 10',
+    },
+
+    'Saluran Air': {
+      'enzim': 1,
+      'campuran': 1,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 1',
+    },
+
+    'Penghilang Bau': {
+      'enzim': 1,
+      'campuran': 500,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 500',
+    },
+
+    // Pertanian
+    'Pupuk Organik': {
+      'enzim': 1,
+      'campuran': 1000,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 1000',
+    },
+
+    'Pestisida Sayuran': {
+      'enzim': 1,
+      'campuran': 500,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 500',
+    },
+
+    'Kompos': {
+      'enzim': 1,
+      'campuran': 100,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 100',
+    },
+
+    // Lingkungan
+    'Air Purifier': {
+      'enzim': 1,
+      'campuran': 1000,
+      'bahan': 'Air',
+      'label': 'Eco Enzim : Air = 1 : 1000',
+    },
   };
 
   void _hitung() {
@@ -252,15 +394,25 @@ class _TabPenggunaanState extends State<_TabPenggunaan> {
     }
     final jumlahMl   = _satuan == 'Liter' ? jumlah * 1000 : jumlah;
     final rasio      = _rasio[_jenisGunaan]!;
-    final totalParts = (rasio['enzim'] as int) + (rasio['air'] as int);
-    final enzimMl    = (jumlahMl / totalParts) * (rasio['enzim'] as int);
-    final airMl      = jumlahMl - enzimMl;
+    final totalParts =
+        (rasio['enzim'] as int) +
+        (rasio['campuran'] as int);
+    final enzimMl =
+        (jumlahMl / totalParts) *
+        (rasio['enzim'] as int);
+    final campuranMl =
+        jumlahMl - enzimMl;
 
     setState(() {
       _hasil = {
-        'Eco Enzim':     '${enzimMl.toStringAsFixed(1)} mL',
-        'Air':           '${airMl.toStringAsFixed(1)} mL',
-        'Total Larutan': '${jumlahMl.toStringAsFixed(1)} mL',
+        'Eco Enzim':
+            '${enzimMl.toStringAsFixed(1)} mL',
+
+        rasio['bahan'] as String:
+            '${campuranMl.toStringAsFixed(1)} mL',
+
+        'Total Larutan':
+            '${jumlahMl.toStringAsFixed(1)} mL',
       };
     });
   }
