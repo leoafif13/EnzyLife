@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/product.dart';
-import 'app_color.dart';
+import '../app_color.dart';
 import 'belanja_page.dart';
 import 'shopping_cart.dart';
 // import 'widgets/sub_page_appbar.dart';

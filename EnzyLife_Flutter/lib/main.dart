@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'app_color.dart';
 import 'widgets/app_header.dart';
 import 'widgets/bottom_navbar.dart';
-import 'login_page.dart';
-import 'edukasi_page.dart';
-import 'belanja_page.dart';
-import 'profil_page.dart';
-import 'shopping_cart.dart';
+import 'auth/login_page.dart';
+import 'edukasi/edukasi_page.dart';
+import 'belanja/belanja_page.dart';
+import 'profil/profil_page.dart';
+import 'belanja/shopping_cart.dart';
 import 'services/auth_service.dart';
 
 void main() async {

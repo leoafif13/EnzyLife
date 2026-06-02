@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'app_color.dart';
+import '../app_color.dart';
 // import 'shopping_cart.dart';
-import 'detail_produk.dart';
-import 'services/api_service.dart';
+import 'detail_produk_page.dart';
+import '../services/api_service.dart';
 import 'checkout_page.dart';
-import 'models/product.dart';
+import '../models/product.dart';
 
 // ══════════════════════════════════════════════
 //  CartState — singleton ChangeNotifier
@@ -110,23 +110,6 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
   @override
   Widget build(BuildContext context) {
 
-    // loading dulu sebelum data muncul
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    if (_products.isEmpty) {
-      return const Scaffold(
-        body: Center(
-          child: Text('Produk tidak tersedia'),
-        ),
-      );
-    }
-
     final cart = CartState.instance;
 
     // ambil produk pertama jadi featured
@@ -195,11 +178,71 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
             // Product list
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: listProds
-                    .map((p) => _ProductCard(product: p, fmtPrice: _fmt, onChanged: _refresh))
-                    .toList(),
-              ),
+              child: _isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 80),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : listProds.isEmpty
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.55,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 72,
+                                height: 72,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.green50,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.shopping_bag_outlined,
+                                  size: 34,
+                                  color: AppColors.green500,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _query.isNotEmpty
+                                    ? 'Produk "$_query" tidak ditemukan'
+                                    : 'Belum ada produk tersedia',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.text1,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _query.isNotEmpty
+                                    ? 'Coba gunakan kata kunci lain'
+                                    : 'Produk akan muncul di sini ketika tersedia',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      : Column(
+                          children: listProds
+                              .map(
+                                (p) => _ProductCard(
+                                  product: p,
+                                  fmtPrice: _fmt,
+                                  onChanged: _refresh,
+                                ),
+                              )
+                              .toList(),
+                        ),
             ),
           ],
         ),

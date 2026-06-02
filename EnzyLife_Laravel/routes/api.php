@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ArtikelController;
+use App\Http\Controllers\Api\InfografikController;
 
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -14,5 +15,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::apiResource('products', ProductController::class);
+
 Route::get('/artikel', [ArtikelController::class, 'index']);
 Route::get('/artikel/{id}', [ArtikelController::class, 'show']);
+
+Route::get('/infografik', [InfografikController::class, 'index']);
+Route::get('/infografik/{id}', [InfografikController::class, 'show']);

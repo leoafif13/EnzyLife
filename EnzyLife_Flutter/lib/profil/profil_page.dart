@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'app_color.dart';
-import 'login_page.dart';
-import 'profil/edit_profil_page.dart';
-import 'profil/ubah_password_page.dart';
-import 'profil/notifikasi_page.dart';
-import 'profil/riwayat_belanja_page.dart';
-import 'profil/artikel_tersimpan_page.dart';
-import 'profil/riwayat_kalkulator_page.dart';
-import 'profil/bantuan_page.dart';
-import 'profil/tentang_aplikasi_page.dart';
-import 'profil/kebijakan_privasi_page.dart';
-import 'services/auth_service.dart';
+import '../app_color.dart';
+import '../auth/login_page.dart';
+import 'edit_profil_page.dart';
+import 'ubah_password_page.dart';
+import 'notifikasi_page.dart';
+import 'riwayat_belanja_page.dart';
+import 'artikel_tersimpan_page.dart';
+import 'riwayat_kalkulator_page.dart';
+import 'bantuan_page.dart';
+import 'tentang_aplikasi_page.dart';
+import 'kebijakan_privasi_page.dart';
+import '../services/auth_service.dart';
 
 class ProfilScreen extends StatelessWidget {
   const ProfilScreen({super.key});

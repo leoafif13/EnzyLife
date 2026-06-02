@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'app_color.dart';
-import 'edukasi/artikel_page.dart';
-import 'edukasi/kalkulator_page.dart';
-import 'edukasi/faq_page.dart';
+import '../app_color.dart';
+import 'artikel_page.dart';
+import 'kalkulator_page.dart';
+import 'faq_page.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 // ══════════════════════════════════════════════
@@ -194,21 +194,41 @@ class EducationScreen extends StatelessWidget {
     _EduSection(
       title: 'Mengenal Eco Enzim lebih jauh',
       items: [
-        _EduItem(hasVideo: true,  caption: 'Video Edukasi Eco Enzyme', videoId:'EwvJbebrlbk'),
+        _EduItem(
+          hasVideo: true,
+          caption: 'Video Edukasi Eco Enzyme',
+          videoId: 'EwvJbebrlbk',
+        ),
       ],
     ),
+
     _EduSection(
       title: 'Manfaat Eco Enzim',
       items: [
-        _EduItem(hasVideo: false, caption: ''), // TODO: isi caption
-        _EduItem(hasVideo: false, caption: ''), // TODO: isi caption
+        _EduItem(
+          hasVideo: false,
+          image: 'assets/images/edukasi/eco1.jpg',
+          caption:
+              'Eco Enzim dapat digunakan sebagai pembersih alami untuk lantai, dapur, dan kamar mandi.',
+        ),
       ],
     ),
+
     _EduSection(
       title: 'Cara Penggunaan Eco Enzim',
       items: [
-        _EduItem(hasVideo: false, caption: ''), // TODO: isi caption
-        _EduItem(hasVideo: false, caption: ''), // TODO: isi caption
+        _EduItem(
+          hasVideo: false,
+          image: 'assets/images/edukasi/penggunaan-benar.png',
+          caption:
+              'Campurkan Eco Enzim dengan air sesuai kebutuhan sebelum digunakan sebagai pembersih.',
+        ),
+        _EduItem(
+          hasVideo: false,
+          image: 'assets/images/edukasi/penggunaan-salah.png',
+          caption:
+              'Eco Enzim juga dapat digunakan sebagai pupuk cair dengan pengenceran yang tepat.',
+        ),
       ],
     ),
   ];
@@ -354,11 +374,13 @@ class _EduItem {
   final bool hasVideo;
   final String caption;
   final String? videoId;
+  final String? image;
 
   const _EduItem({
     required this.hasVideo,
     required this.caption,
     this.videoId,
+    this.image,
   });
 }
 
@@ -438,14 +460,12 @@ class _EduItemCard extends StatelessWidget {
                       ),
                     ),
                   )
-                : Container(
-                    color: AppColors.green50,
-                    child: Icon(
-                      Icons.image_outlined,
-                      size: 40,
-                      color: AppColors.green500.withOpacity(0.3),
-                    ),
-                  ),
+                : Image.asset(
+                item.image!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
           ),
 

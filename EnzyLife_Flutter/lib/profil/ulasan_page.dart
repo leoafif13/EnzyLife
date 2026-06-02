@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../app_color.dart';
-import '../widgets/sub_page_appbar.dart';
+import '../../app_color.dart';
+import '../../widgets/sub_page_appbar.dart';
 
 class UlasanScreen extends StatefulWidget {
   final String productName;

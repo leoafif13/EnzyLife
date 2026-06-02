@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 
 import '../models/product.dart';
 import '../models/artikel.dart';
+import '../models/infografik.dart';
+
 
 class ApiService {
 
@@ -12,6 +14,7 @@ class ApiService {
   // Cache
   static List<Product> cachedProducts = [];
   static List<ArtikelModel> cachedArtikel = [];
+  static List<InfografikModel> cachedInfografik = [];
 
   // =====================================================
   // PRODUCTS
@@ -115,6 +118,43 @@ class ApiService {
       print('Error getDetailArtikel: $e');
 
       return null;
+    }
+  }
+
+  // =====================================================
+  // INFOGRAFIK
+  // =====================================================
+
+  static Future<List<InfografikModel>> getInfografik() async {
+    try {
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/infografik'),
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+
+        final List data = jsonDecode(response.body);
+
+        final infografik = data
+            .map((e) => InfografikModel.fromJson(e))
+            .toList();
+
+        cachedInfografik = infografik;
+
+        return infografik;
+      }
+
+      return [];
+
+    } catch (e) {
+
+      print('Error getInfografik: $e');
+
+      return [];
     }
   }
 }

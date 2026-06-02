@@ -14,6 +14,5 @@ class Infografik extends Model
         'judul',
         'deskripsi',
         'gambar',
-        'tanggal_unggah',
     ];
 }
