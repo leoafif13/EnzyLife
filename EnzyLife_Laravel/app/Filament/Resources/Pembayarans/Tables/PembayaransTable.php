@@ -17,7 +17,8 @@ class PembayaransTable
            ->columns([
             TextColumn::make('id')
                 ->label('ID')
-                ->sortable(),
+                ->sortable()
+                ->searchable(),
 
             TextColumn::make('pemesanan.id')
                 ->label('ID Pesanan'),
@@ -53,11 +54,11 @@ class PembayaransTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    // DeleteBulkAction::make(),
                 ]),
             ]);
     }

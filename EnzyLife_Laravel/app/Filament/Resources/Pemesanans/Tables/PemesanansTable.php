@@ -23,6 +23,12 @@ class PemesanansTable
                 ->label('Pelanggan')
                 ->searchable(),
 
+            TextColumn::make('produk')
+                ->label('Produk')
+                ->getStateUsing(function ($record) {
+                    return $record->detailPemesanan->count() . ' Produk';
+                }),
+
             TextColumn::make('total_harga')
                 ->label('Total Harga')
                 ->money('IDR')
@@ -52,11 +58,11 @@ class PemesanansTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    // DeleteBulkAction::make(),
                 ]),
             ]);
     }
