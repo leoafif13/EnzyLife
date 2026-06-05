@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     setState(() => _isLoading = true);
 
     try {
-      final result = await ApiService.login(
+      final result = await AuthService.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
@@ -76,8 +76,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       // Login berhasil
       if (result['token'] != null) {
         // Simpan token
-        await ApiService.saveToken(result['token']);
-        await ApiService.saveUser(result['user']);
+        await AuthService.saveToken(result['token']);
+        await AuthService.saveUser(result['user']);
 
         if (!mounted) return;
 

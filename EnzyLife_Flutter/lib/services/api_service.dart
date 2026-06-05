@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import '../models/product.dart';
 import '../models/artikel.dart';
 import '../models/infografik.dart';
+import '../models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ApiService {
@@ -15,6 +17,18 @@ class ApiService {
   static List<Product> cachedProducts = [];
   static List<ArtikelModel> cachedArtikel = [];
   static List<InfografikModel> cachedInfografik = [];
+  static UserModel? cachedUser;
+
+  static Future<Map<String, String>> _authHeaders() async {
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    return {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 
   // =====================================================
   // PRODUCTS
@@ -25,9 +39,7 @@ class ApiService {
 
       final response = await http.get(
         Uri.parse('$_baseUrl/products'),
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -62,9 +74,7 @@ class ApiService {
 
       final response = await http.get(
         Uri.parse('$_baseUrl/artikel'),
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -99,9 +109,7 @@ class ApiService {
 
       final response = await http.get(
         Uri.parse('$_baseUrl/artikel/$id'),
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -130,9 +138,7 @@ class ApiService {
 
       final response = await http.get(
         Uri.parse('$_baseUrl/infografik'),
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -155,6 +161,79 @@ class ApiService {
       print('Error getInfografik: $e');
 
       return [];
+    }
+  }
+
+  // =====================================================
+  // PROFILE
+  // =====================================================
+
+  static Future<UserModel?> getProfile() async {
+    try {
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/profile'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+
+        final data = jsonDecode(response.body);
+
+        final user = UserModel.fromJson(data['user']);
+
+        cachedUser = user;
+
+        return user;
+      }
+
+      return null;
+
+    } catch (e) {
+
+      print('Error getProfile: $e');
+
+      return null;
+    }
+  }
+
+  // =====================================================
+  // UPDATE PROFILE
+  // =====================================================
+
+  static Future<bool> updateProfile({
+    required String name,
+    String? phone,
+    String? address,
+    String? postalCode,
+  }) async {
+
+    try {
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      final response = await http.put(
+        Uri.parse('$_baseUrl/profile'),
+        headers: await _authHeaders(),
+        body: {
+          'name': name,
+          'phone': phone ?? '',
+          'address': address ?? '',
+          'postal_code': postalCode ?? '',
+        },
+      );
+
+      return response.statusCode == 200;
+
+    } catch (e) {
+
+      print('Error updateProfile: $e');
+
+      return false;
     }
   }
 }

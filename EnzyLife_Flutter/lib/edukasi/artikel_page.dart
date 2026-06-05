@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '/app_color.dart';
 import '/widgets/sub_page_appbar.dart';
+import '/widgets/page_header_card.dart';
+import '/widgets/search_bar_field.dart';
 import 'detail_artikel_page.dart';
 import 'detail_infografik_page.dart';
 import '../models/artikel.dart';
@@ -96,25 +98,9 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
           Container(
             color: AppColors.bgCard,
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.bgCard,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow,
-              ),
-              child: Column(
-                children: [
-                  const Text('Artikel & Infografik',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800,
-                          color: AppColors.text1)),
-                  const SizedBox(height: 6),
-                  Text('Kumpulan artikel dan infografik seputar Eco Enzim',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5)),
-                ],
-              ),
+            child: const PageHeaderCard(
+              title: 'Artikel & Infografik',
+              subtitle: 'Kumpulan artikel dan infografik seputar Eco Enzim',
             ),
           ),
 
@@ -122,25 +108,12 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
           Container(
             color: AppColors.bgCard,
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            child: TextField(
+            child: SearchBarField(
               controller: _search,
+              hintText: 'Cari artikel atau infografik...',
               onChanged: (v) => setState(() => _query = v),
-              style: const TextStyle(fontSize: 14, color: AppColors.text1),
-              decoration: InputDecoration(
-                hintText: 'Cari artikel atau infografik...',
-                hintStyle: const TextStyle(color: AppColors.hint, fontSize: 13),
-                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.hint, size: 20),
-                suffixIcon: _query.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.close, size: 18, color: AppColors.hint),
-                        onPressed: () { setState(() => _query = ''); _search.clear(); })
-                    : null,
-                filled: true,
-                fillColor: AppColors.bgPage,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              ),
+              showClearButton: _query.isNotEmpty,
+              onClear: () { setState(() => _query = ''); _search.clear(); },
             ),
           ),
 

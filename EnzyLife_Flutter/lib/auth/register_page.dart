@@ -89,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     setState(() => _isLoading = true);
 
     try {
-      final response = await ApiService.register(
+      final response = await AuthService.register(
         name,
         email,
         password,
@@ -97,9 +97,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       );
 
       if (response['token'] != null) {
-        await ApiService.saveToken(response['token']);
+        await AuthService.saveToken(response['token']);
         // SIMPAN DATA USER
-        await ApiService.saveUser(response['user']);
+        await AuthService.saveUser(response['user']);
 
         if (!mounted) return;
 

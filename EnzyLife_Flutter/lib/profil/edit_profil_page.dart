@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
+import '../services/api_service.dart';
+import '../models/user.dart';
 
 class EditProfilScreen extends StatefulWidget {
   const EditProfilScreen({super.key});
@@ -10,33 +12,107 @@ class EditProfilScreen extends StatefulWidget {
 }
 
 class _EditProfilScreenState extends State<EditProfilScreen> {
-  final _namaController  = TextEditingController(text: 'Rafi Akhbar'); // TODO: dari session/auth
-  final _emailController = TextEditingController(text: 'rafi@email.com');
-  final _noHpController  = TextEditingController(text: '');
+
+  UserModel? user;
+
+  final _namaController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _noHpController = TextEditingController();
+  final _alamatController = TextEditingController();
+  final _kodePosController = TextEditingController();
+
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+
+    final result = await ApiService.getProfile();
+
+    if (result == null || !mounted) return;
+
+    setState(() {
+
+      user = result;
+
+      _namaController.text = result.name;
+      _emailController.text = result.email;
+      _noHpController.text = result.phone ?? '';
+      _alamatController.text = result.address ?? '';
+      _kodePosController.text = result.postalCode ?? '';
+
+    });
+  }
 
   @override
   void dispose() {
     _namaController.dispose();
     _emailController.dispose();
     _noHpController.dispose();
+    _alamatController.dispose();
+    _kodePosController.dispose();
     super.dispose();
   }
 
   Future<void> _simpan() async {
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1)); // TODO: request API update profil
+
+    final success = await ApiService.updateProfile(
+      name: _namaController.text,
+      phone: _noHpController.text,
+      address: _alamatController.text,
+      postalCode: _kodePosController.text,
+    );
+
     setState(() => _isLoading = false);
+
     if (!mounted) return;
+
+    if (!success) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal memperbarui profil'),
+        ),
+      );
+
+      return;
+    }
+
+    await ApiService.getProfile();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Profil berhasil diperbarui'),
         backgroundColor: AppColors.green500,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
+
     Navigator.of(context).pop();
+  }
+
+  String getInitials(String name) {
+    final words = name.trim().split(' ');
+
+    if (words.length >= 2) {
+      return words[0][0].toUpperCase() +
+          words[1][0].toUpperCase();
+    }
+
+    if (words.isNotEmpty && words[0].isNotEmpty) {
+      return words[0][0].toUpperCase();
+    }
+
+    return '?';
   }
 
   @override
@@ -62,16 +138,21 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
                         end: Alignment.bottomRight,
                       ),
                     ),
-                    child: const Center(
-                      // TODO: ganti dengan foto profil user
-                      child: Text('RA',
-                          style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.white)),
+                    child: Center(
+                      child: Text(
+                        getInitials(user?.name ?? ''),
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                   Positioned(
                     bottom: 0, right: 0,
                     child: GestureDetector(
-                      onTap: () {}, // TODO: buka image picker
+                      onTap: () {},
                       child: Container(
                         width: 30, height: 30,
                         decoration: BoxDecoration(
@@ -116,6 +197,7 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
                     hint: 'Masukkan email',
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
+                    readOnly: true,
                   ),
                   const SizedBox(height: 16),
                   _FormField(
@@ -124,6 +206,21 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
                     hint: 'Masukkan nomor HP',
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 16),
+                  _FormField(
+                    controller: _alamatController,
+                    label: 'Alamat',
+                    hint: 'Masukkan alamat',
+                    icon: Icons.location_on_outlined,
+                  ),
+                  const SizedBox(height: 16),
+                  _FormField(
+                    controller: _kodePosController,
+                    label: 'Kode Pos',
+                    hint: 'Masukkan kode pos',
+                    icon: Icons.markunread_mailbox_outlined,
+                    keyboardType: TextInputType.number,
                   ),
                 ],
               ),
@@ -162,11 +259,15 @@ class _FormField extends StatelessWidget {
   final String label, hint;
   final IconData icon;
   final TextInputType? keyboardType;
+  final bool readOnly;
 
   const _FormField({
-    required this.controller, required this.label,
-    required this.hint, required this.icon,
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.icon,
     this.keyboardType,
+    this.readOnly = false,
   });
 
   @override
@@ -181,6 +282,7 @@ class _FormField extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
+          readOnly: readOnly,
           style: const TextStyle(fontSize: 14, color: AppColors.text1),
           decoration: InputDecoration(
             hintText: hint,

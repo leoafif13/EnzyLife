@@ -11,17 +11,54 @@ import 'bantuan_page.dart';
 import 'tentang_aplikasi_page.dart';
 import 'kebijakan_privasi_page.dart';
 import '../services/auth_service.dart';
+import '../services/api_service.dart';
+import '../models/user.dart';
 
-class ProfilScreen extends StatelessWidget {
+class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
 
   @override
+  State<ProfilScreen> createState() => _ProfilScreenState();
+}
+
+class _ProfilScreenState extends State<ProfilScreen> {
+
+  UserModel? user;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+
+    final result = await ApiService.getProfile();
+
+    if (!mounted) return;
+
+    setState(() {
+      user = result;
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 32),
       child: Column(
         children: [
-          const _ProfileHeader(),
+          _ProfileHeader(
+            user: user,
+          ),
           const SizedBox(height: 16),
           const _StatsRow(),
           const SizedBox(height: 16),
@@ -67,7 +104,7 @@ class ProfilScreen extends StatelessWidget {
                         onPressed: () async {
                           Navigator.of(context).pop();
 
-                          await ApiService.logout();
+                          await AuthService.logout();
 
                           if (!context.mounted) return;
 
@@ -116,7 +153,13 @@ class ProfilScreen extends StatelessWidget {
 
 // ── Profile header ────────────────────────────
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
+
+  final UserModel? user;
+
+  const _ProfileHeader({
+    super.key,
+    this.user,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -137,9 +180,8 @@ class _ProfileHeader extends StatelessWidget {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: const Center(
-                  // TODO: ganti dengan foto profil user — ClipOval(child: Image.network/asset)
-                  child: Text('RA',
+                child: Center(
+                  child: Text(getInitials(user?.name ?? ''),
                       style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
                 ),
               ),
@@ -162,13 +204,13 @@ class _ProfileHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Rafi Akhbar', // TODO: dari session/auth
+                Text(
+                  user?.name ?? '-',
                   style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.text1),
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'rafi@email.com', // TODO: dari session/auth
+                  user?.email ?? '-',
                   style: TextStyle(fontSize: 13, color: Colors.grey[500]),
                 ),
                 const SizedBox(height: 8),
@@ -194,6 +236,22 @@ class _ProfileHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+String getInitials(String name) {
+
+  if (name.trim().isEmpty) {
+    return '?';
+  }
+
+  final words = name.trim().split(' ');
+
+  if (words.length >= 2) {
+    return words[0][0].toUpperCase() +
+        words[1][0].toUpperCase();
+  }
+
+  return words[0][0].toUpperCase();
 }
 
 // ── Stats row ─────────────────────────────────

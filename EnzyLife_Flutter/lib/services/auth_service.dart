@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ApiService {
+class AuthService {
   // Emulator Android
   static const String _baseUrl = 'http://127.0.0.1:8000/api';
 

@@ -13,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Ambil token dari local storage
-  final token = await ApiService.getToken();
+  final token = await AuthService.getToken();
 
   runApp(MyApp(
     isLoggedIn: token != null,
@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> loadUser() async {
-    final user = await ApiService.getUser();
+    final user = await AuthService.getUser();
 
     if (user != null) {
       setState(() {
