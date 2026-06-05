@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../models/artikel.dart';
 import '../models/infografik.dart';
 import '../models/user.dart';
+import '../models/order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -25,6 +26,7 @@ class ApiService {
     final token = prefs.getString('token');
 
     return {
+      'Content-Type': 'application/x-www-form-urlencoded',
       'Accept': 'application/json',
       'Authorization': 'Bearer $token',
     };
@@ -170,10 +172,6 @@ class ApiService {
 
   static Future<UserModel?> getProfile() async {
     try {
-
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
       final response = await http.get(
         Uri.parse('$_baseUrl/profile'),
         headers: await _authHeaders(),
@@ -212,10 +210,6 @@ class ApiService {
   }) async {
 
     try {
-
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
       final response = await http.put(
         Uri.parse('$_baseUrl/profile'),
         headers: await _authHeaders(),
@@ -234,6 +228,86 @@ class ApiService {
       print('Error updateProfile: $e');
 
       return false;
+    }
+  }
+
+  // =====================================================
+  // CHECKOUT / PEMESANAN
+  // =====================================================
+
+  static Future<Map<String, dynamic>?> checkout({
+    required List<Map<String, dynamic>> items,
+    required String metodePembayaran,
+    String? jenisCod,
+  }) async {
+    try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/checkout'),
+        headers: headers,
+        body: jsonEncode({
+          'items': items,
+          'metode_pembayaran': metodePembayaran,
+          'jenis_cod': jenisCod,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 400) {
+        return jsonDecode(response.body);
+      }
+      print('Checkout error status: ${response.statusCode}, body: ${response.body}');
+      return null;
+    } catch (e) {
+      print('Error checkout: $e');
+      return null;
+    }
+  }
+
+  // =====================================================
+  // ORDER HISTORY
+  // =====================================================
+
+  static Future<List<OrderModel>> getOrderHistory() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/orders'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List ordersJson = data['data'] ?? [];
+          return ordersJson.map((e) => OrderModel.fromJson(e)).toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error getOrderHistory: $e');
+      return [];
+    }
+  }
+
+  // =====================================================
+  // CONFIRM ORDER PAYMENT
+  // =====================================================
+
+  static Future<Map<String, dynamic>?> payOrder(int orderId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/orders/$orderId/pay'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 400) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error payOrder: $e');
+      return null;
     }
   }
 }

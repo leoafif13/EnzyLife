@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import 'ulasan_page.dart';
+import '../services/api_service.dart';
+import '../models/order.dart';
+import 'detail_riwayat_belanja_page.dart';
 
 // ── Status pesanan ────────────────────────────
 enum OrderStatus { dipesan, dikirim, selesai }
@@ -32,20 +35,6 @@ extension OrderStatusExt on OrderStatus {
   }
 }
 
-// ── Model pesanan ─────────────────────────────
-class _Order {
-  final String id, productName, productDesc;
-  final int qty, totalPrice;
-  final OrderStatus status;
-  final String dateInfo; // teks tanggal (diterima / perkiraan)
-
-  const _Order({
-    required this.id, required this.productName, required this.productDesc,
-    required this.qty, required this.totalPrice,
-    required this.status, required this.dateInfo,
-  });
-}
-
 class RiwayatBelanjaScreen extends StatefulWidget {
   const RiwayatBelanjaScreen({super.key});
 
@@ -55,55 +44,28 @@ class RiwayatBelanjaScreen extends StatefulWidget {
 
 class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
   OrderStatus _filter = OrderStatus.selesai;
+  List<OrderModel> _allOrders = [];
+  bool _isLoading = true;
 
-  // TODO: ganti dengan data dari API/database
-  static const _orders = [
-    _Order(
-      id: 'o1',
-      productName: 'Eco Enzim Tipe A',
-      productDesc: 'Penjelasan singkat produk',
-      qty: 2, totalPrice: 300000,
-      status: OrderStatus.selesai,
-      dateInfo: 'Diterima tanggal 09 April 2026',
-    ),
-    _Order(
-      id: 'o2',
-      productName: 'Eco Enzim Tipe A',
-      productDesc: 'Penjelasan singkat produk',
-      qty: 2, totalPrice: 300000,
-      status: OrderStatus.dikirim,
-      dateInfo: 'Perkiraan diterima tanggal 09 - 13 April 2026',
-    ),
-    _Order(
-      id: 'o3',
-      productName: 'Eco Enzim Starter Kit',
-      productDesc: 'Paket lengkap pemula',
-      qty: 1, totalPrice: 450000,
-      status: OrderStatus.dipesan,
-      dateInfo: 'Menunggu konfirmasi penjual',
-    ),
-    _Order(
-      id: 'o4',
-      productName: 'Eco Enzim Premium',
-      productDesc: 'Produk unggulan kualitas premium',
-      qty: 1, totalPrice: 500000,
-      status: OrderStatus.selesai,
-      dateInfo: 'Diterima tanggal 01 Maret 2026',
-    ),
-  ];
-
-  static String _fmt(int price) {
-    final s = price.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return 'Rp. $buf';
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
   }
 
-  List<_Order> get _filtered =>
-      _orders.where((o) => o.status == _filter).toList();
+  Future<void> _loadHistory() async {
+    setState(() => _isLoading = true);
+    final orders = await ApiService.getOrderHistory();
+    setState(() {
+      _allOrders = orders;
+      _isLoading = false;
+    });
+  }
+
+  static String _fmt(int price) => _fmtPrice(price);
+
+  List<OrderModel> get _filtered =>
+      _allOrders.where((o) => o.orderStatus == _filter).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -220,16 +182,23 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
 
           // Order list
           Expanded(
-            child: _filtered.isEmpty
-                ? _EmptyOrders(status: _filter)
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                    itemCount: _filtered.length,
-                    itemBuilder: (_, i) => _OrderCard(
-                      order: _filtered[i],
-                      fmtPrice: _fmt,
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.green500,
                     ),
-                  ),
+                  )
+                : _filtered.isEmpty
+                    ? _EmptyOrders(status: _filter)
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                        itemCount: _filtered.length,
+                        itemBuilder: (_, i) => _OrderCard(
+                          order: _filtered[i],
+                          fmtPrice: _fmt,
+                          onRefresh: _loadHistory,
+                        ),
+                      ),
           ),
         ],
       ),
@@ -239,21 +208,90 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
 
 // ── Order card ────────────────────────────────
 class _OrderCard extends StatelessWidget {
-  final _Order order;
+  final OrderModel order;
   final String Function(int) fmtPrice;
+  final VoidCallback onRefresh;
 
-  const _OrderCard({required this.order, required this.fmtPrice});
+  const _OrderCard({
+    required this.order,
+    required this.fmtPrice,
+    required this.onRefresh,
+  });
+
+  Color getStatusColor(String status) {
+    switch (status) {
+      case 'MENUNGGU_PEMBAYARAN':
+        return const Color(0xFFE65100);
+      case 'DIPROSES':
+      case 'DIKEMAS':
+        return const Color(0xFF512DA8);
+      case 'SIAP_DIAMBIL':
+      case 'SELESAI':
+        return AppColors.green700;
+      case 'DIKIRIM':
+        return const Color(0xFF1565C0);
+      case 'DIBATALKAN':
+        return Colors.red[700]!;
+      default:
+        return Colors.grey[700]!;
+    }
+  }
+
+  Color getStatusBgColor(String status) {
+    switch (status) {
+      case 'MENUNGGU_PEMBAYARAN':
+        return const Color(0xFFFFF3E0);
+      case 'DIPROSES':
+      case 'DIKEMAS':
+        return const Color(0xFFEDE7F6);
+      case 'SIAP_DIAMBIL':
+      case 'SELESAI':
+        return AppColors.green50;
+      case 'DIKIRIM':
+        return const Color(0xFFE3F2FD);
+      case 'DIBATALKAN':
+        return Colors.red[50]!;
+      default:
+        return Colors.grey[100]!;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow,
-      ),
-      child: Padding(
+    final firstItem = order.items.isNotEmpty ? order.items.first : null;
+    final otherItemsCount = order.items.length - 1;
+    final totalQty = order.items.fold<int>(0, (sum, item) => sum + item.quantity);
+    final title = firstItem != null
+        ? (otherItemsCount > 0
+            ? '${firstItem.product?.name ?? 'Produk'} dan $otherItemsCount produk lainnya'
+            : (firstItem.product?.name ?? 'Produk'))
+        : 'Pesanan #${order.id}';
+    
+    final imageUrl = (firstItem?.product?.image != null && firstItem!.product!.image.isNotEmpty)
+        ? 'http://localhost:8000/gambar/produk/${firstItem.product!.image.split('/').last}'
+        : null;
+
+    final dateStr = order.createdAt.split('T')[0];
+
+    return GestureDetector(
+      onTap: () async {
+        final refresh = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => DetailRiwayatBelanjaPage(order: order),
+          ),
+        );
+        if (refresh == true) {
+          onRefresh();
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: AppColors.bgCard,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppColors.cardShadow,
+        ),
+        child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,9 +306,21 @@ class _OrderCard extends StatelessWidget {
                   child: Container(
                     width: 64, height: 64,
                     color: AppColors.green50,
-                    child: Icon(Icons.image_outlined, size: 24,
-                        color: AppColors.green500.withOpacity(0.3)),
-                    // TODO: ganti dengan Image.network(url) / Image.asset
+                    child: imageUrl != null
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.image_outlined,
+                              size: 24,
+                              color: AppColors.green500,
+                            ),
+                          )
+                        : Icon(
+                            Icons.image_outlined,
+                            size: 24,
+                            color: AppColors.green500.withOpacity(0.3),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -282,7 +332,7 @@ class _OrderCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(order.productName,
+                            child: Text(title,
                                 style: const TextStyle(fontSize: 14,
                                     fontWeight: FontWeight.w700, color: AppColors.text1)),
                           ),
@@ -291,26 +341,28 @@ class _OrderCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(
-                              color: order.status.bgColor,
+                              color: getStatusBgColor(order.statusPemesanan),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(order.status.label,
+                            child: Text(order.statusDescription,
                                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                                    color: order.status.color)),
+                                    color: getStatusColor(order.statusPemesanan))),
                           ),
                         ],
                       ),
                       const SizedBox(height: 3),
-                      Text(order.productDesc,
+                      Text(firstItem?.product?.description ?? 'Eco enzyme premium quality',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: 12, color: Colors.grey[500])),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('${order.qty}pcs',
+                          Text('${totalQty}pcs',
                               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
                                   color: AppColors.text2)),
-                          Text('Total: ${fmtPrice(order.totalPrice)}',
+                          Text('Total: ${fmtPrice(order.totalHarga)}',
                               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
                                   color: AppColors.text1)),
                         ],
@@ -328,7 +380,7 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Icon(Icons.schedule_outlined, size: 13, color: Colors.grey[400]),
                 const SizedBox(width: 4),
-                Text(order.dateInfo,
+                Text('Tanggal Pemesanan: $dateStr',
                     style: TextStyle(fontSize: 11, color: Colors.grey[500])),
               ],
             ),
@@ -342,19 +394,21 @@ class _OrderCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
 
 // ── Action buttons per status ─────────────────
 class _OrderActions extends StatelessWidget {
-  final _Order order;
+  final OrderModel order;
   const _OrderActions({required this.order});
 
   @override
   Widget build(BuildContext context) {
-    switch (order.status) {
+    switch (order.orderStatus) {
       case OrderStatus.selesai:
+        final firstItem = order.items.isNotEmpty ? order.items.first : null;
         return Row(
           children: [
             Expanded(
@@ -375,8 +429,8 @@ class _OrderActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => UlasanScreen(
-                    productName: order.productName,
-                    orderId: order.id,
+                    productName: firstItem?.product?.name ?? 'Eco Enzim',
+                    orderId: order.id.toString(),
                   )),
                 ), // navigasi ke halaman ulasan
                 style: ElevatedButton.styleFrom(
@@ -394,20 +448,7 @@ class _OrderActions extends StatelessWidget {
         );
 
       case OrderStatus.dikirim:
-        return SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () {}, // TODO: navigasi ke halaman tracking pengiriman
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.green500),
-              foregroundColor: AppColors.green500,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text('Lihat proses pengantaran',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-          ),
-        );
+        return const SizedBox.shrink();
 
       case OrderStatus.dipesan:
         return SizedBox(
@@ -455,4 +496,15 @@ class _EmptyOrders extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── Helpers & Detail Bottom Sheet ────────────────
+String _fmtPrice(int price) {
+  final s = price.toString();
+  final buf = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
+    buf.write(s[i]);
+  }
+  return 'Rp. $buf';
 }

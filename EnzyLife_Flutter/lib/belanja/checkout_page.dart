@@ -3,6 +3,9 @@ import '../models/product.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import 'belanja_page.dart';
+import '../services/api_service.dart';
+import '../profil/riwayat_belanja_page.dart';
+import '../models/user.dart';
 
 class CheckoutPage extends StatefulWidget {
   final Map<int, int> items;
@@ -39,6 +42,39 @@ class _CheckoutPageState extends State<CheckoutPage> {
     'COD (Bayar di Tempat)',
     'Dompet Digital',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _kotaController.text = 'Batam';
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    UserModel? user = ApiService.cachedUser;
+    if (user == null) {
+      user = await ApiService.getProfile();
+    }
+
+    if (user != null) {
+      setState(() {
+        _namaController.text = user!.name;
+        _teleponController.text = user.phone ?? '';
+        
+        final addr = user.address ?? '';
+        if (addr.contains(',')) {
+          final parts = addr.split(',');
+          _alamatController.text = parts[0].trim();
+          _kotaController.text = parts[1].trim();
+        } else {
+          _alamatController.text = addr;
+          _kotaController.text = 'Batam';
+        }
+        
+        _kodeposController.text = user.postalCode ?? '';
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -88,54 +124,116 @@ class _CheckoutPageState extends State<CheckoutPage> {
       }
     }
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2)); // TODO: request API order
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    CartState.instance.clear();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72, height: 72,
-              decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
-              child: const Icon(Icons.check_circle_outline_rounded, size: 40, color: AppColors.green500),
-            ),
-            const SizedBox(height: 16),
-            const Text('Pesanan Berhasil!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.text1)),
-            const SizedBox(height: 8),
-            Text(
-              _method == _DeliveryMethod.ambilSendiri
-                  ? 'Silakan ambil pesanan di lab sesuai jadwal.'
-                  : 'Pesanan akan segera dikirim ke alamat kamu.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).popUntil((r) => r.isFirst);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.green500, foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
+    try {
+      // Jika diantar, update data profil user terlebih dahulu agar tersimpan di backend
+      if (_method == _DeliveryMethod.diantar) {
+        final addressFull = '${_alamatController.text}, ${_kotaController.text}';
+        await ApiService.updateProfile(
+          name: _namaController.text,
+          phone: _teleponController.text,
+          address: addressFull,
+          postalCode: _kodeposController.text,
+        );
+      }
+
+      // Map item pesanan untuk request body
+      final requestItems = widget.items.entries.map((e) {
+        return {
+          'produk_id': e.key,
+          'qty': e.value,
+        };
+      }).toList();
+
+      // Map metode pembayaran
+      final String apiMetodePembayaran =
+          _paymentMethod == 'COD (Bayar di Tempat)' ? 'COD' : 'ONLINE';
+
+      // Map jenis COD jika COD dipilih
+      String? apiJenisCod;
+      if (apiMetodePembayaran == 'COD') {
+        apiJenisCod = _method == _DeliveryMethod.ambilSendiri
+            ? 'AMBIL_TEMPAT'
+            : 'BAYAR_DI_RUMAH';
+      }
+
+      final res = await ApiService.checkout(
+        items: requestItems,
+        metodePembayaran: apiMetodePembayaran,
+        jenisCod: apiJenisCod,
+      );
+
+      setState(() => _isLoading = false);
+
+      if (!mounted) return;
+
+      if (res != null && res['success'] == true) {
+        CartState.instance.clear();
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 72, height: 72,
+                  decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+                  child: const Icon(Icons.check_circle_outline_rounded, size: 40, color: AppColors.green500),
                 ),
-                child: const Text('Kembali ke Beranda', style: TextStyle(fontWeight: FontWeight.w600)),
-              ),
+                const SizedBox(height: 16),
+                const Text('Pesanan Berhasil!',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.text1)),
+                const SizedBox(height: 8),
+                Text(
+                  _method == _DeliveryMethod.ambilSendiri
+                      ? 'Silakan ambil pesanan di lab sesuai jadwal.'
+                      : 'Pesanan akan segera dikirim ke alamat kamu.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).popUntil((r) => r.isFirst);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.green500, foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Lihat Riwayat Belanja', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(res?['message'] ?? 'Gagal memproses pesanan. Silakan coba lagi.'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ));
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Terjadi kesalahan: $e'),
+        backgroundColor: Colors.red[400],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ));
+    }
   }
 
   IconData _paymentIcon(String m) {
@@ -281,7 +379,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   children: [
                                     Expanded(flex: 2,
                                       child: _CField(controller: _kotaController, label: 'Kota',
-                                          hint: 'Kota/Kabupaten', icon: Icons.location_city_outlined)),
+                                          hint: 'Kota/Kabupaten', icon: Icons.location_city_outlined, readOnly: true)),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: _CField(controller: _kodeposController, label: 'Kode Pos',
@@ -391,8 +489,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: _isLoading
                         ? const SizedBox(width: 22, height: 22,
                             child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                        : const Text('Bayar Sekarang',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                        : Text(
+                            _paymentMethod == 'COD (Bayar di Tempat)'
+                                ? 'Buat Pesanan'
+                                : 'Bayar Sekarang',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ],
@@ -472,8 +573,18 @@ class _CField extends StatelessWidget {
   final IconData icon;
   final TextInputType? keyboardType;
   final int maxLines;
-  const _CField({required this.controller, required this.label, required this.hint,
-      required this.icon, this.keyboardType, this.maxLines = 1});
+  final bool readOnly;
+
+  const _CField({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.icon,
+    this.keyboardType,
+    this.maxLines = 1,
+    this.readOnly = false,
+  });
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,6 +593,7 @@ class _CField extends StatelessWidget {
       const SizedBox(height: 6),
       TextField(
         controller: controller, keyboardType: keyboardType, maxLines: maxLines,
+        readOnly: readOnly,
         style: const TextStyle(fontSize: 13, color: AppColors.text1),
         decoration: InputDecoration(
           hintText: hint,

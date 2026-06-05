@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '/app_color.dart';
-import '/widgets/sub_page_appbar.dart';
-import '/widgets/page_header_card.dart';
-import '/widgets/search_bar_field.dart';
+import '../app_color.dart';
+import '../widgets/sub_page_appbar.dart';
+import '../widgets/page_header_card.dart';
+import '../widgets/search_bar_field.dart';
 import 'detail_artikel_page.dart';
 import 'detail_infografik_page.dart';
 import '../models/artikel.dart';

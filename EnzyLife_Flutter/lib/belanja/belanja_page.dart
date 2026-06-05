@@ -83,17 +83,23 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
     fetchProducts();
   }
 
-  void _refresh() => setState(() {});
+  void _refresh() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   Future<void> fetchProducts() async {
     try {
       final products = await ApiService.getProducts();
 
+      if (!mounted) return;
       setState(() {
         _products = products;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -299,25 +305,37 @@ class _FeaturedCard extends StatelessWidget {
                             style: const TextStyle(color: Colors.white, fontSize: 20,
                                 fontWeight: FontWeight.w800, letterSpacing: -0.3)),
                         const SizedBox(height: 4),
+                        Text(
+                          product.stock > 0 ? 'Stok: ${product.stock}' : 'Stok Habis',
+                          style: TextStyle(
+                            color: product.stock > 0 ? Colors.white.withOpacity(0.9) : Colors.red[200],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
                         Text(product.description,
                             style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 12, height: 1.4)),
                         const SizedBox(height: 14),
                         // Tombol Beli → checkout langsung
                         ElevatedButton(
-                          onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => CheckoutPage(
-                                items: {product.id: 1},
-                                allProducts: [product],
-                              ))),
+                          onPressed: product.stock > 0
+                              ? () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => CheckoutPage(
+                                    items: {product.id: 1},
+                                    allProducts: [product],
+                                  )))
+                              : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white, foregroundColor: AppColors.green900,
+                            backgroundColor: product.stock > 0 ? Colors.white : Colors.grey[300], 
+                            foregroundColor: product.stock > 0 ? AppColors.green900 : Colors.grey[500],
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text('Beli Sekarang',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                          child: Text(product.stock > 0 ? 'Beli Sekarang' : 'Stok Habis',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                         ),
                       ],
                     ),
@@ -404,6 +422,15 @@ class _ProductCard extends StatelessWidget {
                     Text(product.description,
                         maxLines: 2, overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 12, color: Colors.grey[500], height: 1.4)),
+                    const SizedBox(height: 4),
+                    Text(
+                      product.stock > 0 ? 'Stok: ${product.stock}' : 'Stok Habis',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: product.stock > 0 ? AppColors.green500 : Colors.red,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -413,21 +440,48 @@ class _ProductCard extends StatelessWidget {
                                 color: AppColors.text1)),
                         Row(
                           children: [
-                            // Tombol keranjang
-                            _IconBtn(
-                              icon: Icons.shopping_cart_outlined,
-                              onTap: () { cart.add(product.id); onChanged(); },
-                            ),
-                            const SizedBox(width: 8),
-                            // Tombol Beli → checkout langsung
-                            _SmallBtn(
-                              label: 'Beli',
-                              onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => CheckoutPage(
-                                    items: {product.id: 1},
-                                    allProducts: [product],
-                                  ))),
-                            ),
+                            if (product.stock > 0) ...[
+                              // Tombol keranjang
+                              _IconBtn(
+                                icon: Icons.shopping_cart_outlined,
+                                onTap: () {
+                                  if (cart.qty(product.id) < product.stock) {
+                                    cart.add(product.id);
+                                    onChanged();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Batas stok maksimum tercapai (${product.stock} item)'),
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: Colors.orange[800],
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              // Tombol Beli → checkout langsung
+                              _SmallBtn(
+                                label: 'Beli',
+                                onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => CheckoutPage(
+                                      items: {product.id: 1},
+                                      allProducts: [product],
+                                    ))),
+                              ),
+                            ] else ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.red[50],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Habis',
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.red[700]),
+                                ),
+                              )
+                            ],
                           ],
                         ),
                       ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/app_color.dart';
+import '../app_color.dart';
 
 // ══════════════════════════════════════════════
 //  SubPageAppBar — AppBar standar untuk halaman
@@ -12,11 +12,13 @@ import '/app_color.dart';
 class SubPageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
+  final VoidCallback? onBack;
 
   const SubPageAppBar({
     super.key,
     required this.title,
     this.actions,
+    this.onBack,
   });
 
   @override
@@ -36,7 +38,7 @@ class SubPageAppBar extends StatelessWidget implements PreferredSizeWidget {
           size: 18,
           color: AppColors.text1,
         ),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: onBack ?? () => Navigator.of(context).pop(),
       ),
       title: Text(
         title,

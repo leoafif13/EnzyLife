@@ -15,7 +15,7 @@ class InfografikModel {
 
   factory InfografikModel.fromJson(Map<String, dynamic> json) {
     return InfografikModel(
-      id: json['id_infografik'],
+      id: json['id_infografik'] ?? 0,
       judul: json['judul'] ?? '',
       deskripsi: json['deskripsi'] ?? '',
       gambar: json['gambar'] ?? '',

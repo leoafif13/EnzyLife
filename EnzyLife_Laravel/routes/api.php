@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
 
     Route::post('/checkout', [CheckoutController::class, 'checkout']);
+    Route::get('/orders', [CheckoutController::class, 'history']);
+    Route::post('/orders/{id}/pay', [CheckoutController::class, 'pay']);
 });
 
 

@@ -180,7 +180,19 @@ class _CartScreenState extends State<CartScreen> {
                             _checked.remove(e.key);
                           }
                         }),
-                        onAdd: () => cart.add(p.id),
+                        onAdd: () {
+                          if (cart.qty(p.id) < p.stock) {
+                            cart.add(p.id);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Batas stok maksimum tercapai (${p.stock} item)'),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.orange[800],
+                              ),
+                            );
+                          }
+                        },
                         onRemove: () => cart.removeOne(p.id),
                         onDelete: () {
                           cart.removeAll(p.id);
@@ -333,7 +345,7 @@ class _CartItem extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  'http://localhost:8000/gambar/${product.image.split('/').last}',
+                  'http://localhost:8000/gambar/produk/${product.image.split('/').last}',
                   width: 64,
                   height: 64,
                   fit: BoxFit.cover,

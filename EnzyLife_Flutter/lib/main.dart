@@ -8,6 +8,11 @@ import 'belanja/belanja_page.dart';
 import 'profil/profil_page.dart';
 import 'belanja/shopping_cart.dart';
 import 'services/auth_service.dart';
+import 'services/api_service.dart';
+import 'models/artikel.dart';
+import 'models/infografik.dart';
+import 'edukasi/detail_artikel_page.dart';
+import 'edukasi/detail_infografik_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +69,12 @@ class _MainScreenState extends State<MainScreen> {
     ProfilScreen(),
   ];
 
+  void _onTabTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   // Buka keranjang dari mana saja
   void _openCart() {
     Navigator.of(context).push(
@@ -87,7 +98,7 @@ class _MainScreenState extends State<MainScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+        onTap: _onTabTap,
       ),
     );
   }
@@ -103,11 +114,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String userName = 'Pengguna';
+  List<ArtikelModel> _artikelList = [];
+  List<InfografikModel> _infografikList = [];
+  bool _isLoadingContent = true;
 
   @override
   void initState() {
     super.initState();
     loadUser();
+    _loadContent();
   }
 
   Future<void> loadUser() async {
@@ -120,12 +135,24 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  static const _articles = [
-    _ArticleData(title: 'Kegiatan Membuat Eco Enzim di SDN 010 Batam', author: 'Admin'),
-    _ArticleData(title: 'Kegiatan Membuat Eco Enzim di SDN 010 Batam', author: 'Admin'),
-    _ArticleData(title: 'Manfaat Eco Enzim untuk Lingkungan Sekitar',   author: 'Admin'),
-    _ArticleData(title: 'Cara Mudah Membuat Eco Enzim di Rumah',        author: 'Admin'),
-  ];
+  Future<void> _loadContent() async {
+    final artikel = await ApiService.getArtikel();
+    final infografik = await ApiService.getInfografik();
+
+    if (!mounted) return;
+
+    // Sort descending berdasarkan created_at (terbaru di awal)
+    artikel.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    infografik.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    setState(() {
+      // Ambil 4 artikel terbaru
+      _artikelList = artikel.take(4).toList();
+      // Ambil 6 infografik terbaru
+      _infografikList = infografik.take(6).toList();
+      _isLoadingContent = false;
+    });
+  }
 
   static const _favorites = [
     _FavoriteData(label: 'Artikel', icon: Icons.article_outlined),
@@ -168,8 +195,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$userName!', 
-                        style: TextStyle(
+                        '$userName!',
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: AppColors.green500,
@@ -227,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 28),
 
-          // Pembaruan terkini
+          // ── Artikel Terbaru ──────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -236,9 +263,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const _SectionTitle(title: 'Pembaruan terkini'),
+                    const _SectionTitle(title: 'Artikel Terbaru'),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Navigate ke tab Edukasi (index 1)
+                        final mainState = context.findAncestorStateOfType<_MainScreenState>();
+                        mainState?._onTabTap(1);
+                      },
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.green500,
                         padding: EdgeInsets.zero,
@@ -253,18 +284,81 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.82,
-                  ),
-                  itemCount: _articles.length,
-                  itemBuilder: (_, i) => _ArticleCard(data: _articles[i]),
+                _isLoadingContent
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : _artikelList.isEmpty
+                        ? const _EmptyContentCard(
+                            icon: Icons.article_outlined,
+                            message: 'Belum ada artikel tersedia',
+                          )
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.82,
+                            ),
+                            itemCount: _artikelList.length,
+                            itemBuilder: (_, i) => _ArtikelCard(artikel: _artikelList[i]),
+                          ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 28),
+
+          // ── Infografik Terbaru ───────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const _SectionTitle(title: 'Infografik Terbaru'),
+                    TextButton(
+                      onPressed: () {
+                        final mainState = context.findAncestorStateOfType<_MainScreenState>();
+                        mainState?._onTabTap(1);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.green500,
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Lihat semua',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 14),
+                _isLoadingContent
+                    ? const SizedBox.shrink()
+                    : _infografikList.isEmpty
+                        ? const _EmptyContentCard(
+                            icon: Icons.image_outlined,
+                            message: 'Belum ada infografik tersedia',
+                          )
+                        : SizedBox(
+                            height: 200,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _infografikList.length,
+                              separatorBuilder: (_, __) => const SizedBox(width: 12),
+                              itemBuilder: (_, i) => _InfografikCard(infografik: _infografikList[i]),
+                            ),
+                          ),
               ],
             ),
           ),
@@ -277,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
 // ── Section title ──────────────────────────────
 class _SectionTitle extends StatelessWidget {
   final String title;
-  const _SectionTitle({super.key, required this.title});
+  const _SectionTitle({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +396,7 @@ class _FavoriteData {
 
 class _FavoriteItem extends StatelessWidget {
   final _FavoriteData data;
-  const _FavoriteItem({super.key, required this.data});
+  const _FavoriteItem({required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -344,45 +438,73 @@ class _FavoriteItem extends StatelessWidget {
   }
 }
 
-// ── Article card ──────────────────────────────
-class _ArticleData {
-  final String title;
-  final String author;
-  const _ArticleData({required this.title, required this.author});
+// ── Empty content placeholder ─────────────────
+class _EmptyContentCard extends StatelessWidget {
+  final IconData icon;
+  final String message;
+  const _EmptyContentCard({required this.icon, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      decoration: BoxDecoration(
+        color: AppColors.bgCard,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppColors.cardShadow,
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 56, height: 56,
+            decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+            child: Icon(icon, size: 28, color: AppColors.green500),
+          ),
+          const SizedBox(height: 12),
+          Text(message, style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+        ],
+      ),
+    );
+  }
 }
 
-class _ArticleCard extends StatelessWidget {
-  final _ArticleData data;
-  const _ArticleCard({super.key, required this.data});
+// ── Artikel card (data dari API) ──────────────
+class _ArtikelCard extends StatelessWidget {
+  final ArtikelModel artikel;
+  const _ArtikelCard({required this.artikel});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => DetailArtikelPage(item: artikel)),
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          boxShadow: AppColors.cardShadow,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail
+            // Thumbnail dari database
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Container(
+              child: SizedBox(
                 height: 100,
-                color: AppColors.green50,
-                child: Center(
-                  child: Icon(Icons.image_outlined, size: 36,
-                      color: AppColors.green500.withOpacity(0.4)),
+                width: double.infinity,
+                child: Image.network(
+                  'http://localhost:8000/gambar/${artikel.gambar}',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: AppColors.green50,
+                    child: Center(
+                      child: Icon(Icons.article_outlined, size: 36,
+                          color: AppColors.green500.withOpacity(0.4)),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -392,8 +514,22 @@ class _ArticleCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Badge kategori
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.green50,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        artikel.kategori,
+                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600,
+                            color: AppColors.green500),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     Text(
-                      data.title,
+                      artikel.judul,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -402,15 +538,6 @@ class _ArticleCard extends StatelessWidget {
                         color: Color(0xFF1A1A1A),
                         height: 1.4,
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(Icons.person_outline, size: 12, color: Colors.grey[500]),
-                        const SizedBox(width: 3),
-                        Text(data.author,
-                            style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                      ],
                     ),
                     const Spacer(),
                     const Text(
@@ -429,124 +556,76 @@ class _ArticleCard extends StatelessWidget {
   }
 }
 
-// ── Placeholder halaman lain ──────────────────
-class _PlaceholderPage extends StatelessWidget {
-  final String label;
-  const _PlaceholderPage({super.key, required this.label});
+// ── Infografik card (horizontal scroll) ───────
+class _InfografikCard extends StatelessWidget {
+  final InfografikModel infografik;
+  const _InfografikCard({required this.infografik});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Halaman $label',
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => DetailInfografikPage(item: infografik)),
       ),
-    );
-  }
-}
-
-// ── Global menu bottom sheet ──────────────────
-class _GlobalMenu extends StatelessWidget {
-  final int selectedIndex;
-  final VoidCallback onLogout;
-  const _GlobalMenu({required this.selectedIndex, required this.onLogout});
-
-  static const _tabLabels = ['Beranda', 'Edukasi', 'Belanja', 'Akun'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Handle
-          Center(
-            child: Container(
-              width: 36, height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE0E0E0),
-                borderRadius: BorderRadius.circular(2),
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          color: AppColors.bgCard,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppColors.cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Thumbnail dari database
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: SizedBox(
+                height: 120,
+                width: 160,
+                child: Image.network(
+                  'http://localhost:8000/gambar/${infografik.gambar}',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: AppColors.green50,
+                    child: Center(
+                      child: Icon(Icons.image_outlined, size: 36,
+                          color: AppColors.green500.withOpacity(0.4)),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Menu — ${_tabLabels[selectedIndex]}',
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: AppColors.text1,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      infografik.judul,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                        height: 1.3,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      infografik.createdAt.split('T')[0],
+                      style: TextStyle(fontSize: 10, color: Colors.grey[400]),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Divider(height: 1, color: AppColors.divider),
-          const SizedBox(height: 12),
-          _MenuRow(
-            icon: Icons.notifications_outlined,
-            label: 'Notifikasi',
-            onTap: () => Navigator.pop(context),
-          ),
-          _MenuRow(
-            icon: Icons.help_outline_rounded,
-            label: 'Bantuan',
-            onTap: () => Navigator.pop(context),
-          ),
-          _MenuRow(
-            icon: Icons.info_outline_rounded,
-            label: 'Tentang Aplikasi',
-            onTap: () => Navigator.pop(context),
-          ),
-          const SizedBox(height: 8),
-          const Divider(height: 1, color: AppColors.divider),
-          const SizedBox(height: 8),
-          _MenuRow(
-            icon: Icons.logout_rounded,
-            label: 'Keluar',
-            color: Colors.red,
-            onTap: onLogout,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final VoidCallback onTap;
-
-  const _MenuRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = color ?? AppColors.text1;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: c),
-            const SizedBox(width: 14),
-            Text(label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: c,
-                )),
           ],
         ),
       ),
     );
   }
 }
+

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/product.dart';
+import '../models/product.dart';
 import '../app_color.dart';
 import 'belanja_page.dart';
 import 'shopping_cart.dart';
@@ -23,6 +23,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void initState() {
     super.initState();
     CartState.instance.addListener(_refreshBadge);
+    if (widget.product.stock <= 0) {
+      _qty = 0;
+    }
   }
 
   void _refreshBadge() => setState(() {});
@@ -257,8 +260,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ],
                         ),
                         const SizedBox(height: 10),
-                        Text(_fmt(p.price),
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(_fmt(p.price),
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500)),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: p.stock > 0 ? AppColors.green50 : Colors.red[50],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: p.stock > 0 ? AppColors.green200 : Colors.red[200]!),
+                              ),
+                              child: Text(
+                                p.stock > 0 ? 'Stok: ${p.stock}' : 'Stok Habis',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.stock > 0 ? AppColors.green700 : Colors.red[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 12),
                         // Rating ringkasan
                         Row(
@@ -323,7 +347,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                               Text('$_qty', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.green500)),
                               GestureDetector(
-                                onTap: () => setState(() => _qty++),
+                                onTap: () {
+                                  if (_qty < p.stock) {
+                                    setState(() => _qty++);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Batas pembelian maksimum tercapai (${p.stock} item)'),
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: Colors.orange[800],
+                                      ),
+                                    );
+                                  }
+                                },
                                 child: const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   child: Icon(Icons.add, size: 16, color: AppColors.green500),
@@ -456,12 +492,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 // Tombol keranjang
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: _addToCart,
+                    onPressed: p.stock > 0 ? _addToCart : null,
                     icon: const Icon(Icons.shopping_cart_outlined, size: 16),
                     label: const Text('Keranjang', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.green500, width: 1.5),
-                      foregroundColor: AppColors.green500,
+                      side: BorderSide(color: p.stock > 0 ? AppColors.green500 : Colors.grey[300]!, width: 1.5),
+                      foregroundColor: p.stock > 0 ? AppColors.green500 : Colors.grey[400],
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -471,20 +507,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 // Tombol beli sekarang → langsung checkout
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => CheckoutPage(
-                        items: {p.id: _qty},
-                        allProducts: [p],
-                      )),
-                    ),
+                    onPressed: p.stock > 0
+                        ? () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => CheckoutPage(
+                                items: {p.id: _qty},
+                                allProducts: [p],
+                              )),
+                            )
+                        : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.green500,
-                      foregroundColor: Colors.white,
+                      backgroundColor: p.stock > 0 ? AppColors.green500 : Colors.grey[300],
+                      foregroundColor: p.stock > 0 ? Colors.white : Colors.grey[500],
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Beli Sekarang', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                    child: Text(p.stock > 0 ? 'Beli Sekarang' : 'Stok Habis', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ],

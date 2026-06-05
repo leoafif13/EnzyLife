@@ -3,10 +3,10 @@ import '../app_color.dart';
 import '../auth/login_page.dart';
 import 'edit_profil_page.dart';
 import 'ubah_password_page.dart';
-import 'notifikasi_page.dart';
+// import 'notifikasi_page.dart';
 import 'riwayat_belanja_page.dart';
-import 'artikel_tersimpan_page.dart';
-import 'riwayat_kalkulator_page.dart';
+// import 'artikel_tersimpan_page.dart';
+// import 'riwayat_kalkulator_page.dart';
 import 'bantuan_page.dart';
 import 'tentang_aplikasi_page.dart';
 import 'kebijakan_privasi_page.dart';
@@ -60,18 +60,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
             user: user,
           ),
           const SizedBox(height: 16),
-          const _StatsRow(),
-          const SizedBox(height: 16),
           _MenuSection(title: 'Akun Saya', items: [
             _MenuItem(icon: Icons.person_outline_rounded,   label: 'Edit Profil',        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfilScreen()))),
             _MenuItem(icon: Icons.lock_outline_rounded,     label: 'Ubah Password',      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UbahPasswordScreen()))),
-            _MenuItem(icon: Icons.notifications_outlined,   label: 'Notifikasi',         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotifikasiScreen()))),
+            // _MenuItem(icon: Icons.notifications_outlined,   label: 'Notifikasi',         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotifikasiScreen()))),
           ]),
           const SizedBox(height: 12),
           _MenuSection(title: 'Aktivitas', items: [
             _MenuItem(icon: Icons.shopping_bag_outlined,    label: 'Riwayat Pembelian',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()))),
-            _MenuItem(icon: Icons.bookmark_outline_rounded, label: 'Artikel Tersimpan',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ArtikelTersimpanScreen()))),
-            _MenuItem(icon: Icons.calculate_outlined,       label: 'Riwayat Kalkulator', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatKalkulatorScreen()))),
+            // _MenuItem(icon: Icons.bookmark_outline_rounded, label: 'Artikel Tersimpan',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ArtikelTersimpanScreen()))),
+            // _MenuItem(icon: Icons.calculate_outlined,       label: 'Riwayat Kalkulator', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatKalkulatorScreen()))),
           ]),
           const SizedBox(height: 12),
           _MenuSection(title: 'Lainnya', items: [
@@ -254,51 +252,51 @@ String getInitials(String name) {
   return words[0][0].toUpperCase();
 }
 
-// ── Stats row ─────────────────────────────────
-class _StatsRow extends StatelessWidget {
-  const _StatsRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow,
-      ),
-      child: Row(
-        children: [
-          _Stat(value: '12', label: 'Artikel\nDibaca'),      // TODO: dari data user
-          Container(width: 1, height: 36, color: AppColors.divider),
-          _Stat(value: '5',  label: 'Produk\nDibeli'),       // TODO: dari data user
-          Container(width: 1, height: 36, color: AppColors.divider),
-          _Stat(value: '3',  label: 'Kalkulator\nDisimpan'), // TODO: dari data user
-        ],
-      ),
-    );
-  }
-}
-
-class _Stat extends StatelessWidget {
-  final String value, label;
-  const _Stat({required this.value, required this.label});
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: Column(
-      children: [
-        Text(value,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500)),
-        const SizedBox(height: 4),
-        Text(label,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: Colors.grey[500], height: 1.3)),
-      ],
-    ),
-  );
-}
+// ── Stats row (Disabled) ──────────────────────
+// class _StatsRow extends StatelessWidget {
+//   const _StatsRow();
+// 
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       margin: const EdgeInsets.symmetric(horizontal: 20),
+//       padding: const EdgeInsets.symmetric(vertical: 16),
+//       decoration: BoxDecoration(
+//         color: AppColors.bgCard,
+//         borderRadius: BorderRadius.circular(16),
+//         boxShadow: AppColors.cardShadow,
+//       ),
+//       child: Row(
+//         children: [
+//           _Stat(value: '12', label: 'Artikel\nDibaca'),
+//           Container(width: 1, height: 36, color: AppColors.divider),
+//           _Stat(value: '5',  label: 'Produk\nDibeli'),
+//           Container(width: 1, height: 36, color: AppColors.divider),
+//           _Stat(value: '3',  label: 'Kalkulator\nDisimpan'),
+//         ],
+//       ),
+//     );
+//   }
+// }
+// 
+// class _Stat extends StatelessWidget {
+//   final String value, label;
+//   const _Stat({required this.value, required this.label});
+// 
+//   @override
+//   Widget build(BuildContext context) => Expanded(
+//     child: Column(
+//       children: [
+//         Text(value,
+//             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500)),
+//         const SizedBox(height: 4),
+//         Text(label,
+//             textAlign: TextAlign.center,
+//             style: TextStyle(fontSize: 11, color: Colors.grey[500], height: 1.3)),
+//       ],
+//     ),
+//   );
+// }
 
 // ── Menu section ──────────────────────────────
 class _MenuItem {

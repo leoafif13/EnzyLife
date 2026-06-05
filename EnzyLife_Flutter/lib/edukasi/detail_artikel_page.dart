@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/artikel.dart';
-import '/app_color.dart';
-import '/widgets/sub_page_appbar.dart';
-import 'artikel_page.dart';
+import '../app_color.dart';
+import '../widgets/sub_page_appbar.dart';
+
 
 class DetailArtikelPage extends StatelessWidget {
   final ArtikelModel item;
@@ -16,18 +16,6 @@ class DetailArtikelPage extends StatelessWidget {
       backgroundColor: AppColors.bgPage,
       appBar: SubPageAppBar(
         title: item.kategori,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_outline_rounded,
-                color: AppColors.text1, size: 22),
-            onPressed: () {}, // TODO: simpan artikel
-          ),
-          IconButton(
-            icon: const Icon(Icons.share_outlined,
-                color: AppColors.text1, size: 22),
-            onPressed: () {}, // TODO: share artikel
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(

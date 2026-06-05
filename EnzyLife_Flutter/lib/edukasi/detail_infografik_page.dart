@@ -22,20 +22,8 @@ class DetailInfografikPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.bgPage,
-      appBar: SubPageAppBar(
+      appBar: const SubPageAppBar(
         title: 'Infografik',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_outline_rounded,
-                color: AppColors.text1, size: 22),
-            onPressed: () {}, // TODO: simpan
-          ),
-          IconButton(
-            icon: const Icon(Icons.share_outlined,
-                color: AppColors.text1, size: 22),
-            onPressed: () {}, // TODO: share
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 32),
@@ -177,7 +165,7 @@ class _RekomendasiCard extends StatelessWidget {
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
               child: Image.network(
-                      'http://10.0.2.2:8000/storage/${item.gambar}',
+                      'http://localhost:8000/gambar/${item.gambar}',
                       width: 90,
                       height: 90,
                       fit: BoxFit.cover,
