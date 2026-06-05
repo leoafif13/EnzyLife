@@ -25,8 +25,7 @@ class ProductsTable
                 Tables\Columns\TextColumn::make('stok')
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('gambar')
-                    ->disk('public')
-                    ->searchable(),
+                    ->disk('public'),
             ])
             ->filters([
                 //

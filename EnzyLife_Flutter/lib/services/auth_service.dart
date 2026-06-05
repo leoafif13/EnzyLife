@@ -143,4 +143,28 @@ class AuthService {
       await removeToken();
     }
   }
+    static Future<Map<String, dynamic>> checkout({
+    required String metodePembayaran,
+    String? jenisCod,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/checkout'),
+        headers: await _headers(auth: true),
+        body: jsonEncode({
+          'metode_pembayaran': metodePembayaran,
+          'jenis_cod': jenisCod,
+          'items': items,
+        }),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
 }

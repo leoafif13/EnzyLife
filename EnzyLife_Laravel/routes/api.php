@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\InfografikController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\CheckoutController;
 
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -24,5 +25,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+
+    Route::post('/checkout', [CheckoutController::class, 'checkout']);
 });
+
+
+
+    
 
