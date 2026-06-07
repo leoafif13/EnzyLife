@@ -20,6 +20,8 @@ class PemesananResource extends Resource
 {
     protected static ?string $model = Pemesanan::class;
 
+    protected static ?int $navigationSort = 4;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
      protected static ?string $label = 'Pemesanan';

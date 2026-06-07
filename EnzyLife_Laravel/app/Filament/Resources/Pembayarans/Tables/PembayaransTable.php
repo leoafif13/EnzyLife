@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
 
 class PembayaransTable
 {
@@ -33,18 +34,13 @@ class PembayaransTable
             TextColumn::make('payment_type')
                 ->label('Metode'),
 
-            TextColumn::make('status_pembayaran')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'BELUM_DIBAYAR' => 'warning',
-                    'PENDING' => 'info',
-                    'SETTLEMENT' => 'success',
-                    'SUDAH_DIBAYAR' => 'success',
-                    'EXPIRE' => 'danger',
-                    'CANCEL' => 'danger',
-                    'DENY' => 'danger',
-                    default => 'gray',
-                }),
+                SelectColumn::make('status_pembayaran')
+                 ->label('Status')
+                 ->options([
+                     'BELUM_DIBAYAR' => 'Belum Dibayar',
+                     'PENDING' => 'Pending',
+                     'SUDAH_DIBAYAR' => 'Sudah Dibayar',
+                 ]),
 
             TextColumn::make('created_at')
                 ->dateTime('d M Y H:i'),
@@ -53,7 +49,7 @@ class PembayaransTable
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
+                // ViewAction::make(),
                 // EditAction::make(),
             ])
             ->toolbarActions([

@@ -13,6 +13,7 @@ class Pembayaran extends Model
         'total_bayar',
         'payment_type',
         'midtrans_order_id',
+        'snap_token',
         'status_pembayaran',
         'tanggal_pembayaran',
     ];

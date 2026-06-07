@@ -14,3 +14,10 @@ Route::get('/gambar/{folder}/{filename}', function ($folder, $filename) {
         'Access-Control-Allow-Origin' => '*',
     ]);
 });
+
+Route::get('/test-env', function () {
+    return response()->json([
+        'env_server' => env('MIDTRANS_SERVER_KEY'),
+        'config_server' => config('midtrans.server_key'),
+    ]);
+});

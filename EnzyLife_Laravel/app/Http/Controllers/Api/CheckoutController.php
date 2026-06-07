@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Pemesanan;
 use App\Models\Pembayaran;
 use App\Models\DetailPemesanan;
+use App\Services\MidtransService;
 
 class CheckoutController extends Controller
 {
@@ -68,11 +69,33 @@ class CheckoutController extends Controller
             ]);
         }
 
-        Pembayaran::create([
+        $pembayaran = Pembayaran::create([
             'pemesanan_id' => $pemesanan->id,
             'total_bayar' => $totalHarga,
             'status_pembayaran' => 'BELUM_DIBAYAR',
         ]);
+
+        $snapToken = null;
+
+        if ($request->metode_pembayaran === 'ONLINE') {
+
+            $midtrans = new MidtransService();
+
+            $snapToken = $midtrans->createSnapToken([
+                'transaction_details' => [
+                    'order_id' => 'ENZY-' . $pemesanan->id . '-' . time(),
+                    'gross_amount' => (int) $totalHarga,
+                ],
+                'customer_details' => [
+                    'first_name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                ],
+            ]);
+
+            $pembayaran->update([
+                'snap_token' => $snapToken,
+            ]);
+        }
 
         DB::commit();
 
@@ -80,6 +103,7 @@ class CheckoutController extends Controller
             'success' => true,
             'message' => 'Pemesanan berhasil dibuat',
             'pemesanan_id' => $pemesanan->id,
+            'snap_token' => $snapToken,
         ]);
 
     } catch (\Exception $e) {

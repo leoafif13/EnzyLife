@@ -18,6 +18,8 @@ class InfografikResource extends Resource
 {
     protected static ?string $model = Infografik::class;
 
+    protected static ?int $navigationSort = 2;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPresentationChartBar;
 
     protected static ?string $label = 'Infografik';

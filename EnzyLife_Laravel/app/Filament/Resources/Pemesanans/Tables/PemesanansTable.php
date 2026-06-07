@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
 
 class PemesanansTable
 {
@@ -34,36 +35,32 @@ class PemesanansTable
                 ->money('IDR')
                 ->sortable(),
 
-            TextColumn::make('metode_pembayaran')
-                ->badge(),
-
-            TextColumn::make('status_pemesanan')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'MENUNGGU_PEMBAYARAN' => 'warning',
-                    'DIPROSES' => 'info',
-                    'DIKEMAS' => 'primary',
-                    'DIKIRIM' => 'gray',
-                    'SIAP_DIAMBIL' => 'success',
-                    'SELESAI' => 'success',
-                    'DIBATALKAN' => 'danger',
-                    default => 'gray',
-                }),
-
-            TextColumn::make('created_at')
-                ->dateTime('d M Y H:i'),
-            ])  
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                // EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    // DeleteBulkAction::make(),
+            SelectColumn::make('status_pemesanan')
+                ->label('Status')
+                ->options([
+                    'MENUNGGU_PEMBAYARAN' => 'Menunggu Pembayaran',
+                    'DIPROSES' => 'Diproses',
+                    'DIKEMAS' => 'Dikemas',
+                    'DIKIRIM' => 'Dikirim',
+                    'SIAP_DIAMBIL' => 'Siap Diambil',
+                    'SELESAI' => 'Selesai',
+                    'DIBATALKAN' => 'Dibatalkan',
                 ]),
-            ]);
+
+                TextColumn::make('created_at')
+                    ->dateTime('d M Y H:i'),
+                ])  
+                ->filters([
+                    //
+                ])
+                ->recordActions([
+                    // ViewAction::make(),
+                    // EditAction::make(),
+                ])
+                ->toolbarActions([
+                    BulkActionGroup::make([
+                        // DeleteBulkAction::make(),
+                    ]),
+                ]);
     }
 }
