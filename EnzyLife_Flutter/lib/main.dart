@@ -13,6 +13,7 @@ import 'models/artikel.dart';
 import 'models/infografik.dart';
 import 'edukasi/detail_artikel_page.dart';
 import 'edukasi/detail_infografik_page.dart';
+import 'splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,11 +44,12 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      // Kalau token ada → langsung masuk app
-      // Kalau tidak ada → login dulu
-      home: isLoggedIn
-          ? const MainScreen()
-          : const LoginScreen(),
+      // Splash screen dulu, baru ke login/main
+      home: SplashScreen(
+        nextScreen: isLoggedIn
+            ? const MainScreen()
+            : const LoginScreen(),
+      ),
     );
   }
 }

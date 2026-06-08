@@ -4,6 +4,8 @@ import '../app_color.dart';
 import '../auth/register_page.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
+import 'verification_page.dart';
+import 'forgot_password_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -92,10 +94,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
         );
 
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainScreen()),
-          (route) => false,
-        );
+        if (result['needs_verification'] == true || result['user']['email_verified_at'] == null) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => VerificationScreen(email: result['user']['email']),
+            ),
+            (route) => false,
+          );
+        } else {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+            (route) => false,
+          );
+        }
       } else {
         // Login gagal
         if (!mounted) return;
@@ -301,7 +312,11 @@ class _FormCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () {}, // TODO: implementasi lupa password
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                );
+              },
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.green700,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4)),

@@ -4,6 +4,7 @@ import '../app_color.dart';
 import '../auth/login_page.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
+import 'verification_page.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -108,7 +109,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         );
 
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainScreen()),
+          MaterialPageRoute(
+            builder: (_) => VerificationScreen(email: email),
+          ),
           (route) => false,
         );
       } else {
@@ -131,6 +134,149 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _showTermsModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.75,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Syarat & Ketentuan',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.green900,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              // Body
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Syarat & Ketentuan Penggunaan EnzyLife',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.text1,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Terakhir diperbarui: Juni 2026',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTermItem(
+                        '1. Penerimaan Ketentuan',
+                        'Dengan mendaftar dan menggunakan aplikasi EnzyLife, Anda menyetujui untuk terikat oleh Syarat dan Ketentuan ini serta Kebijakan Privasi kami. Jika Anda tidak menyetujui salah satu bagian dari ketentuan ini, Anda tidak diperkenankan menggunakan layanan kami.',
+                      ),
+                      _buildTermItem(
+                        '2. Akun Pengguna',
+                        'Anda bertanggung jawab untuk menjaga kerahasiaan informasi akun dan password Anda. Anda setuju untuk bertanggung jawab atas semua aktivitas yang terjadi di bawah akun Anda. EnzyLife berhak membatasi atau menghentikan akun yang terindikasi melakukan pelanggaran.',
+                      ),
+                      _buildTermItem(
+                        '3. Layanan Belanja & Eco-Enzyme',
+                        'EnzyLife menyediakan platform edukasi dan e-commerce produk ramah lingkungan berbasis Eco-Enzyme. Informasi produk, stok, dan harga yang tertera dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya. Pembayaran produk difasilitasi melalui gateway pembayaran resmi yang aman.',
+                      ),
+                      _buildTermItem(
+                        '4. Kebijakan Konten & Edukasi',
+                        'Seluruh konten edukasi berupa artikel, infografik, dan panduan pembuatan Eco-Enzyme di aplikasi EnzyLife dilindungi oleh hak cipta. Pengguna diperbolehkan membagikan konten untuk tujuan edukatif non-komersial dengan mencantumkan sumber asli EnzyLife.',
+                      ),
+                      _buildTermItem(
+                        '5. Batasan Tanggung Jawab',
+                        'EnzyLife tidak bertanggung jawab atas kerugian langsung maupun tidak langsung yang disebabkan oleh penggunaan produk atau informasi dari aplikasi ini yang tidak sesuai dengan instruksi keselamatan pembuatan atau pemakaian Eco-Enzyme.',
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+              // Footer Button
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.green500,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Saya Mengerti',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTermItem(String title, String body) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.green700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            body,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[700],
+              height: 1.5,
+            ),
+            textAlign: TextAlign.justify,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -232,11 +378,23 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                     child: RichText(
                                       text: TextSpan(
                                         style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                                        children: const [
-                                          TextSpan(text: 'Saya setuju dengan '),
-                                          TextSpan(text: 'Syarat & Ketentuan',
-                                              style: TextStyle(color: AppColors.green500, fontWeight: FontWeight.w600)),
-                                          TextSpan(text: ' yang berlaku'),
+                                        children: [
+                                          const TextSpan(text: 'Saya setuju dengan '),
+                                          WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: GestureDetector(
+                                              onTap: _showTermsModal,
+                                              child: const Text(
+                                                'Syarat & Ketentuan',
+                                                style: TextStyle(
+                                                  color: AppColors.green500,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const TextSpan(text: ' yang berlaku'),
                                         ],
                                       ),
                                     ),

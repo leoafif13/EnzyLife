@@ -6,6 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\SendOTPMail;
 
 class AuthController extends Controller
 {
@@ -29,6 +33,7 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'user'  => $user,
+            'needs_verification' => $user->email_verified_at === null,
         ]);
     }
 
@@ -46,11 +51,23 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Generate OTP
+        $otp = rand(100000, 999999);
+        Cache::put('email_verification_otp_' . $user->email, $otp, now()->addMinutes(15));
+
+        // Send Email
+        try {
+            Mail::to($user->email)->send(new SendOTPMail($otp, 'verification'));
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim email verifikasi: ' . $e->getMessage());
+        }
+
         $token = $user->createToken('flutter-app')->plainTextToken;
 
         return response()->json([
             'token' => $token,
             'user'  => $user,
+            'needs_verification' => true,
         ]);
     }
 
@@ -63,5 +80,119 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         return response()->json($request->user());
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $user = $request->user();
+        $cachedOtp = Cache::get('email_verification_otp_' . $user->email);
+
+        if (!$cachedOtp || $cachedOtp != $request->otp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP tidak valid atau telah kedaluwarsa.',
+            ], 400);
+        }
+
+        $user->forceFill([
+            'email_verified_at' => now(),
+        ])->save();
+
+        Cache::forget('email_verification_otp_' . $user->email);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Email Anda berhasil diverifikasi.',
+            'user' => $user,
+        ]);
+    }
+
+    public function resendVerificationOtp(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->email_verified_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email Anda sudah terverifikasi.',
+            ], 400);
+        }
+
+        $otp = rand(100000, 999999);
+        Cache::put('email_verification_otp_' . $user->email, $otp, now()->addMinutes(15));
+
+        try {
+            Mail::to($user->email)->send(new SendOTPMail($otp, 'verification'));
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim ulang email verifikasi: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email verifikasi. Silakan coba beberapa saat lagi.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP verifikasi baru telah dikirim ke email Anda.',
+        ]);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $otp = rand(100000, 999999);
+        Cache::put('password_reset_otp_' . $request->email, $otp, now()->addMinutes(15));
+
+        try {
+            Mail::to($request->email)->send(new SendOTPMail($otp, 'reset'));
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim email reset password: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email reset password. Silakan coba beberapa saat lagi.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP untuk reset password telah dikirim ke email Anda.',
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'otp' => 'required|string|size:6',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $cachedOtp = Cache::get('password_reset_otp_' . $request->email);
+
+        if (!$cachedOtp || $cachedOtp != $request->otp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP tidak valid atau telah kedaluwarsa.',
+            ], 400);
+        }
+
+        $user = User::where('email', $request->email)->firstOrFail();
+        $user->forceFill([
+            'password' => Hash::make($request->password),
+        ])->save();
+
+        Cache::forget('password_reset_otp_' . $request->email);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password Anda berhasil diperbarui. Silakan login kembali.',
+        ]);
     }
 }

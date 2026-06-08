@@ -167,4 +167,81 @@ class AuthService {
       };
     }
   }
+
+  static Future<Map<String, dynamic>> verifyEmail(String otp) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/email/verify'),
+        headers: await _headers(auth: true),
+        body: jsonEncode({'otp': otp}),
+      );
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal menghubungkan ke server.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> resendVerificationOtp() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/email/resend'),
+        headers: await _headers(auth: true),
+      );
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal menghubungkan ke server.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/password/forgot'),
+        headers: await _headers(),
+        body: jsonEncode({'email': email}),
+      );
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal menghubungkan ke server.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> resetPassword(
+    String email,
+    String otp,
+    String password,
+    String passwordConfirmation,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/password/reset'),
+        headers: await _headers(),
+        body: jsonEncode({
+          'email': email,
+          'otp': otp,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal menghubungkan ke server.',
+      };
+    }
+  }
 }
