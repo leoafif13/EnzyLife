@@ -5,6 +5,7 @@ import '../auth/login_page.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
 import 'verification_page.dart';
+import '../belanja/belanja_page.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -101,6 +102,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         await AuthService.saveToken(response['token']);
         // SIMPAN DATA USER
         await AuthService.saveUser(response['user']);
+        await CartState.instance.loadCartForUser();
 
         if (!mounted) return;
 

@@ -21,6 +21,10 @@ void main() async {
   // Ambil token dari local storage
   final token = await AuthService.getToken();
 
+  if (token != null) {
+    await CartState.instance.loadCartForUser();
+  }
+
   runApp(MyApp(
     isLoggedIn: token != null,
   ));
@@ -97,7 +101,10 @@ class _MainScreenState extends State<MainScreen> {
         onCartTap: _openCart,
         onMenuTap: _openMenu,
       ),
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onTabTap,
@@ -498,7 +505,7 @@ class _ArtikelCard extends StatelessWidget {
                 height: 100,
                 width: double.infinity,
                 child: Image.network(
-                  'http://localhost:8000/gambar/${artikel.gambar}',
+                  'http://127.0.0.1:8000/gambar/${artikel.gambar}',
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.green50,
@@ -586,7 +593,7 @@ class _InfografikCard extends StatelessWidget {
                 height: 120,
                 width: 160,
                 child: Image.network(
-                  'http://localhost:8000/gambar/${infografik.gambar}',
+                  'http://127.0.0.1:8000/gambar/${infografik.gambar}',
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.green50,

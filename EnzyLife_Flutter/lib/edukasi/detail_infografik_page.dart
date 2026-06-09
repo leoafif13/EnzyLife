@@ -98,7 +98,7 @@ class DetailInfografikPage extends StatelessWidget {
                       top: Radius.circular(16),
                     ),
                     child: Image.network(
-                      'http://localhost:8000/gambar/${item.gambar}',
+                      'http://127.0.0.1:8000/gambar/${item.gambar}',
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
@@ -165,7 +165,7 @@ class _RekomendasiCard extends StatelessWidget {
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
               child: Image.network(
-                      'http://localhost:8000/gambar/${item.gambar}',
+                      'http://127.0.0.1:8000/gambar/${item.gambar}',
                       width: 90,
                       height: 90,
                       fit: BoxFit.cover,

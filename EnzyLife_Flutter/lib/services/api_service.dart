@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
 
   // Android Emulator
-  static const String _baseUrl = 'http://localhost:8000/api';
+  static const String _baseUrl = 'http://127.0.0.1:8000/api';
 
   // Cache
   static List<Product> cachedProducts = [];
@@ -64,6 +64,60 @@ class ApiService {
       print('Error getProducts: $e');
 
       return [];
+    }
+  }
+
+  static Future<Map<String, dynamic>> getProductsPaginated({
+    int page = 1,
+    int perPage = 6,
+    String? sortBy,
+    String? sortOrder,
+    String? search,
+  }) async {
+    try {
+      String url = '$_baseUrl/products?page=$page&per_page=$perPage';
+      if (sortBy != null) url += '&sort_by=$sortBy';
+      if (sortOrder != null) url += '&sort_order=$sortOrder';
+      if (search != null && search.isNotEmpty) {
+        url += '&search=${Uri.encodeComponent(search)}';
+      }
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final rawData = decoded['data'];
+        List<Product> products = [];
+        int lastPage = 1;
+
+        if (rawData is Map && rawData.containsKey('data')) {
+          products = List<Product>.from(
+            rawData['data'].map((x) => Product.fromJson(x)),
+          );
+          lastPage = rawData['last_page'] ?? 1;
+        } else if (rawData is List) {
+          products = List<Product>.from(
+            rawData.map((x) => Product.fromJson(x)),
+          );
+        }
+
+        // Cache first page
+        if (page == 1 && (search == null || search.isEmpty)) {
+          cachedProducts = products;
+        }
+
+        return {
+          'products': products,
+          'last_page': lastPage,
+        };
+      }
+      return {'products': <Product>[], 'last_page': 1};
+    } catch (e) {
+      print('Error getProductsPaginated: $e');
+      return {'products': <Product>[], 'last_page': 1};
     }
   }
 
@@ -294,11 +348,14 @@ class ApiService {
   // CONFIRM ORDER PAYMENT
   // =====================================================
 
-  static Future<Map<String, dynamic>?> payOrder(int orderId) async {
+  static Future<Map<String, dynamic>?> payOrder(int orderId, {bool simulate = false}) async {
     try {
+      final headers = await _authHeaders();
+      final body = simulate ? {'simulate': 'true'} : <String, String>{};
       final response = await http.post(
         Uri.parse('$_baseUrl/orders/$orderId/pay'),
-        headers: await _authHeaders(),
+        headers: headers,
+        body: body,
       );
 
       if (response.statusCode == 200 || response.statusCode == 400) {
@@ -307,6 +364,23 @@ class ApiService {
       return null;
     } catch (e) {
       print('Error payOrder: $e');
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> cancelOrder(int orderId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/orders/$orderId/cancel'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 400) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error cancelOrder: $e');
       return null;
     }
   }

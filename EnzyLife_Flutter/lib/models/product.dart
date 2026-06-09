@@ -6,6 +6,7 @@ class Product {
   final int stock;
   final String image;
   final bool isPopular;
+  final int salesCount;
 
   const Product({
     required this.id,
@@ -15,6 +16,7 @@ class Product {
     required this.stock,
     required this.image,
     this.isPopular = false,
+    this.salesCount = 0,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -22,10 +24,11 @@ class Product {
       id: json['id'],
       name: json['nama'] ?? '',
       description: json['deskripsi'] ?? '',
-      price: int.parse(json['harga'].toString()),
-      stock: int.parse(json['stok'].toString()),
+      price: double.parse(json['harga'].toString()).toInt(),
+      stock: double.parse(json['stok'].toString()).toInt(),
       image: json['gambar'] ?? '',
       isPopular: json['is_popular'] ?? false,
+      salesCount: double.parse((json['sales_count'] ?? 0).toString()).toInt(),
     );
   }
 }

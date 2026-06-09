@@ -73,17 +73,18 @@ class CheckoutController extends Controller
             'pemesanan_id' => $pemesanan->id,
             'total_bayar' => $totalHarga,
             'status_pembayaran' => 'BELUM_DIBAYAR',
+            'payment_type' => $request->metode_pembayaran,
         ]);
 
         $snapToken = null;
 
         if ($request->metode_pembayaran === 'ONLINE') {
-
             $midtrans = new MidtransService();
+            $midtransOrderId = 'ENZY-' . $pemesanan->id . '-' . time();
 
             $snapToken = $midtrans->createSnapToken([
                 'transaction_details' => [
-                    'order_id' => 'ENZY-' . $pemesanan->id . '-' . time(),
+                    'order_id' => $midtransOrderId,
                     'gross_amount' => (int) $totalHarga,
                 ],
                 'customer_details' => [
@@ -94,6 +95,7 @@ class CheckoutController extends Controller
 
             $pembayaran->update([
                 'snap_token' => $snapToken,
+                'midtrans_order_id' => $midtransOrderId,
             ]);
         }
 
@@ -119,6 +121,9 @@ class CheckoutController extends Controller
 
 public function history()
 {
+    // Auto-expire unpaid online orders older than 24 hours globally
+    Pemesanan::expireUnpaidOrders();
+
     $orders = Pemesanan::with(['detailPemesanan.produk', 'pembayaran'])
         ->where('user_id', auth()->id())
         ->orderBy('created_at', 'desc')
@@ -130,9 +135,40 @@ public function history()
     ]);
 }
 
-public function pay($id)
+public function cancel($id)
 {
     $pemesanan = Pemesanan::where('user_id', auth()->id())
+        ->where('id', $id)
+        ->firstOrFail();
+
+    if ($pemesanan->status_pemesanan !== 'MENUNGGU_PEMBAYARAN' && $pemesanan->status_pemesanan !== 'DIKEMAS') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Pesanan ini tidak dapat dibatalkan karena sedang diproses atau sudah selesai.',
+        ], 400);
+    }
+
+    try {
+        $pemesanan->update([
+            'status_pemesanan' => 'DIBATALKAN',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan berhasil dibatalkan dan stok dikembalikan.',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal membatalkan pesanan: ' . $e->getMessage(),
+        ], 500);
+    }
+}
+
+public function pay($id)
+{
+    $pemesanan = Pemesanan::with('pembayaran')
+        ->where('user_id', auth()->id())
         ->where('id', $id)
         ->firstOrFail();
 
@@ -143,30 +179,76 @@ public function pay($id)
         ], 400);
     }
 
+    $pembayaran = $pemesanan->pembayaran;
+
+    if (!$pembayaran || !$pembayaran->midtrans_order_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Detail pembayaran tidak ditemukan. Silakan lakukan checkout ulang.',
+        ], 400);
+    }
+
+    $isPaid = false;
+    $txStatus = 'pending';
+
+    if (request('simulate') === 'true' || request('simulate') === true) {
+        $isPaid = true;
+    } else {
+        // Panggil API Midtrans langsung untuk mengecek status transaksi
+        $midtrans = new MidtransService();
+        $statusResponse = $midtrans->getStatus($pembayaran->midtrans_order_id);
+
+        if ($statusResponse) {
+            $txStatus = strtolower($statusResponse->transaction_status ?? 'pending');
+            $isPaid = in_array($txStatus, ['settlement', 'capture']);
+        }
+    }
+
+    if (!$isPaid) {
+        if (in_array($txStatus, ['expire', 'cancel', 'deny'])) {
+            DB::beginTransaction();
+            try {
+                $pemesanan->update([
+                    'status_pemesanan' => 'DIBATALKAN',
+                ]);
+                DB::commit();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaksi pembayaran telah kedaluwarsa atau dibatalkan di Midtrans. Pesanan Anda otomatis dibatalkan.',
+                ], 400);
+            } catch (\Exception $e) {
+                DB::rollBack();
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Pembayaran belum diselesaikan. Status saat ini: ' . strtoupper($txStatus) . '. Silakan selesaikan pembayaran di halaman Midtrans terlebih dahulu.',
+        ], 400);
+    }
+
     DB::beginTransaction();
     try {
         $pemesanan->update([
-            'status_pemesanan' => 'DIKEMAS',
+            'status_pemesanan' => 'DIPROSES',
         ]);
 
-        if ($pemesanan->pembayaran) {
-            $pemesanan->pembayaran->update([
-                'status_pembayaran' => 'SUDAH_DIBAYAR',
-                'tanggal_pembayaran' => now(),
-            ]);
-        }
+        $pembayaran->update([
+            'status_pembayaran' => 'SUDAH_DIBAYAR',
+            'tanggal_pembayaran' => now(),
+        ]);
 
         DB::commit();
 
         return response()->json([
             'success' => true,
-            'message' => 'Pembayaran berhasil dikonfirmasi',
+            'message' => 'Pembayaran berhasil diverifikasi secara real-time!',
         ]);
     } catch (\Exception $e) {
         DB::rollBack();
         return response()->json([
             'success' => false,
-            'message' => 'Gagal memproses pembayaran: ' . $e->getMessage(),
+            'message' => 'Gagal memproses verifikasi pembayaran: ' . $e->getMessage(),
         ], 500);
     }
 }

@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/checkout', [CheckoutController::class, 'checkout']);
         Route::get('/orders', [CheckoutController::class, 'history']);
         Route::post('/orders/{id}/pay', [CheckoutController::class, 'pay']);
+        Route::post('/orders/{id}/cancel', [CheckoutController::class, 'cancel']);
     });
 });
 

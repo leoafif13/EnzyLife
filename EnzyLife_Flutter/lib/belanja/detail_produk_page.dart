@@ -5,6 +5,8 @@ import 'belanja_page.dart';
 import 'shopping_cart.dart';
 // import 'widgets/sub_page_appbar.dart';
 import 'checkout_page.dart';
+import '../widgets/purchase_bottom_sheet.dart';
+import '../services/format_helper.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -40,19 +42,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _Review(name: 'Dewi Lestari',  rating: 5, comment: 'Sudah pakai beberapa kali, hasilnya luar biasa untuk pupuk organik.', date: '2 minggu lalu'),
   ];
 
-  static String _fmt(int price) {
-    final s = price.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return 'Rp. $buf';
-  }
+  static String _fmt(int price) => formatPrice(price);
 
   double get _avgRating => _reviews.map((r) => r.rating).reduce((a, b) => a + b) / _reviews.length;
 
   void _addToCart() {
+    final currentQty = CartState.instance.qty(widget.product.id);
+    if (currentQty + _qty > widget.product.stock) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menambahkan. Total di keranjang melebihi stok (${widget.product.stock} item)'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.orange[800],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
     for (int i = 0; i < _qty; i++) {
       CartState.instance.add(widget.product.id);
     }
@@ -143,7 +149,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   width: double.infinity,
                                   color: AppColors.green50,
                                   child: Image.network(
-                                    'http://localhost:8000/gambar/produk/${p.image.split('/').last}',
+                                    'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) {
                                       return const Icon(Icons.image_not_supported);
@@ -216,7 +222,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    'http://localhost:8000/gambar/produk/${p.image.split('/').last}',
+                                    'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) {
                                       return const Icon(Icons.image_not_supported);
@@ -504,15 +510,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                // Tombol beli sekarang → langsung checkout
+                // Tombol beli sekarang → modal bottom sheet
                 Expanded(
                   child: ElevatedButton(
                     onPressed: p.stock > 0
-                        ? () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => CheckoutPage(
-                                items: {p.id: _qty},
-                                allProducts: [p],
-                              )),
+                        ? () => showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => PurchaseBottomSheet(
+                                product: p,
+                                initialQty: _qty,
+                              ),
                             )
                         : null,
                     style: ElevatedButton.styleFrom(

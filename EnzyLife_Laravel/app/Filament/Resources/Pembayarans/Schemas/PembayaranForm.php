@@ -14,7 +14,8 @@ class PembayaranForm
             TextInput::make('status_pembayaran')
                 ->disabled(),
 
-            TextInput::make('payment_type')
+            TextInput::make('pemesanan.metode_pembayaran')
+                ->label('Metode Pembayaran')
                 ->disabled(),
 
             TextInput::make('midtrans_order_id')

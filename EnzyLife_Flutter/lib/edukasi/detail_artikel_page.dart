@@ -28,7 +28,7 @@ class DetailArtikelPage extends StatelessWidget {
                 children: [
                   Positioned.fill(
                     child: Image.network(
-                      'http://localhost:8000/gambar/${item.gambar}',
+                      'http://127.0.0.1:8000/gambar/${item.gambar}',
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) {
                         return Container(

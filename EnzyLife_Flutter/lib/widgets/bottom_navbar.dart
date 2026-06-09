@@ -27,7 +27,7 @@ class AppBottomNavBar extends StatelessWidget {
   static const _items = [
     _NavItem(icon: Icons.home_outlined,       label: 'Beranda'),
     _NavItem(icon: Icons.menu_book_outlined,  label: 'Edukasi'),
-    _NavItem(icon: Icons.shopping_cart_outlined, label: 'Belanja'),
+    _NavItem(icon: Icons.shopping_bag_outlined, label: 'Produk'),
     _NavItem(icon: Icons.person_outline,      label: 'Akun'),
   ];
  

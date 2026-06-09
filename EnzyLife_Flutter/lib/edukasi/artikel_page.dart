@@ -214,7 +214,7 @@ class _ArtikelCard extends StatelessWidget {
                   alignment: Alignment.center,
                   children: [
                     Image.network(
-                      'http://localhost:8000/gambar/${item.gambar}',
+                      'http://127.0.0.1:8000/gambar/${item.gambar}',
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.cover,
@@ -312,7 +312,7 @@ class _InfografikCard extends StatelessWidget {
                 width: 100, height: 120,
                 color: const Color(0xFFE8F5E9),
                 child: Image.network(
-                        'http://localhost:8000/gambar/${item.gambar}',
+                        'http://127.0.0.1:8000/gambar/${item.gambar}',
                         width: double.infinity,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) {

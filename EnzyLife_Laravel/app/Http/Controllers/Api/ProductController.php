@@ -9,9 +9,46 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     // GET ALL PRODUCTS
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all();
+        $perPage = $request->query('per_page');
+        $sortBy = $request->query('sort_by', 'sales'); // 'sales' or 'price'
+        $sortOrder = $request->query('sort_order', 'desc'); // 'asc' or 'desc'
+        $search = $request->query('search');
+
+        $query = Product::withSum('detailPemesanan as sales_count', 'kuantitas');
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        }
+
+        // 1. Stock = 0 goes to the bottom
+        $query->orderByRaw('CASE WHEN stok = 0 THEN 1 ELSE 0 END ASC');
+
+        // 2. Sort by price or sales_count
+        if ($sortBy === 'price') {
+            $query->orderBy('harga', $sortOrder);
+        } else {
+            $query->orderBy('sales_count', $sortOrder);
+        }
+
+        if ($perPage) {
+            $products = $query->paginate((int) $perPage);
+            
+            $products->getCollection()->transform(function ($product) {
+                $product->sales_count = (int) ($product->sales_count ?? 0);
+                return $product;
+            });
+        } else {
+            $products = $query->get()->map(function ($product) {
+                $product->sales_count = (int) ($product->sales_count ?? 0);
+                return $product;
+            });
+        }
 
         return response()->json([
             'status' => true,

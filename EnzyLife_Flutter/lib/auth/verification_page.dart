@@ -5,6 +5,7 @@ import '../app_color.dart';
 import '../services/auth_service.dart';
 import '../main.dart';
 import 'login_page.dart';
+import '../belanja/belanja_page.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String email;
@@ -121,6 +122,7 @@ class _VerificationScreenState extends State<VerificationScreen>
         if (response['user'] != null) {
           await AuthService.saveUser(response['user']);
         }
+        await CartState.instance.loadCartForUser();
 
         if (!mounted) return;
 

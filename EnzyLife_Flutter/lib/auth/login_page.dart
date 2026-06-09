@@ -6,6 +6,7 @@ import '../main.dart';
 import '../services/auth_service.dart';
 import 'verification_page.dart';
 import 'forgot_password_page.dart';
+import '../belanja/belanja_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -80,6 +81,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         // Simpan token
         await AuthService.saveToken(result['token']);
         await AuthService.saveUser(result['user']);
+        await CartState.instance.loadCartForUser();
 
         if (!mounted) return;
 

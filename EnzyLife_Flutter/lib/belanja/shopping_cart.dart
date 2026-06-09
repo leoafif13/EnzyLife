@@ -6,6 +6,7 @@ import 'belanja_page.dart';
 import 'checkout_page.dart';
 import '../services/api_service.dart';
 import 'detail_produk_page.dart';
+import '../services/format_helper.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -17,25 +18,29 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   List<Product> get _products => ApiService.cachedProducts;
   final Set<int> _checked = {};
+  bool _isLoading = false;
 
-  
-
-  static String _fmt(int price) {
-    final s = price.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return 'Rp. $buf';
-  }
+  static String _fmt(int price) => formatPrice(price);
 
   @override
   void initState() {
     super.initState();
     CartState.instance.addListener(_onCartChanged);
-    // Centang semua item saat buka keranjang
     _checked.addAll(CartState.instance.items.keys);
+    if (ApiService.cachedProducts.isEmpty) {
+      _loadProducts();
+    }
+  }
+
+  Future<void> _loadProducts() async {
+    setState(() => _isLoading = true);
+    await ApiService.getProducts();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _checked.addAll(CartState.instance.items.keys);
+      });
+    }
   }
 
   void _onCartChanged() {
@@ -123,10 +128,12 @@ class _CartScreenState extends State<CartScreen> {
             ),
         ],
       ),
-      body: items.isEmpty
-          ? const _EmptyCart()
-          : Column(
-              children: [
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: AppColors.green500))
+          : items.isEmpty
+              ? const _EmptyCart()
+              : Column(
+                  children: [
                 // ── Select all + hint swipe ──────────
                 Container(
                   color: AppColors.bgCard,
@@ -345,7 +352,7 @@ class _CartItem extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  'http://localhost:8000/gambar/produk/${product.image.split('/').last}',
+                  'http://127.0.0.1:8000/gambar/produk/${product.image.split('/').last}',
                   width: 64,
                   height: 64,
                   fit: BoxFit.cover,

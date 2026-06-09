@@ -31,6 +31,39 @@
 
   <title>frontend</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Midtrans Sandbox Snap Library -->
+  <script type="text/javascript"
+    src="https://app.sandbox.midtrans.com/snap/snap.js"
+    data-client-key="Mid-client-wRuuZklrmrK6sCst"></script>
+
+  <script type="text/javascript">
+    window.snapPay = function(snapToken, callback) {
+      if (typeof snap === 'undefined') {
+        console.error('Midtrans Snap is not loaded!');
+        if (callback) callback(false);
+        return;
+      }
+      snap.pay(snapToken, {
+        onSuccess: function(result) {
+          console.log('success', result);
+          if (callback) callback(true);
+        },
+        onPending: function(result) {
+          console.log('pending', result);
+          if (callback) callback(false);
+        },
+        onError: function(result) {
+          console.log('error', result);
+          if (callback) callback(false);
+        },
+        onClose: function() {
+          console.log('customer closed the popup');
+          if (callback) callback(false);
+        }
+      });
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

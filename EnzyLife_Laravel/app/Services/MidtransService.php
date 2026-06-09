@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Midtrans\Config;
 use Midtrans\Snap;
+use Midtrans\Transaction;
 
 class MidtransService
 {
@@ -18,5 +19,14 @@ class MidtransService
     public function createSnapToken(array $params)
     {
         return Snap::getSnapToken($params);
+    }
+
+    public function getStatus($orderId)
+    {
+        try {
+            return Transaction::status($orderId);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../models/product.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
@@ -6,6 +7,9 @@ import 'belanja_page.dart';
 import '../services/api_service.dart';
 import '../profil/riwayat_belanja_page.dart';
 import '../models/user.dart';
+import '../services/midtrans_helper.dart';
+import '../services/format_helper.dart';
+
 
 class CheckoutPage extends StatefulWidget {
   final Map<int, int> items;
@@ -23,7 +27,7 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   _DeliveryMethod _method = _DeliveryMethod.ambilSendiri;
-  String _paymentMethod   = 'Transfer Bank';
+  String _paymentMethod   = 'Pembayaran Online';
   bool _isLoading         = false;
 
   final _namaController    = TextEditingController();
@@ -37,10 +41,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   static const _labInfo   = 'Lab EnzyLife\nJl. Batam Center No. 10\nBatam, Kepulauan Riau\nSenin–Sabtu, 08.00–17.00 WIB'; // TODO
 
   static const _paymentOptions = [
-    'Transfer Bank',
-    'QRIS',
+    'Pembayaran Online',
     'COD (Bayar di Tempat)',
-    'Dompet Digital',
   ];
 
   @override
@@ -100,15 +102,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   int get _ongkirTotal => _method == _DeliveryMethod.diantar ? _ongkir : 0;
   int get _grandTotal  => _subtotal + _ongkirTotal + _biayaAdmin;
 
-  static String _fmt(int price) {
-    final s = price.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return 'Rp. $buf';
-  }
+  static String _fmt(int price) => formatPrice(price);
 
   Future<void> _bayar() async {
     if (_method == _DeliveryMethod.diantar) {
@@ -169,53 +163,92 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       if (res != null && res['success'] == true) {
         CartState.instance.clear();
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 72, height: 72,
-                  decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
-                  child: const Icon(Icons.check_circle_outline_rounded, size: 40, color: AppColors.green500),
-                ),
-                const SizedBox(height: 16),
-                const Text('Pesanan Berhasil!',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.text1)),
-                const SizedBox(height: 8),
-                Text(
-                  _method == _DeliveryMethod.ambilSendiri
-                      ? 'Silakan ambil pesanan di lab sesuai jadwal.'
-                      : 'Pesanan akan segera dikirim ke alamat kamu.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).popUntil((r) => r.isFirst);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.green500, foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Lihat Riwayat Belanja', style: TextStyle(fontWeight: FontWeight.w600)),
+
+        void showSuccess() {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72, height: 72,
+                    decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+                    child: const Icon(Icons.check_circle_outline_rounded, size: 40, color: AppColors.green500),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  const Text('Pesanan Berhasil!',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.text1)),
+                  const SizedBox(height: 8),
+                  Text(
+                    _method == _DeliveryMethod.ambilSendiri
+                        ? 'Silakan ambil pesanan di lab sesuai jadwal.'
+                        : 'Pesanan akan segera dikirim ke alamat kamu.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).popUntil((r) => r.isFirst);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green500, foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Lihat Riwayat Belanja', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
+
+        if (apiMetodePembayaran == 'ONLINE' && res['snap_token'] != null) {
+          final orderId = res['pemesanan_id'] as int;
+          final snapToken = res['snap_token'] as String;
+
+          setState(() => _isLoading = true);
+
+          // Open Midtrans Snap directly (inline on web)
+          await MidtransPayHelper.pay(snapToken);
+
+          // After Snap closes, check status from backend
+          final verifyRes = await ApiService.payOrder(orderId, simulate: false);
+
+          setState(() => _isLoading = false);
+          if (!mounted) return;
+
+          if (verifyRes != null && verifyRes['success'] == true) {
+            showSuccess();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(verifyRes?['message'] ?? 'Pembayaran belum diselesaikan. Anda dapat membayar nanti di Riwayat Belanja.'),
+                backgroundColor: Colors.orange[850],
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+            Navigator.of(context).popUntil((r) => r.isFirst);
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
+            );
+          }
+          return;
+        }
+
+        showSuccess();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(res?['message'] ?? 'Gagal memproses pesanan. Silakan coba lagi.'),
@@ -238,10 +271,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   IconData _paymentIcon(String m) {
     switch (m) {
-      case 'Transfer Bank':         return Icons.account_balance_outlined;
-      case 'QRIS':                  return Icons.qr_code_scanner_outlined;
+      case 'Pembayaran Online':     return Icons.account_balance_outlined;
       case 'COD (Bayar di Tempat)': return Icons.payments_outlined;
-      case 'Dompet Digital':        return Icons.wallet_outlined;
       default:                       return Icons.credit_card_outlined;
     }
   }
@@ -268,6 +299,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         Product? p;
                         try { p = widget.allProducts.firstWhere((x) => x.id == e.key); } catch (_) {}
                         if (p == null) return const SizedBox.shrink();
+                        final imageUrl = (p.image != null && p.image.isNotEmpty)
+                            ? 'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}'
+                            : null;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Row(
@@ -276,8 +310,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: Container(
                                   width: 52, height: 52, color: AppColors.green50,
-                                  child: Icon(Icons.image_outlined, size: 20,
-                                      color: AppColors.green500.withOpacity(0.3)),
+                                  child: imageUrl != null
+                                      ? Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => const Icon(
+                                            Icons.image_outlined,
+                                            size: 20,
+                                            color: AppColors.green500,
+                                          ),
+                                        )
+                                      : Icon(Icons.image_outlined, size: 20,
+                                          color: AppColors.green500.withOpacity(0.3)),
                                 ),
                               ),
                               const SizedBox(width: 12),

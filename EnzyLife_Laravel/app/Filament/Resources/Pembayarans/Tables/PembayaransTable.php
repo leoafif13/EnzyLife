@@ -31,7 +31,7 @@ class PembayaransTable
                 ->label('Total Bayar')
                 ->money('IDR'),
 
-            TextColumn::make('payment_type')
+            TextColumn::make('pemesanan.metode_pembayaran')
                 ->label('Metode'),
 
                 SelectColumn::make('status_pembayaran')
@@ -40,6 +40,9 @@ class PembayaransTable
                      'BELUM_DIBAYAR' => 'Belum Dibayar',
                      'PENDING' => 'Pending',
                      'SUDAH_DIBAYAR' => 'Sudah Dibayar',
+                     'CANCEL' => 'Dibatalkan',
+                     'EXPIRE' => 'Kadaluarsa',
+                     'DENY' => 'Ditolak',
                  ]),
 
             TextColumn::make('created_at')

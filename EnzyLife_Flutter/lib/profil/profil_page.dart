@@ -13,6 +13,7 @@ import 'kebijakan_privasi_page.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
+import '../belanja/belanja_page.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -103,6 +104,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                           Navigator.of(context).pop();
 
                           await AuthService.logout();
+                          CartState.instance.clearMemoryOnly();
 
                           if (!context.mounted) return;
 

@@ -19,6 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        try {
+            if (config('database.default') && \Illuminate\Support\Facades\Schema::hasTable('pemesanan')) {
+                \App\Models\Pemesanan::expireUnpaidOrders();
+            }
+        } catch (\Exception $e) {
+            // Silence database exceptions during migration/setup
+        }
     }
 }

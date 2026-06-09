@@ -5,6 +5,7 @@ import 'ulasan_page.dart';
 import '../services/api_service.dart';
 import '../models/order.dart';
 import 'detail_riwayat_belanja_page.dart';
+import '../services/format_helper.dart';
 
 // ── Status pesanan ────────────────────────────
 enum OrderStatus { dipesan, dikirim, selesai }
@@ -56,13 +57,14 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
   Future<void> _loadHistory() async {
     setState(() => _isLoading = true);
     final orders = await ApiService.getOrderHistory();
+    if (!mounted) return;
     setState(() {
       _allOrders = orders;
       _isLoading = false;
     });
   }
 
-  static String _fmt(int price) => _fmtPrice(price);
+  static String _fmt(int price) => formatPrice(price);
 
   List<OrderModel> get _filtered =>
       _allOrders.where((o) => o.orderStatus == _filter).toList();
@@ -71,15 +73,8 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
-      appBar: SubPageAppBar(
+      appBar: const SubPageAppBar(
         title: 'Riwayat Belanja',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined,
-                color: AppColors.text1, size: 22),
-            onPressed: () {}, // TODO: navigasi ke CartScreen
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -89,21 +84,67 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.bgCard,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow,
+                gradient: const LinearGradient(
+                  colors: [AppColors.green900, AppColors.green700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: AppColors.heroShadow,
               ),
-              child: Column(
+              child: Row(
                 children: [
-                  const Text('Riwayat Belanja',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800,
-                          color: AppColors.text1)),
-                  const SizedBox(height: 6),
-                  Text('Jelajahi berbagai produk eco enzyme yang tersedia, lengkap dengan informasi, pengelolaan, dan kemudahan untuk melakukan pembelian',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text(
+                            '🛍️  Riwayat Belanja',
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Daftar Transaksi',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Pantau status pesanan, riwayat pembelian produk eco enzyme, serta lakukan pembayaran dan ulasan dalam satu tempat.',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 13,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.eco_rounded, color: Colors.white, size: 30),
+                  ),
                 ],
               ),
             ),
@@ -218,44 +259,6 @@ class _OrderCard extends StatelessWidget {
     required this.onRefresh,
   });
 
-  Color getStatusColor(String status) {
-    switch (status) {
-      case 'MENUNGGU_PEMBAYARAN':
-        return const Color(0xFFE65100);
-      case 'DIPROSES':
-      case 'DIKEMAS':
-        return const Color(0xFF512DA8);
-      case 'SIAP_DIAMBIL':
-      case 'SELESAI':
-        return AppColors.green700;
-      case 'DIKIRIM':
-        return const Color(0xFF1565C0);
-      case 'DIBATALKAN':
-        return Colors.red[700]!;
-      default:
-        return Colors.grey[700]!;
-    }
-  }
-
-  Color getStatusBgColor(String status) {
-    switch (status) {
-      case 'MENUNGGU_PEMBAYARAN':
-        return const Color(0xFFFFF3E0);
-      case 'DIPROSES':
-      case 'DIKEMAS':
-        return const Color(0xFFEDE7F6);
-      case 'SIAP_DIAMBIL':
-      case 'SELESAI':
-        return AppColors.green50;
-      case 'DIKIRIM':
-        return const Color(0xFFE3F2FD);
-      case 'DIBATALKAN':
-        return Colors.red[50]!;
-      default:
-        return Colors.grey[100]!;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final firstItem = order.items.isNotEmpty ? order.items.first : null;
@@ -268,10 +271,17 @@ class _OrderCard extends StatelessWidget {
         : 'Pesanan #${order.id}';
     
     final imageUrl = (firstItem?.product?.image != null && firstItem!.product!.image.isNotEmpty)
-        ? 'http://localhost:8000/gambar/produk/${firstItem.product!.image.split('/').last}'
+        ? 'http://127.0.0.1:8000/gambar/produk/${firstItem.product!.image.split('/').last}'
         : null;
 
-    final dateStr = order.createdAt.split('T')[0];
+    String dateStr = order.createdAt;
+    if (order.createdAt.contains('T')) {
+      final parts = order.createdAt.split('T');
+      final datePart = parts[0];
+      final timePart = parts[1].split('.')[0];
+      final timeFormatted = timePart.length >= 5 ? timePart.substring(0, 5) : timePart;
+      dateStr = '$datePart $timeFormatted';
+    }
 
     return GestureDetector(
       onTap: () async {
@@ -341,12 +351,12 @@ class _OrderCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(
-                              color: getStatusBgColor(order.statusPemesanan),
+                              color: order.statusBgColor,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(order.statusDescription,
                                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                                    color: getStatusColor(order.statusPemesanan))),
+                                    color: order.statusColor)),
                           ),
                         ],
                       ),
@@ -404,11 +414,91 @@ class _OrderActions extends StatelessWidget {
   final OrderModel order;
   const _OrderActions({required this.order});
 
+  Future<void> _cancelOrder(BuildContext context, OrderModel order) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Batalkan Pesanan?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        content: const Text('Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.',
+            style: TextStyle(fontSize: 13)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Ya, Batalkan', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    // Tampilkan loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.green500)),
+    );
+
+    final res = await ApiService.cancelOrder(order.id);
+
+    if (!context.mounted) return;
+    Navigator.of(context).pop(); // pop loading
+
+    if (res != null && res['success'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(res['message'] ?? 'Pesanan berhasil dibatalkan'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      // Refresh list
+      final state = context.findAncestorStateOfType<_RiwayatBelanjaScreenState>();
+      if (state != null) {
+        state._loadHistory();
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(res?['message'] ?? 'Gagal membatalkan pesanan. Silakan coba lagi.'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     switch (order.orderStatus) {
       case OrderStatus.selesai:
         final firstItem = order.items.isNotEmpty ? order.items.first : null;
+        final isCancelled = order.statusPemesanan == 'DIBATALKAN';
+        
+        if (isCancelled) {
+          return SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {}, // TODO: beli lagi — tambahkan produk ke cart
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.green500),
+                foregroundColor: AppColors.green500,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Beli lagi',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            ),
+          );
+        }
+
         return Row(
           children: [
             Expanded(
@@ -451,10 +541,57 @@ class _OrderActions extends StatelessWidget {
         return const SizedBox.shrink();
 
       case OrderStatus.dipesan:
+        if (order.metodePembayaran == 'ONLINE') {
+          if (order.statusPemesanan == 'MENUNGGU_PEMBAYARAN') {
+            return Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _cancelOrder(context, order),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.red[300]!),
+                      foregroundColor: Colors.red[400],
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('Batalkan',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => DetailRiwayatBelanjaPage(order: order),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.green500,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('Bayar Sekarang',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ],
+            );
+          } else {
+            // Sudah dibayar, tidak bisa dibatalkan (sembunyikan tombol)
+            return const SizedBox.shrink();
+          }
+        }
+
+        // Default (misal COD) masih bisa dibatalkan jika belum selesai/dikirim
         return SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () {}, // TODO: batalkan pesanan
+            onPressed: () => _cancelOrder(context, order),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Colors.red[300]!),
               foregroundColor: Colors.red[400],
@@ -499,12 +636,3 @@ class _EmptyOrders extends StatelessWidget {
 }
 
 // ── Helpers & Detail Bottom Sheet ────────────────
-String _fmtPrice(int price) {
-  final s = price.toString();
-  final buf = StringBuffer();
-  for (int i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-    buf.write(s[i]);
-  }
-  return 'Rp. $buf';
-}
