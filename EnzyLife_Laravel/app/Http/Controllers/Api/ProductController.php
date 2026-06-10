@@ -12,7 +12,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->query('per_page');
-        $sortBy = $request->query('sort_by', 'sales'); // 'sales' or 'price'
+        $sortBy = $request->query('sort_by', 'default'); // 'default', 'sales', or 'price'
         $sortOrder = $request->query('sort_order', 'desc'); // 'asc' or 'desc'
         $search = $request->query('search');
 
@@ -29,11 +29,13 @@ class ProductController extends Controller
         // 1. Stock = 0 goes to the bottom
         $query->orderByRaw('CASE WHEN stok = 0 THEN 1 ELSE 0 END ASC');
 
-        // 2. Sort by price or sales_count
+        // 2. Sort by price, sales_count, or default (created_at/id)
         if ($sortBy === 'price') {
             $query->orderBy('harga', $sortOrder);
-        } else {
+        } elseif ($sortBy === 'sales') {
             $query->orderBy('sales_count', $sortOrder);
+        } else {
+            $query->orderBy('id', $sortOrder);
         }
 
         if ($perPage) {

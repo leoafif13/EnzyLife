@@ -5,8 +5,8 @@ import '../widgets/sub_page_appbar.dart';
 import 'belanja_page.dart';
 import 'checkout_page.dart';
 import '../services/api_service.dart';
-import 'detail_produk_page.dart';
 import '../services/format_helper.dart';
+import 'widgets/cart_item_tile.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -174,7 +174,7 @@ class _CartScreenState extends State<CartScreen> {
                         (x) => x.id == e.key,
                       );
 
-                      return _CartItem(
+                      return CartItemTile(
                         key: ValueKey(e.key),
                         product: p,
                         qty: e.value,
@@ -214,7 +214,7 @@ class _CartScreenState extends State<CartScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: AppColors.bgCard,
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08),
+                    boxShadow: [BoxShadow(color: Colors.black.withAlpha(20),
                         blurRadius: 12, offset: const Offset(0, -2))],
                   ),
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
@@ -253,7 +253,7 @@ class _CartScreenState extends State<CartScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.green500,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: AppColors.green500.withOpacity(0.4),
+                            disabledBackgroundColor: AppColors.green500.withAlpha(102),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
@@ -274,159 +274,6 @@ class _CartScreenState extends State<CartScreen> {
             ),
     );
   }
-}
-
-// ── Cart item dengan checkbox + swipe ─────────
-class _CartItem extends StatelessWidget {
-  final Product product;
-  final int qty;
-  final bool checked;
-  final String Function(int) fmtPrice;
-  final ValueChanged<bool?> onToggleCheck;
-  final VoidCallback onAdd, onRemove, onDelete;
-
-  const _CartItem({
-    super.key,
-    required this.product, required this.qty, required this.checked,
-    required this.fmtPrice, required this.onToggleCheck,
-    required this.onAdd, required this.onRemove, required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Dismissible(
-      key: ValueKey('dismiss_${product.id}'),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete(),
-      background: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.red[400],
-          borderRadius: BorderRadius.circular(16),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.delete_outline_rounded, color: Colors.white, size: 26),
-            SizedBox(height: 4),
-            Text('Hapus', style: TextStyle(color: Colors.white, fontSize: 11,
-                fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
-      child: GestureDetector(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
-        ),
-        child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: AppColors.bgCard,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppColors.cardShadow,
-          border: checked
-              ? Border.all(color: AppColors.green500.withOpacity(0.4), width: 1.5)
-              : null,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Checkbox
-              SizedBox(
-                width: 24, height: 24,
-                child: Checkbox(
-                  value: checked,
-                  onChanged: onToggleCheck,
-                  activeColor: AppColors.green500,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5)),
-                ),
-              ),
-              const SizedBox(width: 10),
-
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  'http://127.0.0.1:8000/gambar/produk/${product.image.split('/').last}',
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
-                    return Container(
-                      width: 64,
-                      height: 64,
-                      color: AppColors.green50,
-                      child: const Icon(Icons.image_not_supported),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              // Info produk
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(product.name,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                            color: AppColors.text1)),
-                    const SizedBox(height: 4),
-                    Text(fmtPrice(product.price),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                            color: AppColors.green500)),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Subtotal
-                        Text('Subtotal: ${fmtPrice(product.price * qty)}',
-                            style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                        // Qty control
-                        _QtyControl(qty: qty, onAdd: onAdd, onRemove: onRemove),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ));
-  }
-}
-
-// ── Qty control ───────────────────────────────
-class _QtyControl extends StatelessWidget {
-  final int qty;
-  final VoidCallback onAdd, onRemove;
-  const _QtyControl({required this.qty, required this.onAdd, required this.onRemove});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(
-        border: Border.all(color: AppColors.green500),
-        borderRadius: BorderRadius.circular(8)),
-    child: Row(
-      children: [
-        GestureDetector(onTap: onRemove,
-            child: const Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                child: Icon(Icons.remove, size: 14, color: AppColors.green500))),
-        Text('$qty', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-            color: AppColors.green500)),
-        GestureDetector(onTap: onAdd,
-            child: const Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                child: Icon(Icons.add, size: 14, color: AppColors.green500))),
-      ],
-    ),
-  );
 }
 
 // ── Empty state ───────────────────────────────

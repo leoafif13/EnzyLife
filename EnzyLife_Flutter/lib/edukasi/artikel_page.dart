@@ -28,34 +28,90 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
   _Filter _filter = _Filter.semua;
   String _query = '';
   final _search = TextEditingController();
+  late final ScrollController _scrollController;
+  int _limit = 5;
 
   List<ArtikelModel> _artikel = [];
   List<InfografikModel> _infografik = [];
   bool _isLoading = true;
 
   @override
-    void dispose() {
-      _search.dispose();
-      super.dispose();
-    }
+  void dispose() {
+    _search.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     fetchArtikel();
   }
 
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMore();
+    }
+  }
+
+  void _loadMore() {
+    final totalCount = _calculateTotalCount();
+    if (_limit < totalCount) {
+      setState(() {
+        _limit += 5;
+      });
+    }
+  }
+
+  int _calculateTotalCount() {
+    final filteredArtikelCount = _artikel.where((item) {
+      if (_query.isEmpty) return true;
+      return item.judul.toLowerCase().contains(_query.toLowerCase()) ||
+          item.ringkasan.toLowerCase().contains(_query.toLowerCase());
+    }).length;
+
+    final filteredInfografikCount = _infografik.where((item) {
+      if (_query.isEmpty) return true;
+      return item.judul.toLowerCase().contains(_query.toLowerCase()) ||
+          item.deskripsi.toLowerCase().contains(_query.toLowerCase());
+    }).length;
+
+    int total = 0;
+    if (_filter != _Filter.infografik) total += filteredArtikelCount;
+    if (_filter != _Filter.artikel) total += filteredInfografikCount;
+    return total;
+  }
+
   Future<void> fetchArtikel() async {
+    // Cache-first loading
+    if (ApiService.cachedArtikel.isNotEmpty || ApiService.cachedInfografik.isNotEmpty) {
+      setState(() {
+        _artikel = ApiService.cachedArtikel;
+        _infografik = ApiService.cachedInfografik;
+        _isLoading = false;
+      });
+    }
 
-    final artikel = await ApiService.getArtikel();
-    final infografik = await ApiService.getInfografik();
+    try {
+      final artikel = await ApiService.getArtikel();
+      final infografik = await ApiService.getInfografik();
 
-
-    setState(() {
-      _artikel = artikel;
-      _infografik = infografik;
-      _isLoading = false;
-    });
+      if (mounted) {
+        setState(() {
+          _artikel = artikel;
+          _infografik = infografik;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -89,6 +145,10 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
       );
     }
 
+    final totalContent = content.length;
+    final showLoadingFooter = totalContent > _limit;
+    final visibleContent = content.take(_limit).toList();
+
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: const SubPageAppBar(title: 'Artikel & Infografik'),
@@ -96,30 +156,41 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
         children: [
           // ── Header card ──────────────────────
           Container(
-            color: AppColors.bgCard,
+            color: AppColors.bgPage,
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: const PageHeaderCard(
+              badge: '📚  Artikel',
               title: 'Artikel & Infografik',
               subtitle: 'Kumpulan artikel dan infografik seputar Eco Enzim',
+              icon: Icons.article_outlined,
             ),
           ),
 
           // ── Search bar ───────────────────────
           Container(
-            color: AppColors.bgCard,
+            color: AppColors.bgPage,
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
             child: SearchBarField(
               controller: _search,
               hintText: 'Cari artikel atau infografik...',
-              onChanged: (v) => setState(() => _query = v),
+              onChanged: (v) => setState(() {
+                _query = v;
+                _limit = 5;
+              }),
               showClearButton: _query.isNotEmpty,
-              onClear: () { setState(() => _query = ''); _search.clear(); },
+              onClear: () {
+                setState(() {
+                  _query = '';
+                  _limit = 5;
+                });
+                _search.clear();
+              },
             ),
           ),
 
           // ── Filter tabs ──────────────────────
           Container(
-            color: AppColors.bgCard,
+            color: AppColors.bgPage,
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
             child: Row(
               children: _Filter.values.map((f) {
@@ -132,7 +203,10 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: GestureDetector(
-                    onTap: () => setState(() => _filter = f),
+                    onTap: () => setState(() {
+                      _filter = f;
+                      _limit = 5;
+                    }),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
@@ -161,8 +235,6 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
             ),
           ),
 
-          const Divider(height: 1, color: AppColors.divider),
-
           // ── List konten ──────────────────────
           Expanded(
             child: _isLoading
@@ -175,8 +247,19 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
                         filter: _filter,
                       )
                     : ListView(
+                        controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                        children: content,
+                        physics: const BouncingScrollPhysics(),
+                        children: [
+                          ...visibleContent,
+                          if (showLoadingFooter)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                        ],
                       ),
           ),
         ],
@@ -192,88 +275,122 @@ class _ArtikelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return _AnimatedPressCard(
       onTap: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => DetailArtikelPage(item: item))),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(16),
           boxShadow: AppColors.cardShadow,
+          border: Border.all(color: AppColors.border.withAlpha(80)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail 16:9
+            // Thumbnail 16:9 with Hero
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child:  Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.network(
-                      'http://127.0.0.1:8000/gambar/${item.gambar}',
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return Container(
-                          color: AppColors.green50,
-                          child: Icon(
-                            Icons.article_outlined,
-                            size: 44,
-                            color: AppColors.green500.withOpacity(0.25),
-                          ),
-                        );
-                      },
-                    ),
-                    Positioned(
-                      top: 10,
-                      left: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.green500,
-                          borderRadius: BorderRadius.circular(20),
+                child: Hero(
+                  tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                  child: Image.network(
+                    'http://127.0.0.1:8000/gambar/${item.gambar}',
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) {
+                      return Container(
+                        color: AppColors.green50,
+                        child: Icon(
+                          Icons.article_outlined,
+                          size: 44,
+                          color: AppColors.green500.withAlpha(50),
                         ),
-                        child: Text(
-                          item.kategori,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.judul,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
-                          color: AppColors.text1, height: 1.4)),
-                  const SizedBox(height: 6),
-                  Text(item.ringkasan,
-                      maxLines: 2, overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500], height: 1.5)),
+                  // Category Tag above title
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.green50,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      item.kategori.toUpperCase(),
+                      style: const TextStyle(
+                        color: AppColors.green700,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 10),
+
+                  // Title
+                  Text(
+                    item.judul,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.text1,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Summary
+                  Text(
+                    item.ringkasan,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  const Divider(height: 1, color: AppColors.divider),
+                  const SizedBox(height: 12),
+
+                  // Metadata Row
                   Row(
                     children: [
-                      Icon(Icons.person_outline, size: 13, color: Colors.grey[400]),
+                      const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.text3),
                       const SizedBox(width: 4),
-                      Text('Admin',
-                          style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                      Text(
+                        item.createdAt.split('T')[0],
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.text3,
+                        ),
+                      ),
                       const Spacer(),
-                      Text(item.createdAt.split('T')[0],
-                          style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                      const Text(
+                        'Baca Selengkapnya →',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.green500,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -293,7 +410,7 @@ class _InfografikCard extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return _AnimatedPressCard(
       onTap: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => DetailInfografikPage(item: item))),
       child: Container(
@@ -302,69 +419,118 @@ class _InfografikCard extends StatelessWidget {
           color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(16),
           boxShadow: AppColors.cardShadow,
+          border: Border.all(color: AppColors.border.withAlpha(80)),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail kiri — portrait style
+            // Thumbnail left with Hero
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-              child: Container(
-                width: 100, height: 120,
-                color: const Color(0xFFE8F5E9),
-                child: Image.network(
-                        'http://127.0.0.1:8000/gambar/${item.gambar}',
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) {
-                          return Container(
-                            color: AppColors.green50,
-                            child: Icon(
-                              Icons.article_outlined,
-                              size: 44,
-                              color: AppColors.green500.withOpacity(0.25),
-                            ),
-                          );
-                        },
-                      ),
+              child: SizedBox(
+                width: 105,
+                height: 135,
+                child: Hero(
+                  tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                  child: Image.network(
+                    'http://127.0.0.1:8000/gambar/${item.gambar}',
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) {
+                      return Container(
+                        color: AppColors.green50,
+                        child: Icon(
+                          Icons.article_outlined,
+                          size: 36,
+                          color: AppColors.green500.withAlpha(50),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
-            // Konten kanan
+            // Right Content
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Badge info blue
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE3F2FD),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text('Infografik',
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600,
-                              color: Color(0xFF1565C0))),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.image_outlined, size: 11, color: Color(0xFF1565C0)),
+                          SizedBox(width: 4),
+                          Text(
+                            'INFOGRAFIK',
+                            style: TextStyle(
+                              fontSize: 9, 
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1565C0),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    Text(item.judul,
-                        maxLines: 3, overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                            color: AppColors.text1, height: 1.4)),
-                    const SizedBox(height: 6),
-                    Text(item.deskripsi,
-                        maxLines: 2, overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 11, color: Colors.grey[500], height: 1.4)),
-                    const SizedBox(height: 8),
+
+                    // Title
+                    Text(
+                      item.judul,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.text1,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Description
+                    Text(
+                      item.deskripsi,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[600],
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Footer Row
                     Row(
                       children: [
-                        Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey[400]),
-                        const SizedBox(width: 3),
-                        Text(item.createdAt.split('T')[0],
-                            style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                        const Icon(Icons.calendar_today_outlined, size: 10, color: AppColors.text3),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.createdAt.split('T')[0],
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.text3,
+                          ),
+                        ),
                         const Spacer(),
-                        const Text('Lihat →',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                                color: AppColors.green500)),
+                        const Text(
+                          'Lihat →',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.green500,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -373,6 +539,40 @@ class _InfografikCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Tactile Press Scale Animation Wrapper ─────
+class _AnimatedPressCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _AnimatedPressCard({
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  State<_AnimatedPressCard> createState() => _AnimatedPressCardState();
+}
+
+class _AnimatedPressCardState extends State<_AnimatedPressCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.975 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOutCubic,
+        child: widget.child,
       ),
     );
   }

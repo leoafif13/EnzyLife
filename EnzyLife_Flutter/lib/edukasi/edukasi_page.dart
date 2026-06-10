@@ -3,6 +3,8 @@ import '../app_color.dart';
 import 'artikel_page.dart';
 import 'kalkulator_page.dart';
 import 'faq_page.dart';
+import '../widgets/page_header_card.dart';
+import '../widgets/zoomable_image_dialog.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 // ══════════════════════════════════════════════
@@ -209,7 +211,19 @@ class EducationScreen extends StatelessWidget {
           hasVideo: false,
           image: 'assets/images/edukasi/eco1.jpg',
           caption:
-              'Eco Enzim dapat digunakan sebagai pembersih alami untuk lantai, dapur, dan kamar mandi.',
+              'Kenapa Harus Menggunakan Eco Enzim\n\nKarena kandungannya, eco Enzyme memiliki banyak cara untuk membantu siklus alam seperti memudahkan pertumbuhan tanaman (sebagai fertilizer), mengobati tanah dan juga membersihkan air yang tercemar. Selain itu bisa juga ditambahkan ke produk pembersih rumah tangga seperti shampoo, pencuci piring, deterjen, dll.\n\nPembersih enzim ini 100% natural dan bebas dari bahan kimia, mudah terurai dan lembut di tangan dan lingkungan. Cairan ini juga penolak serangga alami yang membuat semut, serangga dll menjauh. Saking alaminya, setelah digunakan untuk pel, cairan ini juga bisa dipakai untuk menyiram tanaman. Eco Enzyme juga dapat digunakan untuk merangsang hormon tanaman untuk meningkatkan kualitas buah dan sayuran dan untuk meningkatkan hasil panen.',
+        ),
+      ],
+    ),
+
+    _EduSection(
+      title: 'Panduan Pembuatan Eco Enzim',
+      items: [
+        _EduItem(
+          hasVideo: false,
+          image: 'assets/images/edukasi/pembuatan.png',
+          caption:
+              'Campurkan gula merah, bahan organik (kulit buah/sayuran segar), dan air dengan rasio 1:3:10 ke dalam wadah plastik bermulut lebar, lalu fermentasikan selama 3 bulan.',
         ),
       ],
     ),
@@ -240,9 +254,15 @@ class EducationScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _HeroBanner(),
-          const SizedBox(height: 12),
-          const _IntroCard(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: PageHeaderCard(
+              badge: '🌿  Edukasi',
+              title: 'Tentang Eco Enzim',
+              subtitle: 'Eco Enzim adalah cairan serbaguna hasil fermentasi limbah organik seperti kulit buah dan sayuran, gula merah, dan air. Dapat digunakan sebagai pupuk, pembersih alami, hingga pestisida organik.',
+              icon: Icons.eco_rounded,
+            ),
+          ),
           const SizedBox(height: 4),
           ..._sections.map((s) => _SectionBlock(section: s)),
         ],
@@ -251,117 +271,7 @@ class EducationScreen extends StatelessWidget {
   }
 }
 
-// ── Hero banner ───────────────────────────────
-class _HeroBanner extends StatelessWidget {
-  const _HeroBanner();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.green900, AppColors.green700],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AppColors.heroShadow,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    '🌿  Edukasi',
-                    style: TextStyle(
-                        color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Tentang Eco Enzim',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '', // TODO: isi deskripsi singkat hero banner
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 13,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.eco_rounded, color: Colors.white, size: 30),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Intro card dengan expand/collapse ─────────
-class _IntroCard extends StatelessWidget {
-  const _IntroCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow,
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'Tentang Eco Enzim',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: AppColors.text1,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Eco Enzim adalah cairan serbaguna hasil fermentasi limbah organik seperti kulit buah dan sayuran, gula merah, dan air. Dapat digunakan sebagai pupuk, pembersih alami, hingga pestisida organik.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── Section model ─────────────────────────────
 class _EduSection {
@@ -387,31 +297,47 @@ class _EduItem {
 // ── Section block ─────────────────────────────
 class _SectionBlock extends StatelessWidget {
   final _EduSection section;
-  const _SectionBlock({super.key, required this.section});
+  const _SectionBlock({required this.section});
+
+  IconData _getSectionIcon(String title) {
+    if (title.toLowerCase().contains('mengenal')) return Icons.menu_book_rounded;
+    if (title.toLowerCase().contains('manfaat')) return Icons.spa_outlined;
+    if (title.toLowerCase().contains('pembuatan')) return Icons.science_outlined;
+    if (title.toLowerCase().contains('cara')) return Icons.integration_instructions_outlined;
+    return Icons.star_rounded;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final icon = _getSectionIcon(section.title);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                    color: AppColors.green500, shape: BoxShape.circle),
+                width: 4,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: AppColors.green500,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(width: 8),
-              Text(
-                section.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.text1,
-                  letterSpacing: -0.2,
+              Icon(icon, color: AppColors.green700, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  section.title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.text1,
+                    letterSpacing: -0.3,
+                  ),
                 ),
               ),
             ],
@@ -427,19 +353,50 @@ class _SectionBlock extends StatelessWidget {
 }
 
 // ── Card item 16:9 + caption ──────────────────
-class _EduItemCard extends StatelessWidget {
+class _EduItemCard extends StatefulWidget {
   final _EduItem item;
   final int index;
-  const _EduItemCard({super.key, required this.item, required this.index});
+  const _EduItemCard({required this.item, required this.index});
+
+  @override
+  State<_EduItemCard> createState() => _EduItemCardState();
+}
+
+class _EduItemCardState extends State<_EduItemCard> {
+  YoutubePlayerController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.item.hasVideo && widget.item.videoId != null) {
+      _controller = YoutubePlayerController.fromVideoId(
+        videoId: widget.item.videoId!,
+        autoPlay: false,
+        params: const YoutubePlayerParams(
+          showFullscreenButton: true,
+          showControls: true,
+          origin: 'https://www.youtube-nocookie.com',
+          userAgent: 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(16),
         boxShadow: AppColors.cardShadow,
+        border: Border.all(color: AppColors.border.withAlpha(80)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,43 +406,141 @@ class _EduItemCard extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: AspectRatio(
               aspectRatio: 16 / 9,
-              child: item.hasVideo
-                ? YoutubePlayer(
-                    controller: YoutubePlayerController.fromVideoId(
-                      videoId: item.videoId!,
-                      autoPlay: false,
-                      params: const YoutubePlayerParams(
-                        showFullscreenButton: true,
-                        showControls: true,
-                      ),
-                    ),
-                  )
-                : Image.asset(
-                item.image!,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
+              child: widget.item.hasVideo && _controller != null
+                ? YoutubePlayer(controller: _controller!)
+                : widget.item.image != null
+                    ? Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Hero(
+                              tag: widget.item.image!,
+                              child: Image.asset(
+                                widget.item.image!,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 12,
+                            bottom: 12,
+                            child: GestureDetector(
+                              onTap: () => openFullscreenImage(context, widget.item.image!, isNetwork: false),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withAlpha(140),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 22),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(color: Colors.black12),
             ),
           ),
 
-          // Caption
+          // Caption & badge info
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-            child: item.caption.isNotEmpty
-                ? Text(
-                    item.caption,
-                    style: const TextStyle(
-                        fontSize: 13, color: AppColors.text2, height: 1.6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Badge indicator
+                if (widget.item.hasVideo)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEBEE),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.play_circle_fill_rounded, color: Color(0xFFC62828), size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          'VIDEO EDUKASI',
+                          style: TextStyle(
+                            color: Color(0xFFC62828),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
                   )
-                : Text(
-                    'Caption',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange[700],
-                      fontStyle: FontStyle.italic,
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.green50,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.lightbulb_outline_rounded, color: AppColors.green700, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          'PANDUAN & MANFAAT',
+                          style: TextStyle(
+                            color: AppColors.green900,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                const SizedBox(height: 10),
+
+                // Caption text
+                widget.item.caption.isNotEmpty
+                    ? (widget.item.caption.contains('Kenapa Harus Menggunakan Eco Enzim')
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Kenapa Harus Menggunakan Eco Enzim',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.text1,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                widget.item.caption.replaceAll('Kenapa Harus Menggunakan Eco Enzim\n\n', '').replaceAll('Kenapa Harus Menggunakan Eco Enzim\n', ''),
+                                style: const TextStyle(
+                                    fontSize: 13, 
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.text2, 
+                                    height: 1.6),
+                              ),
+                            ],
+                          )
+                        : Text(
+                            widget.item.caption,
+                            style: const TextStyle(
+                                fontSize: 13, 
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.text2, 
+                                height: 1.6),
+                          ))
+                    : Text(
+                        'Informasi edukasi lengkap mengenai eco enzyme.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+              ],
+            ),
           ),
         ],
       ),

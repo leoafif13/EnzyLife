@@ -64,13 +64,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
           _MenuSection(title: 'Akun Saya', items: [
             _MenuItem(icon: Icons.person_outline_rounded,   label: 'Edit Profil',        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfilScreen()))),
             _MenuItem(icon: Icons.lock_outline_rounded,     label: 'Ubah Password',      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UbahPasswordScreen()))),
-            // _MenuItem(icon: Icons.notifications_outlined,   label: 'Notifikasi',         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotifikasiScreen()))),
-          ]),
-          const SizedBox(height: 12),
-          _MenuSection(title: 'Aktivitas', items: [
             _MenuItem(icon: Icons.shopping_bag_outlined,    label: 'Riwayat Pembelian',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()))),
-            // _MenuItem(icon: Icons.bookmark_outline_rounded, label: 'Artikel Tersimpan',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ArtikelTersimpanScreen()))),
-            // _MenuItem(icon: Icons.calculate_outlined,       label: 'Riwayat Kalkulator', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatKalkulatorScreen()))),
           ]),
           const SizedBox(height: 12),
           _MenuSection(title: 'Lainnya', items: [
@@ -168,36 +162,20 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       child: Row(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 80, height: 80,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [AppColors.green500, AppColors.green700],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Center(
-                  child: Text(getInitials(user?.name ?? ''),
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
-                ),
+          Container(
+            width: 80, height: 80,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppColors.green500, AppColors.green700],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              Positioned(
-                bottom: 0, right: 0,
-                child: Container(
-                  width: 24, height: 24,
-                  decoration: BoxDecoration(
-                    color: AppColors.green500,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Icon(Icons.edit, size: 12, color: Colors.white),
-                ),
-              ),
-            ],
+            ),
+            child: Center(
+              child: Text(getInitials(user?.name ?? ''),
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -206,28 +184,12 @@ class _ProfileHeader extends StatelessWidget {
               children: [
                 Text(
                   user?.name ?? '-',
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.text1),
+                  style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.text1),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   user?.email ?? '-',
                   style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                      color: AppColors.green50, borderRadius: BorderRadius.circular(20)),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.verified_rounded, size: 13, color: AppColors.green500),
-                      SizedBox(width: 4),
-                      Text('Member Aktif',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                              color: AppColors.green500)),
-                    ],
-                  ),
                 ),
               ],
             ),

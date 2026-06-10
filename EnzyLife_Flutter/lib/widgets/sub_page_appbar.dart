@@ -27,7 +27,7 @@ class SubPageAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.bgCard,
+      backgroundColor: AppColors.bgPage,
       elevation: 0,
       scrolledUnderElevation: 1,
       shadowColor: Colors.black12,

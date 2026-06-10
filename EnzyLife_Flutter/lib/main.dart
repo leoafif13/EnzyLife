@@ -13,6 +13,7 @@ import 'models/artikel.dart';
 import 'models/infografik.dart';
 import 'edukasi/detail_artikel_page.dart';
 import 'edukasi/detail_infografik_page.dart';
+import 'widgets/page_header_card.dart';
 import 'splash_screen.dart';
 
 void main() async {
@@ -178,68 +179,20 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Greeting
-          Container(
-            margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: PageHeaderCard(
+              badge: '👋  Selamat datang',
+              title: '$userName!',
+              subtitle: 'Hidup sehat dimulai dari sini. Mari berkontribusi untuk bumi dengan menggunakan eco enzim.',
+              rightWidget: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
+                  color: Colors.white,
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Selamat datang,',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$userName!',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.green500,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppColors.green50,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          '🌿  Hidup sehat dimulai dari sini',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.green900,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
-                  padding: const EdgeInsets.all(12),
-                  child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
-                ),
-              ],
+              ),
             ),
           ),
 

@@ -6,6 +6,8 @@ import '../services/api_service.dart';
 import '../models/order.dart';
 import 'detail_riwayat_belanja_page.dart';
 import '../services/format_helper.dart';
+import '../widgets/search_bar_field.dart';
+import '../widgets/page_header_card.dart';
 
 // ── Status pesanan ────────────────────────────
 enum OrderStatus { dipesan, dikirim, selesai }
@@ -47,6 +49,14 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
   OrderStatus _filter = OrderStatus.selesai;
   List<OrderModel> _allOrders = [];
   bool _isLoading = true;
+  String _query = '';
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -66,8 +76,16 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
 
   static String _fmt(int price) => formatPrice(price);
 
-  List<OrderModel> get _filtered =>
-      _allOrders.where((o) => o.orderStatus == _filter).toList();
+  List<OrderModel> get _filtered {
+    return _allOrders.where((o) {
+      if (o.orderStatus != _filter) return false;
+      if (_query.isEmpty) return true;
+      final queryLower = _query.toLowerCase();
+      if (o.id.toString().contains(queryLower)) return true;
+      return o.items.any((item) =>
+          (item.product?.name ?? '').toLowerCase().contains(queryLower));
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,116 +97,35 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
       body: Column(
         children: [
           // Header card
-          Container(
-            color: AppColors.bgCard,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.green900, AppColors.green700],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: AppColors.heroShadow,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            '🛍️  Riwayat Belanja',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Daftar Transaksi',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                            height: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Pantau status pesanan, riwayat pembelian produk eco enzyme, serta lakukan pembayaran dan ulasan dalam satu tempat.',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.eco_rounded, color: Colors.white, size: 30),
-                  ),
-                ],
-              ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: PageHeaderCard(
+              badge: '🛍️  Riwayat Belanja',
+              title: 'Daftar Transaksi',
+              subtitle: 'Pantau status pesanan, riwayat pembelian produk eco enzyme, serta lakukan pembayaran dan ulasan dalam satu tempat.',
+              icon: Icons.eco_rounded,
             ),
           ),
 
           // Search bar
           Container(
-            color: AppColors.bgCard,
+            color: AppColors.bgPage,
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    style: const TextStyle(fontSize: 14, color: AppColors.text1),
-                    decoration: InputDecoration(
-                      hintText: 'Cari produk eco enzim..',
-                      hintStyle: const TextStyle(color: AppColors.hint, fontSize: 13),
-                      prefixIcon: const Icon(Icons.search_rounded,
-                          color: AppColors.hint, size: 20),
-                      filled: true,
-                      fillColor: AppColors.bgPage,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(
-                      color: AppColors.green50,
-                      borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.tune_rounded,
-                      color: AppColors.green500, size: 20),
-                ),
-              ],
+            child: SearchBarField(
+              controller: _searchController,
+              hintText: 'Cari pesanan anda..',
+              onChanged: (v) => setState(() => _query = v),
+              showClearButton: _query.isNotEmpty,
+              onClear: () {
+                setState(() => _query = '');
+                _searchController.clear();
+              },
             ),
           ),
 
           // Filter tabs
           Container(
-            color: AppColors.bgCard,
+            color: AppColors.bgPage,
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Row(
               children: OrderStatus.values.map((status) {

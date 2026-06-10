@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../models/product.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
@@ -9,6 +8,8 @@ import '../profil/riwayat_belanja_page.dart';
 import '../models/user.dart';
 import '../services/midtrans_helper.dart';
 import '../services/format_helper.dart';
+import '../widgets/custom_text_field.dart';
+import 'widgets/method_tile.dart';
 
 
 class CheckoutPage extends StatefulWidget {
@@ -54,9 +55,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Future<void> _loadUserProfile() async {
     UserModel? user = ApiService.cachedUser;
-    if (user == null) {
-      user = await ApiService.getProfile();
-    }
+    user ??= await ApiService.getProfile();
 
     if (user != null) {
       setState(() {
@@ -299,7 +298,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         Product? p;
                         try { p = widget.allProducts.firstWhere((x) => x.id == e.key); } catch (_) {}
                         if (p == null) return const SizedBox.shrink();
-                        final imageUrl = (p.image != null && p.image.isNotEmpty)
+                        final imageUrl = p.image.isNotEmpty
                             ? 'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}'
                             : null;
                         return Padding(
@@ -321,7 +320,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                           ),
                                         )
                                       : Icon(Icons.image_outlined, size: 20,
-                                          color: AppColors.green500.withOpacity(0.3)),
+                                          color: AppColors.green500.withAlpha(76)),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -353,7 +352,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     title: 'Metode Pengambilan',
                     child: Column(
                       children: [
-                        _MethodTile(
+                        MethodTile(
                           icon: Icons.store_outlined,
                           label: 'Ambil Sendiri di Lab',
                           desc: 'Gratis, ambil langsung di laboratorium',
@@ -361,7 +360,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           onTap: () => setState(() => _method = _DeliveryMethod.ambilSendiri),
                         ),
                         const SizedBox(height: 10),
-                        _MethodTile(
+                        MethodTile(
                           icon: Icons.local_shipping_outlined,
                           label: 'Diantar ke Rumah',
                           desc: 'Ongkos kirim ${_fmt(_ongkir)}',
@@ -408,25 +407,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             title: 'Alamat Pengiriman',
                             child: Column(
                               children: [
-                                _CField(controller: _namaController, label: 'Nama Penerima',
+                                CustomTextField(controller: _namaController, label: 'Nama Penerima',
                                     hint: 'Masukkan nama penerima', icon: Icons.person_outline_rounded),
                                 const SizedBox(height: 12),
-                                _CField(controller: _teleponController, label: 'Nomor Telepon',
+                                CustomTextField(controller: _teleponController, label: 'Nomor Telepon',
                                     hint: 'Masukkan nomor telepon', icon: Icons.phone_outlined,
                                     keyboardType: TextInputType.phone),
                                 const SizedBox(height: 12),
-                                _CField(controller: _alamatController, label: 'Alamat Lengkap',
+                                CustomTextField(controller: _alamatController, label: 'Alamat Lengkap',
                                     hint: 'Nama jalan, nomor, RT/RW', icon: Icons.home_outlined,
                                     maxLines: 2),
                                 const SizedBox(height: 12),
                                 Row(
                                   children: [
                                     Expanded(flex: 2,
-                                      child: _CField(controller: _kotaController, label: 'Kota',
+                                      child: CustomTextField(controller: _kotaController, label: 'Kota',
                                           hint: 'Kota/Kabupaten', icon: Icons.location_city_outlined, readOnly: true)),
                                     const SizedBox(width: 12),
                                     Expanded(
-                                      child: _CField(controller: _kodeposController, label: 'Kode Pos',
+                                      child: CustomTextField(controller: _kodeposController, label: 'Kode Pos',
                                           hint: '00000', icon: Icons.markunread_mailbox_outlined,
                                           keyboardType: TextInputType.number)),
                                   ],
@@ -503,7 +502,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           Container(
             decoration: BoxDecoration(
               color: AppColors.bgCard,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08),
+              boxShadow: [BoxShadow(color: Colors.black.withAlpha(20),
                   blurRadius: 12, offset: const Offset(0, -2))],
             ),
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
@@ -525,7 +524,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     onPressed: _isLoading ? null : _bayar,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.green500, foregroundColor: Colors.white,
-                      disabledBackgroundColor: AppColors.green500.withOpacity(0.6),
+                      disabledBackgroundColor: AppColors.green500.withAlpha(153),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -569,90 +568,7 @@ class _SectionCard extends StatelessWidget {
   );
 }
 
-class _MethodTile extends StatelessWidget {
-  final IconData icon;
-  final String label, desc;
-  final bool selected;
-  final VoidCallback onTap;
-  const _MethodTile({required this.icon, required this.label, required this.desc,
-      required this.selected, required this.onTap});
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: selected ? AppColors.green50 : AppColors.bgPage,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: selected ? AppColors.green500 : AppColors.border,
-            width: selected ? 1.5 : 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40, height: 40,
-            decoration: BoxDecoration(
-                color: selected ? AppColors.green500 : Colors.grey[200], shape: BoxShape.circle),
-            child: Icon(icon, size: 20, color: selected ? Colors.white : Colors.grey[500]),
-          ),
-          const SizedBox(width: 14),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-                color: selected ? AppColors.green900 : AppColors.text1)),
-            const SizedBox(height: 2),
-            Text(desc, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-          ])),
-          Icon(selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-              color: selected ? AppColors.green500 : Colors.grey[400], size: 20),
-        ],
-      ),
-    ),
-  );
-}
 
-class _CField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label, hint;
-  final IconData icon;
-  final TextInputType? keyboardType;
-  final int maxLines;
-  final bool readOnly;
-
-  const _CField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.icon,
-    this.keyboardType,
-    this.maxLines = 1,
-    this.readOnly = false,
-  });
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.green900)),
-      const SizedBox(height: 6),
-      TextField(
-        controller: controller, keyboardType: keyboardType, maxLines: maxLines,
-        readOnly: readOnly,
-        style: const TextStyle(fontSize: 13, color: AppColors.text1),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: AppColors.hint, fontSize: 13),
-          prefixIcon: maxLines == 1 ? Icon(icon, color: AppColors.green500, size: 18) : null,
-          filled: true, fillColor: AppColors.green50,
-          contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: maxLines > 1 ? 14 : 0),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: AppColors.green500, width: 1.5)),
-        ),
-      ),
-    ],
-  );
-}
 
 class _PriceRow extends StatelessWidget {
   final String label, value;

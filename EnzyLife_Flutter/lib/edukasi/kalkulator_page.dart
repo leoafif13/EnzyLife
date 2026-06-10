@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
+import '../widgets/page_header_card.dart';
 
 class KalkulatorScreen extends StatefulWidget {
   const KalkulatorScreen({super.key});
@@ -33,62 +34,66 @@ class _KalkulatorScreenState extends State<KalkulatorScreen>
       body: Column(
         children: [
           // Header card
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.bgCard,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow,
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Kalkulator Eco Enzim',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.text1,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Hitung kebutuhan untuk membuat dan menggunakan eco enzim',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
-                  ),
-                ],
-              ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: PageHeaderCard(
+              badge: '🧮  Kalkulator',
+              title: 'Kalkulator Eco Enzim',
+              subtitle: 'Hitung kebutuhan untuk membuat dan menggunakan eco enzim',
+              icon: Icons.calculate_outlined,
             ),
           ),
-          const SizedBox(height: 12),
-          // Tab bar
-          Container(
-            color: AppColors.bgCard,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: AppColors.green500,
-              unselectedLabelColor: Colors.grey[500],
-              labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-              indicatorColor: AppColors.green500,
-              indicatorWeight: 2.5,
-              tabs: const [
-                Tab(text: 'Pembuatan'),
-                Tab(text: 'Penggunaan'),
-              ],
-            ),
-          ),
-          // Tab content
+          
+          // Tab bar & views wrapped in a single card
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: const [
-                _TabPembuatan(),
-                _TabPenggunaan(),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.bgCard,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: AppColors.cardShadow,
+                ),
+                child: Column(
+                  children: [
+                    // Styled TabBar inside card with horizontal padding to prevent stretching edge-to-edge
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      child: TabBar(
+                        controller: _tabController,
+                        labelColor: AppColors.green500,
+                        unselectedLabelColor: Colors.grey[500],
+                        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                        unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                        indicatorColor: AppColors.green500,
+                        indicatorWeight: 3,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        tabs: const [
+                          Tab(
+                            icon: Icon(Icons.build_circle_outlined, size: 20),
+                            text: 'Pembuatan',
+                          ),
+                          Tab(
+                            icon: Icon(Icons.opacity_rounded, size: 20),
+                            text: 'Penggunaan',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1, color: AppColors.divider),
+                    // Tab content inside card
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: const [
+                          _TabPembuatan(),
+                          _TabPenggunaan(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -131,7 +136,6 @@ class _TabPembuatanState extends State<_TabPembuatan> {
     double air;
 
     switch (_kategori) {
-
       case 'Gula':
         gula = jumlah;
         organik = gula * 3;
@@ -169,7 +173,6 @@ class _TabPembuatanState extends State<_TabPembuatan> {
     }
 
     final wadah = air * 1.2;
-
     final pakaiMl = _satuan == 'Mililiter';
 
     setState(() {
@@ -202,28 +205,44 @@ class _TabPembuatanState extends State<_TabPembuatan> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner rumus
+          // Banner rumus gradient
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
             decoration: BoxDecoration(
-              color: AppColors.green500,
+              gradient: const LinearGradient(
+                colors: [AppColors.green900, AppColors.green700],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(16),
+              boxShadow: AppColors.heroShadow,
             ),
             child: const Column(
               children: [
-                Text('Rumus Eco Enzim',
-                    style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
-                SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.science_outlined, color: Colors.white70, size: 16),
+                    SizedBox(width: 6),
+                    Text('Rumus Eco Enzim',
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+                SizedBox(height: 6),
                 Text('1 : 3 : 10',
-                    style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 2)),
+                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: 2)),
                 SizedBox(height: 4),
                 Text('Gula : Bahan Organik : Air',
-                    style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600)),
+                SizedBox(height: 4),
+                Text('Hitung kebutuhan bahan untuk wadah dan pembuatan eco enzim secara presisi',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: 11)),
               ],
             ),
           ),
@@ -231,7 +250,7 @@ class _TabPembuatanState extends State<_TabPembuatan> {
           const SizedBox(height: 20),
 
           const Text('Pilih Kategori Input',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.text1)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1)),
           const SizedBox(height: 8),
           _DropdownField(
             value: _kategori,
@@ -252,10 +271,14 @@ class _TabPembuatanState extends State<_TabPembuatan> {
 
           const SizedBox(height: 16),
 
-          const Text('Jumlah',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.text1)),
+          const Text('Jumlah & Satuan',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1)),
           const SizedBox(height: 8),
-          _NumberInput(controller: _jumlahController, hint: 'Masukkan jumlah'),
+          _NumberInput(
+            controller: _jumlahController,
+            hint: 'Masukkan jumlah',
+            prefixIcon: Icons.edit_note_rounded,
+          ),
           const SizedBox(height: 8),
           _DropdownField(
             value: _satuan,
@@ -268,12 +291,16 @@ class _TabPembuatanState extends State<_TabPembuatan> {
 
           const SizedBox(height: 20),
 
-          _HitungButton(label: 'Hitung Kebutuhan', onPressed: _hitung),
+          _HitungButton(
+            label: 'Hitung Kebutuhan',
+            icon: Icons.calculate_outlined,
+            onPressed: _hitung,
+          ),
 
           if (_hasil != null) ...[
             const SizedBox(height: 24),
             const Text('Hasil Perhitungan',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text1)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text1)),
             const SizedBox(height: 12),
             ..._hasil!.entries.map((e) => _HasilCard(label: e.key, value: e.value)),
           ],
@@ -426,26 +453,41 @@ class _TabPenggunaanState extends State<_TabPenggunaan> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner dosis
+          // Banner dosis gradient
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
             decoration: BoxDecoration(
-              color: AppColors.green500,
+              gradient: const LinearGradient(
+                colors: [AppColors.green900, AppColors.green700],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(16),
+              boxShadow: AppColors.heroShadow,
             ),
             child: const Column(
               children: [
-                Text('Dosis Penggunaan',
-                    style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.opacity_rounded, color: Colors.white70, size: 16),
+                    SizedBox(width: 6),
+                    Text('Dosis Penggunaan',
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+                SizedBox(height: 6),
+                Text('Kalkulator Dosis',
+                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800)),
                 SizedBox(height: 4),
                 Text('Hitung kebutuhan Eco Enzim untuk berbagai keperluan',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    style: TextStyle(color: Colors.white70, fontSize: 11)),
               ],
             ),
           ),
@@ -453,7 +495,7 @@ class _TabPenggunaanState extends State<_TabPenggunaan> {
           const SizedBox(height: 20),
 
           const Text('Jenis Penggunaan',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.text1)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1)),
           const SizedBox(height: 8),
           _DropdownField(
             value: _jenisGunaan,
@@ -469,22 +511,32 @@ class _TabPenggunaanState extends State<_TabPenggunaan> {
               color: AppColors.green50,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              _rasio[_jenisGunaan]!['label'] as String,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.green700,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline_rounded, size: 14, color: AppColors.green700),
+                const SizedBox(width: 6),
+                Text(
+                  _rasio[_jenisGunaan]!['label'] as String,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.green700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
 
           const SizedBox(height: 16),
 
-          const Text('Jumlah',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.text1)),
+          const Text('Jumlah & Satuan',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1)),
           const SizedBox(height: 8),
-          _NumberInput(controller: _jumlahController, hint: 'Masukkan jumlah'),
+          _NumberInput(
+            controller: _jumlahController,
+            hint: 'Masukkan jumlah',
+            prefixIcon: Icons.edit_note_rounded,
+          ),
           const SizedBox(height: 8),
           _DropdownField(
             value: _satuan,
@@ -494,18 +546,63 @@ class _TabPenggunaanState extends State<_TabPenggunaan> {
 
           const SizedBox(height: 20),
 
-          _HitungButton(label: 'Hitung Dosis', onPressed: _hitung),
+          _HitungButton(
+            label: 'Hitung Dosis',
+            icon: Icons.calculate_outlined,
+            onPressed: _hitung,
+          ),
 
           if (_hasil != null) ...[
             const SizedBox(height: 24),
             const Text('Hasil Perhitungan',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text1)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text1)),
             const SizedBox(height: 12),
             ..._hasil!.entries.map((e) => _HasilCard(label: e.key, value: e.value)),
           ],
         ],
       ),
     );
+  }
+}
+
+// Helper function to dynamically map dropdown labels to corresponding icons
+IconData _getItemIcon(String item) {
+  switch (item) {
+    // Pembuatan input
+    case 'Wadah':
+      return Icons.inventory_2_outlined;
+    case 'Air':
+      return Icons.water_drop_outlined;
+    case 'Bahan Organik':
+      return Icons.spa_outlined;
+    case 'Gula':
+      return Icons.cookie_outlined;
+    
+    // Penggunaan input
+    case 'Kompor & Area Dapur':
+    case 'Cuci Piring':
+      return Icons.kitchen_outlined;
+    case 'Cuci Pakaian':
+    case 'Pel Lantai':
+    case 'Kamar Mandi':
+    case 'Saluran Air':
+    case 'Penghilang Bau':
+      return Icons.clean_hands_outlined;
+    case 'Pupuk Organik':
+    case 'Pestisida Sayuran':
+    case 'Kompos':
+      return Icons.spa_outlined;
+    case 'Air Purifier':
+      return Icons.wb_sunny_outlined;
+
+    // Satuan
+    case 'Liter':
+    case 'Mililiter':
+      return Icons.opacity_rounded;
+    case 'Kilogram':
+      return Icons.scale_outlined;
+    default:
+      return Icons.category_outlined;
   }
 }
 
@@ -526,7 +623,7 @@ class _DropdownField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.bgCard,
+        color: AppColors.bgPage,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),
@@ -537,7 +634,16 @@ class _DropdownField extends StatelessWidget {
           icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.text2),
           style: const TextStyle(fontSize: 14, color: AppColors.text1),
           items: items
-              .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+              .map((v) => DropdownMenuItem(
+                    value: v,
+                    child: Row(
+                      children: [
+                        Icon(_getItemIcon(v), size: 18, color: AppColors.green500),
+                        const SizedBox(width: 10),
+                        Text(v),
+                      ],
+                    ),
+                  ))
               .toList(),
           onChanged: onChanged,
         ),
@@ -550,8 +656,13 @@ class _DropdownField extends StatelessWidget {
 class _NumberInput extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
+  final IconData? prefixIcon;
 
-  const _NumberInput({required this.controller, required this.hint});
+  const _NumberInput({
+    required this.controller,
+    required this.hint,
+    this.prefixIcon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -562,8 +673,9 @@ class _NumberInput extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.hint, fontSize: 13),
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppColors.green500, size: 20) : null,
         filled: true,
-        fillColor: AppColors.bgCard,
+        fillColor: AppColors.bgPage,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -586,24 +698,26 @@ class _NumberInput extends StatelessWidget {
 class _HitungButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final IconData icon;
 
-  const _HitungButton({required this.label, required this.onPressed});
+  const _HitungButton({required this.label, required this.onPressed, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 50,
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: onPressed,
+        icon: Icon(icon, size: 18),
+        label: Text(label,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.green500,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
-        child: Text(label,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
       ),
     );
   }
@@ -616,36 +730,90 @@ class _HasilCard extends StatelessWidget {
 
   const _HasilCard({required this.label, required this.value});
 
-  static const _colors = [
-    Color(0xFFE3F2FD),
-    Color(0xFFFFF8E1),
-    Color(0xFFE8F5E9),
-    Color(0xFFFCE4EC),
-  ];
+  IconData _getHasilIcon(String label) {
+    if (label.contains('Wadah')) return Icons.inventory_2_outlined;
+    if (label.contains('Gula')) return Icons.cookie_outlined;
+    if (label.contains('Organik')) return Icons.spa_outlined;
+    if (label.contains('Air')) return Icons.water_drop_outlined;
+    if (label.contains('Eco Enzim')) return Icons.eco_rounded;
+    if (label.contains('Total')) return Icons.opacity_rounded;
+    return Icons.bubble_chart_outlined;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final color = _colors[label.hashCode.abs() % _colors.length];
     final lines = value.split('\n');
+    final icon = _getHasilIcon(label);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: color,
+        color: AppColors.green50.withAlpha(128), // Premium soft green background
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.green200.withAlpha(128)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.text2)),
-          const SizedBox(height: 4),
-          Text(lines[0],
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text1)),
-          if (lines.length > 1)
-            Text(lines[1], style: TextStyle(fontSize: 11, color: Colors.grey[600])),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: AppColors.green500,
+                width: 4.5,
+              ),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label, 
+                      style: const TextStyle(
+                        fontSize: 12, 
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      lines[0],
+                      style: const TextStyle(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.w800, 
+                        color: AppColors.text1,
+                      ),
+                    ),
+                    if (lines.length > 1) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        lines[1], 
+                        style: const TextStyle(
+                          fontSize: 11, 
+                          color: AppColors.text3,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: AppColors.green700, size: 20),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -3,14 +3,18 @@ import '../models/product.dart';
 import '../app_color.dart';
 import 'belanja_page.dart';
 import 'shopping_cart.dart';
-// import 'widgets/sub_page_appbar.dart';
-import 'checkout_page.dart';
+import '../widgets/sub_page_appbar.dart';
 import '../widgets/purchase_bottom_sheet.dart';
 import '../services/format_helper.dart';
+import '../widgets/zoomable_image_dialog.dart';
+import 'widgets/spec_card.dart';
+import 'widgets/review_tile.dart';
+import 'widgets/sentimen_ai_card.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
-  const ProductDetailScreen({super.key, required this.product});
+  final String? heroTag;
+  const ProductDetailScreen({super.key, required this.product, this.heroTag});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -37,9 +41,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // Dummy ulasan
   static const _reviews = [
-    _Review(name: 'Siti Rahma',    rating: 5, comment: 'Produknya bagus sekali, aroma segar dan terasa manfaatnya untuk tanaman saya!', date: '2 hari lalu'),
-    _Review(name: 'Budi Santoso',  rating: 4, comment: 'Kualitas oke, pengiriman cepat. Akan beli lagi.', date: '1 minggu lalu'),
-    _Review(name: 'Dewi Lestari',  rating: 5, comment: 'Sudah pakai beberapa kali, hasilnya luar biasa untuk pupuk organik.', date: '2 minggu lalu'),
+    Review(name: 'Siti Rahma',    rating: 5, comment: 'Produknya bagus sekali, aroma segar dan terasa manfaatnya untuk tanaman saya!', date: '2 hari lalu'),
+    Review(name: 'Budi Santoso',  rating: 4, comment: 'Kualitas oke, pengiriman cepat. Akan beli lagi.', date: '1 minggu lalu'),
+    Review(name: 'Dewi Lestari',  rating: 5, comment: 'Sudah pakai beberapa kali, hasilnya luar biasa untuk pupuk organik.', date: '2 minggu lalu'),
   ];
 
   static String _fmt(int price) => formatPrice(price);
@@ -86,18 +90,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.bgPage,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 1,
-        shadowColor: Colors.black12,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Color(0xFF1A1A1A)),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(p.name,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
-        centerTitle: true,
+      appBar: SubPageAppBar(
+        title: p.name,
         actions: [
           Stack(
             clipBehavior: Clip.none,
@@ -148,12 +142,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 Container(
                                   width: double.infinity,
                                   color: AppColors.green50,
-                                  child: Image.network(
-                                    'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) {
-                                      return const Icon(Icons.image_not_supported);
-                                    },
+                                  child: Hero(
+                                    tag: widget.heroTag ?? 'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
+                                    child: Image.network(
+                                      'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) {
+                                        return const Icon(Icons.image_not_supported);
+                                      },
+                                    ),
                                   )
                                 ),
 
@@ -166,7 +163,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.85),
+                                      color: Colors.white.withAlpha(217),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -175,6 +172,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
                                       ),
+                                    ),
+                                  ),
+                                ),
+
+                                Positioned(
+                                  bottom: 12,
+                                  right: 12,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      final imgUrl = 'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}';
+                                      openFullscreenImage(context, imgUrl, isNetwork: true);
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withAlpha(140),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 22),
                                     ),
                                   ),
                                 ),
@@ -317,11 +333,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         // Spesifikasi
                         const Text('Spesifikasi',
                             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
-                        const SizedBox(height: 10),
-                        _SpecRow(label: 'Volume',    value: '1 Liter'),    // TODO
-                        _SpecRow(label: 'Kemasan',   value: 'Botol HDPE'), // TODO
-                        _SpecRow(label: 'Expired',   value: '2 Tahun'),    // TODO
-                        _SpecRow(label: 'Sertifikat',value: 'Organik'),    // TODO
+                        const SizedBox(height: 12),
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          childAspectRatio: 2.3,
+                          children: const [
+                            SpecCard(label: 'Volume', value: '1 Liter', icon: Icons.scale_outlined),
+                            SpecCard(label: 'Kemasan', value: 'Botol HDPE', icon: Icons.inventory_2_outlined),
+                            SpecCard(label: 'Expired', value: '2 Tahun', icon: Icons.calendar_today_outlined),
+                            SpecCard(label: 'Sertifikat', value: 'Organik', icon: Icons.verified_user_outlined),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -403,7 +429,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         const SizedBox(height: 14),
 
                         // ── Sentimen AI ─────────────────
-                        _SentimenAI(),
+                        SentimenAI(),
 
                         const SizedBox(height: 16),
                         const Divider(height: 1, color: AppColors.divider),
@@ -465,7 +491,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                         const SizedBox(height: 16),
                         const Divider(height: 1, color: Color(0xFFF0F0F0)),
-                        ..._reviews.map((r) => _ReviewTile(review: r)),
+                        ..._reviews.map((r) => ReviewTile(review: r)),
                       ],
                     ),
                   ),
@@ -480,7 +506,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, -2))],
+              boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 12, offset: const Offset(0, -2))],
             ),
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
             child: Row(
@@ -543,185 +569,4 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 }
 
-
-// ── Sentimen AI ───────────────────────────────
-class _SentimenAI extends StatelessWidget {
-  const _SentimenAI();
-
-  // TODO: ganti dengan data dari API analisis sentimen
-  static const _positif = 0.72;
-  static const _netral  = 0.19;
-  static const _negatif = 0.09;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.green50,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.green200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.green500,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 11),
-                    SizedBox(width: 4),
-                    Text('AI', style: TextStyle(color: Colors.white, fontSize: 10,
-                        fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text('Analisis Sentimen Ulasan',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                      color: AppColors.green900)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Mayoritas pembeli memberikan ulasan ${_positif >= 0.6 ? "positif" : "beragam"} terhadap produk ini.',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600], height: 1.4),
-          ),
-          const SizedBox(height: 12),
-          // Bar sentimen
-          _SentimenBar(label: 'Positif', value: _positif, color: AppColors.green500,
-              icon: Icons.sentiment_satisfied_alt_rounded),
-          const SizedBox(height: 8),
-          _SentimenBar(label: 'Netral',  value: _netral,  color: const Color(0xFFFFB300),
-              icon: Icons.sentiment_neutral_rounded),
-          const SizedBox(height: 8),
-          _SentimenBar(label: 'Negatif', value: _negatif, color: Colors.red[400]!,
-              icon: Icons.sentiment_dissatisfied_rounded),
-        ],
-      ),
-    );
-  }
-}
-
-class _SentimenBar extends StatelessWidget {
-  final String label;
-  final double value;
-  final Color color;
-  final IconData icon;
-  const _SentimenBar({
-    required this.label, required this.value,
-    required this.color, required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = (value * 100).round();
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 60,
-          child: Text(label, style: TextStyle(fontSize: 12,
-              color: Colors.grey[700], fontWeight: FontWeight.w500)),
-        ),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: value,
-              backgroundColor: Colors.white,
-              valueColor: AlwaysStoppedAnimation(color),
-              minHeight: 8,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 36,
-          child: Text('$pct%',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color),
-              textAlign: TextAlign.right),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Spesifikasi row ──────────────────────────
-class _SpecRow extends StatelessWidget {
-  final String label, value;
-  const _SpecRow({required this.label, required this.value});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      children: [
-        SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[500]))),
-        const Text(': ', style: TextStyle(color: Color(0xFFDDDDDD))),
-        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF1A1A1A))),
-      ],
-    ),
-  );
-}
-
-// ── Model review ─────────────────────────────
-class _Review {
-  final String name, comment, date;
-  final int rating;
-  const _Review({required this.name, required this.rating, required this.comment, required this.date});
-}
-
-// ── Review tile ──────────────────────────────
-class _ReviewTile extends StatelessWidget {
-  final _Review review;
-  const _ReviewTile({super.key, required this.review});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: const Color(0xFFE8F5E9),
-              child: Text(review.name[0], style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF4CAF50))),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(review.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A))),
-                  Row(children: [
-                    ...List.generate(5, (i) => Icon(
-                      i < review.rating ? Icons.star_rounded : Icons.star_outline_rounded,
-                      size: 12, color: const Color(0xFFFFC107),
-                    )),
-                    const SizedBox(width: 6),
-                    Text(review.date, style: TextStyle(fontSize: 11, color: Colors.grey[400])),
-                  ]),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(review.comment, style: const TextStyle(fontSize: 13, color: Color(0xFF555555), height: 1.5)),
-        const SizedBox(height: 10),
-        const Divider(height: 1, color: Color(0xFFF5F5F5)),
-      ],
-    ),
-  );
-}
+

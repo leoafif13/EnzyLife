@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/artikel.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
+import '../widgets/zoomable_image_dialog.dart';
 
 
 class DetailArtikelPage extends StatelessWidget {
@@ -27,19 +28,22 @@ class DetailArtikelPage extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.network(
-                      'http://127.0.0.1:8000/gambar/${item.gambar}',
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return Container(
-                          color: AppColors.green50,
-                          child: Icon(
-                            Icons.article_outlined,
-                            size: 64,
-                            color: AppColors.green500.withOpacity(0.2),
-                          ),
-                        );
-                      },
+                    child: Hero(
+                      tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                      child: Image.network(
+                        'http://127.0.0.1:8000/gambar/${item.gambar}',
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) {
+                          return Container(
+                            color: AppColors.green50,
+                            child: Icon(
+                              Icons.article_outlined,
+                              size: 64,
+                              color: AppColors.green500.withOpacity(0.2),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
 
@@ -62,6 +66,25 @@ class DetailArtikelPage extends StatelessWidget {
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
+                      ),
+                    ),
+                  ),
+
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: GestureDetector(
+                      onTap: () {
+                        final imgUrl = 'http://127.0.0.1:8000/gambar/${item.gambar}';
+                        openFullscreenImage(context, imgUrl, isNetwork: true);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(140),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 22),
                       ),
                     ),
                   ),

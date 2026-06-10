@@ -3,6 +3,7 @@ import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../models/infografik.dart';
 import '../services/api_service.dart';
+import '../widgets/zoomable_image_dialog.dart';
 
 // ══════════════════════════════════════════════
 //  DetailInfografikPage
@@ -97,10 +98,35 @@ class DetailInfografikPage extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(16),
                     ),
-                    child: Image.network(
-                      'http://127.0.0.1:8000/gambar/${item.gambar}',
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                    child: Stack(
+                      children: [
+                        Hero(
+                          tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                          child: Image.network(
+                            'http://127.0.0.1:8000/gambar/${item.gambar}',
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: GestureDetector(
+                            onTap: () {
+                              final imgUrl = 'http://127.0.0.1:8000/gambar/${item.gambar}';
+                              openFullscreenImage(context, imgUrl, isNetwork: true);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(140),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 22),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -153,6 +179,7 @@ class _RekomendasiCard extends StatelessWidget {
       onTap: () => Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => DetailInfografikPage(item: item))),
       child: Container(
+        width: double.infinity,
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
         decoration: BoxDecoration(
           color: AppColors.bgCard,

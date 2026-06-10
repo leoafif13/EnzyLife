@@ -58,7 +58,7 @@ class SearchBarField extends StatelessWidget {
               )
             : null,
         filled: true,
-        fillColor: AppColors.bgPage,
+        fillColor: AppColors.bgCard,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
