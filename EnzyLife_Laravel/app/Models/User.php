@@ -38,4 +38,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pemesanan::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

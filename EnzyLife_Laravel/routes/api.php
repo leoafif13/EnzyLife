@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\InfografikController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\ReviewController;
 
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -35,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders', [CheckoutController::class, 'history']);
         Route::post('/orders/{id}/pay', [CheckoutController::class, 'pay']);
         Route::post('/orders/{id}/cancel', [CheckoutController::class, 'cancel']);
+
+        Route::post('/review', [ReviewController::class, 'store']);
     });
 });
 
