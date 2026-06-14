@@ -77,8 +77,6 @@ class ReviewController extends Controller
 
             'komentar_aroma' => $request->komentar_aroma,
             'komentar_pengiriman' => $request->komentar_pengiriman,
-
-            // sementara dummy
             'sentiment_score' => $sentiment['score'],
             'sentiment_label' => $sentiment['label'],
         ]);
@@ -87,6 +85,139 @@ class ReviewController extends Controller
             'success' => true,
             'message' => 'Review berhasil disimpan',
             'data' => $review,
+        ]);
+    }
+
+    public function sentimentByProduct($produkId)
+    {
+        $reviews = Review::where('produk_id', $produkId)->get();
+
+        $total = $reviews->count();
+
+        if ($total == 0) {
+            return response()->json([
+                'total' => 0,
+                'positif' => 0,
+                'netral' => 0,
+                'negatif' => 0,
+
+                'comments' => [
+                    'positif' => [],
+                    'netral' => [],
+                    'negatif' => [],
+                ]
+            ]);
+        }
+
+        $positif = $reviews->where('sentiment_label', 'positif')->count();
+        $netral = $reviews->where('sentiment_label', 'netral')->count();
+        $negatif = $reviews->where('sentiment_label', 'negatif')->count();
+
+        return response()->json([
+            'total' => $total,
+
+            'positif' => round(($positif / $total) * 100, 1),
+            'netral' => round(($netral / $total) * 100, 1),
+            'negatif' => round(($negatif / $total) * 100, 1),
+
+        'comments' => [
+            'positif' => $reviews
+                ->where('sentiment_label', 'positif')
+                ->map(fn ($review) => [
+                    'rating' => $review->rating,
+                    'komentar' => $review->komentar_aroma,
+                    'tanggal' => $review->created_at->format('d-m-Y'),
+                ])
+                ->values(),
+
+            'netral' => $reviews
+                ->where('sentiment_label', 'netral')
+                ->map(fn ($review) => [
+                    'rating' => $review->rating,
+                    'komentar' => $review->komentar_aroma,
+                    'tanggal' => $review->created_at->format('d-m-Y'),
+                ])
+                ->values(),
+
+            'negatif' => $reviews
+                ->where('sentiment_label', 'negatif')
+                ->map(fn ($review) => [
+                    'rating' => $review->rating,
+                    'komentar' => $review->komentar_aroma,
+                    'tanggal' => $review->created_at->format('d-m-Y'),
+                ])
+                ->values(),
+            ]   
+        ]);
+    }
+
+    public function reviewSummary($produkId)
+    {
+        $reviews = Review::where('produk_id', $produkId)->get();
+
+        $total = $reviews->count();
+
+        if ($total == 0) {
+            return response()->json([
+                'average_rating' => 0,
+                'total_review' => 0,
+
+                'positif' => 0,
+                'netral' => 0,
+                'negatif' => 0,
+
+                'comments' => [
+                    'positif' => [],
+                    'netral' => [],
+                    'negatif' => [],
+                ]
+            ]);
+        }
+
+        $positif = $reviews->where('sentiment_label', 'positif')->count();
+        $netral = $reviews->where('sentiment_label', 'netral')->count();
+        $negatif = $reviews->where('sentiment_label', 'negatif')->count();
+
+        return response()->json([
+            'average_rating' => round(
+                $reviews->avg('rating'),
+                1
+            ),
+
+            'total_review' => $total,
+
+            'positif' => round(($positif / $total) * 100, 1),
+            'netral' => round(($netral / $total) * 100, 1),
+            'negatif' => round(($negatif / $total) * 100, 1),
+
+            'comments' => [
+                'positif' => $reviews
+                    ->where('sentiment_label', 'positif')
+                    ->map(fn ($review) => [
+                        'rating' => $review->rating,
+                        'komentar' => $review->komentar_aroma,
+                        'tanggal' => $review->created_at->format('d-m-Y'),
+                    ])
+                    ->values(),
+
+                'netral' => $reviews
+                    ->where('sentiment_label', 'netral')
+                    ->map(fn ($review) => [
+                        'rating' => $review->rating,
+                        'komentar' => $review->komentar_aroma,
+                        'tanggal' => $review->created_at->format('d-m-Y'),
+                    ])
+                    ->values(),
+
+                'negatif' => $reviews
+                    ->where('sentiment_label', 'negatif')
+                    ->map(fn ($review) => [
+                        'rating' => $review->rating,
+                        'komentar' => $review->komentar_aroma,
+                        'tanggal' => $review->created_at->format('d-m-Y'),
+                    ])
+                    ->values(),
+            ]
         ]);
     }
 }

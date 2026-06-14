@@ -17,11 +17,11 @@ class PemesanansTable
         return $table
             ->columns([
             TextColumn::make('id')
-                ->label('ID')
+                ->label('ID Pemesanan')
                 ->sortable(),
 
             TextColumn::make('user.name')
-                ->label('Pelanggan')
+                ->label('Nama User')
                 ->searchable(),
 
             TextColumn::make('produk')

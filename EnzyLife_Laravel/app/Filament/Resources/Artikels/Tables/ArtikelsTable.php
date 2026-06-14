@@ -28,6 +28,14 @@ class ArtikelsTable
                     ->limit(40)
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('ringkasan')
+                    ->label('Ringkasan')
+                    ->limit(60),
+
+                Tables\Columns\TextColumn::make('isi_konten')
+                    ->label('Isi Konten')
+                    ->limit(60),
+
                 Tables\Columns\TextColumn::make('kategori')
                     ->label('Kategori')
                     ->badge()

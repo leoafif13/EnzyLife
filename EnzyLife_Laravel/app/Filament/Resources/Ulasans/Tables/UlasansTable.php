@@ -29,7 +29,7 @@ class UlasansTable
                 ->formatStateUsing(fn ($state) => str_repeat('⭐', (int) $state)),
 
             TextColumn::make('sentiment_label')
-                ->label('Sentimen')
+                ->label('Label Sentimen')
                 ->badge()
                 ->color(fn (?string $state): string => match ($state) {
                     'positif' => 'success',
@@ -54,7 +54,7 @@ class UlasansTable
                 ->toggleable(isToggledHiddenByDefault: true),
 
             TextColumn::make('created_at')
-                ->label('Tanggal')
+                ->label('Dibuat')
                 ->dateTime('d M Y H:i')
                 ->sortable(),
             ])

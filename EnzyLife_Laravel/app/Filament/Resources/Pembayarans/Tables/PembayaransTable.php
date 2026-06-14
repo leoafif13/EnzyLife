@@ -17,7 +17,7 @@ class PembayaransTable
         return $table
            ->columns([
             TextColumn::make('id')
-                ->label('ID')
+                ->label('ID Pembayaran')
                 ->sortable()
                 ->searchable(),
 

@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/orders/{id}/cancel', [CheckoutController::class, 'cancel']);
 
         Route::post('/review', [ReviewController::class, 'store']);
+        Route::get('/produk/{produk}/sentiment', [ReviewController::class, 'sentimentByProduct']);
+        Route::get('/produk/{produk}/review-summary', [ReviewController::class, 'reviewSummary']);
     });
 });
 
