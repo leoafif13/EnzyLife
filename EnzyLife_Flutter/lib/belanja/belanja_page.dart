@@ -28,8 +28,8 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
 
   List<Product> _products = [];
   bool _isLoading = true;
-  String _sortBy = 'default'; // 'default', 'sales', or 'price'
-  String _sortOrder = 'desc'; // 'asc' or 'desc'
+  final List<MapEntry<String, String>> _activeSorts = [];
+  int? _selectedRating;
 
   int _page = 1;
   final int _perPage = 6;
@@ -40,6 +40,78 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
   late final PageController _pageController;
   Timer? _carouselTimer;
   int _currentCarouselIndex = 0;
+
+  void _toggleSort(String field, StateSetter setStateSheet) {
+    setStateSheet(() {
+      final existingIndex = _activeSorts.indexWhere((s) => s.key == field);
+      if (existingIndex == -1) {
+        _activeSorts.add(MapEntry(field, 'asc'));
+      } else {
+        final currentDir = _activeSorts[existingIndex].value;
+        if (currentDir == 'asc') {
+          _activeSorts[existingIndex] = MapEntry(field, 'desc');
+        } else {
+          _activeSorts.removeAt(existingIndex);
+        }
+      }
+    });
+  }
+
+  Widget _buildSortChip({
+    required String field,
+    required String label,
+    required List<MapEntry<String, String>> activeSorts,
+    required VoidCallback onTap,
+  }) {
+    final index = activeSorts.indexWhere((s) => s.key == field);
+    final isSelected = index != -1;
+    final direction = isSelected ? activeSorts[index].value : null;
+
+    String displayLabel = label;
+    if (isSelected) {
+      if (field != 'default') {
+        displayLabel += direction == 'asc' ? ' (Terendah)' : ' (Tertinggi)';
+        displayLabel += ' #${index + 1}';
+      }
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.green50 : AppColors.bgPage,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.green500 : AppColors.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              displayLabel,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? AppColors.green900 : AppColors.text2,
+              ),
+            ),
+            if (isSelected && field != 'default') ...[
+              const SizedBox(width: 4),
+              Icon(
+                direction == 'asc' ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                size: 14,
+                color: AppColors.green700,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showFilterBottomSheet() {
     showModalBottomSheet(
@@ -85,7 +157,51 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Urutkan Berdasarkan',
+                    'Urutkan & Prioritaskan (Bisa Multi-Sort)',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.text2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildSortChip(
+                        field: 'default',
+                        label: 'Default',
+                        activeSorts: _activeSorts,
+                        onTap: () {
+                          setStateSheet(() {
+                            _activeSorts.clear();
+                          });
+                        },
+                      ),
+                      _buildSortChip(
+                        field: 'sales',
+                        label: 'Terlaris',
+                        activeSorts: _activeSorts,
+                        onTap: () => _toggleSort('sales', setStateSheet),
+                      ),
+                      _buildSortChip(
+                        field: 'price',
+                        label: 'Harga',
+                        activeSorts: _activeSorts,
+                        onTap: () => _toggleSort('price', setStateSheet),
+                      ),
+                      _buildSortChip(
+                        field: 'rating',
+                        label: 'Rating',
+                        activeSorts: _activeSorts,
+                        onTap: () => _toggleSort('rating', setStateSheet),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Rating Bintang',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -98,59 +214,27 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
                     child: Row(
                       children: [
                         _buildFilterChip(
-                          label: 'Default',
-                          selected: _sortBy == 'default',
+                          label: 'Semua',
+                          selected: _selectedRating == null,
                           onTap: () {
-                            setStateSheet(() => _sortBy = 'default');
+                            setStateSheet(() => _selectedRating = null);
                           },
                         ),
                         const SizedBox(width: 10),
-                        _buildFilterChip(
-                          label: 'Terlaris',
-                          selected: _sortBy == 'sales',
-                          onTap: () {
-                            setStateSheet(() => _sortBy = 'sales');
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        _buildFilterChip(
-                          label: 'Harga',
-                          selected: _sortBy == 'price',
-                          onTap: () {
-                            setStateSheet(() => _sortBy = 'price');
-                          },
-                        ),
+                        ...[5, 4, 3, 2, 1].map((stars) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: _buildFilterChip(
+                              label: stars == 5 ? '5 ⭐' : '$stars ⭐ Keatas',
+                              selected: _selectedRating == stars,
+                              onTap: () {
+                                setStateSheet(() => _selectedRating = stars);
+                              },
+                            ),
+                          );
+                        }),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Arah Urutan',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.text2,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      _buildFilterChip(
-                        label: 'Terendah',
-                        selected: _sortOrder == 'asc',
-                        onTap: () {
-                          setStateSheet(() => _sortOrder = 'asc');
-                        },
-                      ),
-                      const SizedBox(width: 10),
-                      _buildFilterChip(
-                        label: 'Tertinggi',
-                        selected: _sortOrder == 'desc',
-                        onTap: () {
-                          setStateSheet(() => _sortOrder = 'desc');
-                        },
-                      ),
-                    ],
                   ),
                   const SizedBox(height: 28),
                   SizedBox(
@@ -275,13 +359,21 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
       _hasMore = true;
     });
 
+    String? sortByParam;
+    String? sortOrderParam;
+    if (_activeSorts.isNotEmpty) {
+      sortByParam = _activeSorts.map((s) => s.key).join(',');
+      sortOrderParam = _activeSorts.map((s) => s.value).join(',');
+    }
+
     try {
       final res = await ApiService.getProductsPaginated(
         page: _page,
         perPage: _perPage,
-        sortBy: _sortBy,
-        sortOrder: _sortOrder,
+        sortBy: sortByParam,
+        sortOrder: sortOrderParam,
         search: _query,
+        rating: _selectedRating,
       );
 
       final products = res['products'] as List<Product>;
@@ -310,13 +402,21 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
       setState(() => _isLoadMoreRunning = true);
       _page++;
 
+      String? sortByParam;
+      String? sortOrderParam;
+      if (_activeSorts.isNotEmpty) {
+        sortByParam = _activeSorts.map((s) => s.key).join(',');
+        sortOrderParam = _activeSorts.map((s) => s.value).join(',');
+      }
+
       try {
         final res = await ApiService.getProductsPaginated(
           page: _page,
           perPage: _perPage,
-          sortBy: _sortBy,
-          sortOrder: _sortOrder,
+          sortBy: sortByParam,
+          sortOrder: sortOrderParam,
           search: _query,
+          rating: _selectedRating,
         );
 
         final newProducts = res['products'] as List<Product>;
@@ -489,13 +589,13 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
             ),
           ),
 
-          // Body content
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Popular carousel
-                if (_getPopularProducts().isNotEmpty && _query.isEmpty) ...[
+          // Body content - Popular carousel
+          if (_getPopularProducts().isNotEmpty && _query.isEmpty)
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
                   SizedBox(
                     height: 135,
                     child: PageView.builder(
@@ -516,87 +616,100 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
                   ),
                   const SizedBox(height: 16),
                 ],
-
-                // Product list
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.only(top: 80),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : listProds.isEmpty
-                          ? SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.55,
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 72,
-                                      height: 72,
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.green50,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.shopping_bag_outlined,
-                                        size: 34,
-                                        color: AppColors.green500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      _query.isNotEmpty
-                                          ? 'Produk "$_query" tidak ditemukan'
-                                          : 'Belum ada produk tersedia',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.text1,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      _query.isNotEmpty
-                                          ? 'Coba gunakan kata kunci lain'
-                                          : 'Produk akan muncul di sini ketika tersedia',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[500],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : Column(
-                              children: [
-                                ...listProds.map(
-                                  (p) => ProductCard(
-                                    product: p,
-                                    fmtPrice: _fmt,
-                                    onChanged: _refresh,
-                                  ),
-                                ),
-                                if (_isLoadMoreRunning)
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(color: AppColors.green500),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                ),
-                const SizedBox(height: 32),
-              ],
+              ),
             ),
-          ),
+
+          // Product list state (Loading / Empty) OR Actual Lazy List
+          if (_isLoading)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: 80),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            )
+          else if (listProds.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.55,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: const BoxDecoration(
+                            color: AppColors.green50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 34,
+                            color: AppColors.green500,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _query.isNotEmpty
+                              ? 'Produk "$_query" tidak ditemukan'
+                              : 'Belum ada produk tersedia',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text1,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _query.isNotEmpty
+                              ? 'Coba gunakan kata kunci lain'
+                              : 'Produk akan muncul di sini ketika tersedia',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else ...[
+            // Actual Product list using SliverList.builder (LAZY LOADING)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList.builder(
+                itemCount: listProds.length + (_isLoadMoreRunning ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index < listProds.length) {
+                    final p = listProds[index];
+                    return ProductCard(
+                      product: p,
+                      fmtPrice: _fmt,
+                      onChanged: _refresh,
+                    );
+                  } else {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: CircularProgressIndicator(color: AppColors.green500),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 32),
+            ),
+          ],
         ],
       ),
     );

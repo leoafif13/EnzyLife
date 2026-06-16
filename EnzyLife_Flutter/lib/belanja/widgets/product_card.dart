@@ -89,6 +89,29 @@ class ProductCard extends StatelessWidget {
                             color: product.stock > 0 ? AppColors.green500 : Colors.red,
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '|',
+                          style: TextStyle(fontSize: 11, color: Colors.grey[300]),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+                        const SizedBox(width: 2),
+                        Text(
+                          product.ratingAvg.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text1,
+                          ),
+                        ),
+                        Text(
+                          ' (${product.ratingCount})',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: AppColors.text3,
+                          ),
+                        ),
                         if (product.salesCount > 0) ...[
                           const SizedBox(width: 8),
                           Text(

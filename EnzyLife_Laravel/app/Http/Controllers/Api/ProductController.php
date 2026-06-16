@@ -15,8 +15,11 @@ class ProductController extends Controller
         $sortBy = $request->query('sort_by', 'default'); // 'default', 'sales', or 'price'
         $sortOrder = $request->query('sort_order', 'desc'); // 'asc' or 'desc'
         $search = $request->query('search');
+        $rating = $request->query('rating');
 
-        $query = Product::withSum('detailPemesanan as sales_count', 'kuantitas');
+        $query = Product::withSum('detailPemesanan as sales_count', 'kuantitas')
+            ->withAvg('reviews as rating_avg', 'rating')
+            ->withCount('reviews as rating_count');
 
         // Apply search filter
         if ($search) {
@@ -26,28 +29,52 @@ class ProductController extends Controller
             });
         }
 
+        // Apply rating filter
+        if ($rating) {
+            $query->whereRaw('(SELECT AVG(rating) FROM reviews WHERE reviews.produk_id = products.id) >= ?', [$rating]);
+        }
+
         // 1. Stock = 0 goes to the bottom
         $query->orderByRaw('CASE WHEN stok = 0 THEN 1 ELSE 0 END ASC');
 
-        // 2. Sort by price, sales_count, or default (created_at/id)
-        if ($sortBy === 'price') {
-            $query->orderBy('harga', $sortOrder);
-        } elseif ($sortBy === 'sales') {
-            $query->orderBy('sales_count', $sortOrder);
-        } else {
-            $query->orderBy('id', $sortOrder);
+        // 2. Sort by price, sales_count, rating, or default (created_at/id) with multi-sort support
+        $sortFields = explode(',', $sortBy);
+        $sortDirections = explode(',', $sortOrder);
+
+        for ($i = 0; $i < count($sortFields); $i++) {
+            $field = trim($sortFields[$i]);
+            $dir = isset($sortDirections[$i]) ? trim($sortDirections[$i]) : (isset($sortDirections[0]) ? trim($sortDirections[0]) : 'desc');
+            $dir = strtolower($dir) === 'asc' ? 'asc' : 'desc';
+
+            if ($field === 'price') {
+                $query->orderBy('harga', $dir);
+            } elseif ($field === 'sales') {
+                $query->orderBy('sales_count', $dir);
+            } elseif ($field === 'rating') {
+                $query->orderByRaw('CASE WHEN rating_avg IS NULL THEN 1 ELSE 0 END ASC');
+                $query->orderBy('rating_avg', $dir);
+            } elseif ($field === 'default') {
+                $query->orderBy('id', $dir);
+            }
         }
+
+        // Always fallback to id desc for consistent pagination
+        $query->orderBy('id', 'desc');
 
         if ($perPage) {
             $products = $query->paginate((int) $perPage);
             
             $products->getCollection()->transform(function ($product) {
                 $product->sales_count = (int) ($product->sales_count ?? 0);
+                $product->rating_avg = round((float) ($product->rating_avg ?? 0.0), 1);
+                $product->rating_count = (int) ($product->rating_count ?? 0);
                 return $product;
             });
         } else {
             $products = $query->get()->map(function ($product) {
                 $product->sales_count = (int) ($product->sales_count ?? 0);
+                $product->rating_avg = round((float) ($product->rating_avg ?? 0.0), 1);
+                $product->rating_count = (int) ($product->rating_count ?? 0);
                 return $product;
             });
         }
@@ -88,7 +115,10 @@ class ProductController extends Controller
     // GET SINGLE PRODUCT
     public function show($id)
     {
-        $product = Product::find($id);
+        $product = Product::withSum('detailPemesanan as sales_count', 'kuantitas')
+            ->withAvg('reviews as rating_avg', 'rating')
+            ->withCount('reviews as rating_count')
+            ->find($id);
 
         if (!$product) {
             return response()->json([
@@ -96,6 +126,10 @@ class ProductController extends Controller
                 'message' => 'Product tidak ditemukan'
             ], 404);
         }
+
+        $product->sales_count = (int) ($product->sales_count ?? 0);
+        $product->rating_avg = round((float) ($product->rating_avg ?? 0.0), 1);
+        $product->rating_count = (int) ($product->rating_count ?? 0);
 
         return response()->json([
             'status' => true,

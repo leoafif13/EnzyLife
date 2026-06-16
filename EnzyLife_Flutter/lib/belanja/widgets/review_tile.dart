@@ -2,13 +2,25 @@ import 'package:flutter/material.dart';
 
 class Review {
   final String name, comment, date;
+  final String? shippingComment;
   final int rating;
   const Review({
     required this.name,
     required this.rating,
     required this.comment,
+    this.shippingComment,
     required this.date,
   });
+
+  factory Review.fromJson(Map<String, dynamic> json) {
+    return Review(
+      name: json['nama_user'] ?? 'Anonim',
+      rating: json['rating'] ?? 5,
+      comment: json['komentar'] ?? '',
+      shippingComment: json['komentar_pengiriman'],
+      date: json['tanggal'] ?? '',
+    );
+  }
 }
 
 class ReviewTile extends StatelessWidget {
@@ -84,6 +96,40 @@ class ReviewTile extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(review.comment, style: const TextStyle(fontSize: 13, color: Color(0xFF555555), height: 1.5)),
+        if (review.shippingComment != null && review.shippingComment!.trim().isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9F9F9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFEEEEEE)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.local_shipping_outlined,
+                  size: 14,
+                  color: Color(0xFF777777),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    review.shippingComment!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF666666),
+                      height: 1.4,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 10),
         const Divider(height: 1, color: Color(0xFFF5F5F5)),
       ],

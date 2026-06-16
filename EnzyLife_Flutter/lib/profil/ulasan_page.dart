@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
-import '../../app_color.dart';
-import '../../widgets/sub_page_appbar.dart';
+import '../app_color.dart';
+import '../widgets/sub_page_appbar.dart';
+import '../services/api_service.dart';
 
 class UlasanScreen extends StatefulWidget {
   final String productName;
   final String orderId;
+  final int productId;
+  final int? existingRating;
+  final String? existingComment;
+  final String? existingTags;
 
   const UlasanScreen({
     super.key,
     required this.productName,
     required this.orderId,
+    required this.productId,
+    this.existingRating,
+    this.existingComment,
+    this.existingTags,
   });
 
   @override
@@ -21,6 +30,21 @@ class _UlasanScreenState extends State<UlasanScreen> {
   bool _isLoading      = false;
   final _ulasanCtrl    = TextEditingController();
   final List<String>   _selectedTags = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingRating != null) {
+      _rating = widget.existingRating!;
+    }
+    if (widget.existingComment != null) {
+      _ulasanCtrl.text = widget.existingComment!;
+    }
+    if (widget.existingTags != null && widget.existingTags!.isNotEmpty) {
+      final tags = widget.existingTags!.split(', ');
+      _selectedTags.addAll(tags.map((t) => t.trim()));
+    }
+  }
 
   // Tag cepat
   static const _quickTags = [
@@ -55,55 +79,104 @@ class _UlasanScreenState extends State<UlasanScreen> {
       return;
     }
 
+    final reviewText = _ulasanCtrl.text.trim();
+    if (reviewText.isEmpty || reviewText.length < 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Tulis ulasan minimal 3 karakter'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1)); // TODO: POST ke API ulasan
+
+    final orderIdInt = int.tryParse(widget.orderId);
+    if (orderIdInt == null) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('ID Pesanan tidak valid'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    final komentarPengiriman = _selectedTags.isNotEmpty ? _selectedTags.join(', ') : null;
+
+    final response = await ApiService.submitReview(
+      orderId: orderIdInt,
+      productId: widget.productId,
+      rating: _rating,
+      komentarAroma: reviewText,
+      komentarPengiriman: komentarPengiriman,
+    );
+
     setState(() => _isLoading = false);
 
     if (!mounted) return;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72, height: 72,
-              decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
-              child: const Icon(Icons.check_circle_outline_rounded,
-                  size: 40, color: AppColors.green500),
-            ),
-            const SizedBox(height: 16),
-            const Text('Ulasan Terkirim!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
-                    color: AppColors.text1)),
-            const SizedBox(height: 8),
-            Text('Terima kasih atas ulasanmu. Ulasanmu sangat membantu pembeli lain.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5)),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // kembali ke riwayat belanja
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.green500,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Kembali', style: TextStyle(fontWeight: FontWeight.w600)),
+    if (response != null && response['success'] == true) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72, height: 72,
+                decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+                child: const Icon(Icons.check_circle_outline_rounded,
+                    size: 40, color: AppColors.green500),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              const Text('Ulasan Terkirim!',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
+                      color: AppColors.text1)),
+              const SizedBox(height: 8),
+              Text('Terima kasih atas ulasanmu. Ulasanmu sangat membantu pembeli lain.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5)),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(true); // Kembali ke riwayat belanja dengan refresh
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.green500,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Kembali', style: TextStyle(fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      final errorMessage = response?['message'] ?? 'Gagal mengirim ulasan. Silakan coba lagi.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
   }
 
   @override

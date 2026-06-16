@@ -8,6 +8,7 @@ import 'detail_riwayat_belanja_page.dart';
 import '../services/format_helper.dart';
 import '../widgets/search_bar_field.dart';
 import '../widgets/page_header_card.dart';
+import '../widgets/purchase_bottom_sheet.dart';
 
 // ── Status pesanan ────────────────────────────
 enum OrderStatus { dipesan, dikirim, selesai }
@@ -46,7 +47,7 @@ class RiwayatBelanjaScreen extends StatefulWidget {
 }
 
 class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
-  OrderStatus _filter = OrderStatus.selesai;
+  OrderStatus? _filter;
   List<OrderModel> _allOrders = [];
   bool _isLoading = true;
   String _query = '';
@@ -77,14 +78,42 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
   static String _fmt(int price) => formatPrice(price);
 
   List<OrderModel> get _filtered {
-    return _allOrders.where((o) {
-      if (o.orderStatus != _filter) return false;
+    final list = _allOrders.where((o) {
+      if (_filter != null && o.orderStatus != _filter) return false;
       if (_query.isEmpty) return true;
       final queryLower = _query.toLowerCase();
       if (o.id.toString().contains(queryLower)) return true;
       return o.items.any((item) =>
           (item.product?.name ?? '').toLowerCase().contains(queryLower));
     }).toList();
+    list.sort((a, b) => b.id.compareTo(a.id));
+    return list;
+  }
+
+  Widget _buildFilterTab(OrderStatus? status, String label) {
+    final active = _filter == status;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: () => setState(() => _filter = status),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: active ? AppColors.green500 : AppColors.bgCard,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: active ? AppColors.green500 : AppColors.border),
+          ),
+          child: Text(label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                color: active ? Colors.white : AppColors.text2,
+              )),
+        ),
+      ),
+    );
   }
 
   @override
@@ -102,7 +131,7 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
             child: PageHeaderCard(
               badge: '🛍️  Riwayat Belanja',
               title: 'Daftar Transaksi',
-              subtitle: 'Pantau status pesanan, riwayat pembelian produk eco enzyme, serta lakukan pembayaran dan ulasan dalam satu tempat.',
+              subtitle: 'Pantau status pesanan, riwayat belanja produk eco enzyme, serta lakukan pembayaran dan ulasan dalam satu tempat.',
               icon: Icons.eco_rounded,
             ),
           ),
@@ -127,32 +156,14 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
           Container(
             color: AppColors.bgPage,
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-            child: Row(
-              children: OrderStatus.values.map((status) {
-                final active = _filter == status;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: GestureDetector(
-                    onTap: () => setState(() => _filter = status),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: active ? AppColors.green500 : AppColors.bgCard,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            color: active ? AppColors.green500 : AppColors.border),
-                      ),
-                      child: Text(status.label,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                            color: active ? Colors.white : AppColors.text2,
-                          )),
-                    ),
-                  ),
-                );
-              }).toList(),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterTab(null, 'Semua'),
+                  ...OrderStatus.values.map((status) => _buildFilterTab(status, status.label)),
+                ],
+              ),
             ),
           ),
 
@@ -337,7 +348,7 @@ class _OrderCard extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Action buttons per status
-            _OrderActions(order: order),
+            _OrderActions(order: order, onRefresh: onRefresh),
           ],
         ),
       ),
@@ -349,7 +360,8 @@ class _OrderCard extends StatelessWidget {
 // ── Action buttons per status ─────────────────
 class _OrderActions extends StatelessWidget {
   final OrderModel order;
-  const _OrderActions({required this.order});
+  final VoidCallback onRefresh;
+  const _OrderActions({required this.order, required this.onRefresh});
 
   Future<void> _cancelOrder(BuildContext context, OrderModel order) async {
     final confirm = await showDialog<bool>(
@@ -396,10 +408,7 @@ class _OrderActions extends StatelessWidget {
         ),
       );
       // Refresh list
-      final state = context.findAncestorStateOfType<_RiwayatBelanjaScreenState>();
-      if (state != null) {
-        state._loadHistory();
-      }
+      onRefresh();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -423,7 +432,19 @@ class _OrderActions extends StatelessWidget {
           return SizedBox(
             width: double.infinity,
             child: OutlinedButton(
-              onPressed: () {}, // TODO: beli lagi — tambahkan produk ke cart
+              onPressed: () {
+                final product = firstItem?.product;
+                if (product != null) {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    builder: (_) => PurchaseBottomSheet(product: product),
+                  );
+                }
+              },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.green500),
                 foregroundColor: AppColors.green500,
@@ -440,7 +461,19 @@ class _OrderActions extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () {}, // TODO: beli lagi — tambahkan produk ke cart
+                onPressed: () {
+                  final product = firstItem?.product;
+                  if (product != null) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                      builder: (_) => PurchaseBottomSheet(product: product),
+                    );
+                  }
+                },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppColors.green500),
                   foregroundColor: AppColors.green500,
@@ -454,12 +487,28 @@ class _OrderActions extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => UlasanScreen(
-                    productName: firstItem?.product?.name ?? 'Eco Enzim',
-                    orderId: order.id.toString(),
-                  )),
-                ), // navigasi ke halaman ulasan
+                onPressed: () async {
+                  if (order.items.length == 1) {
+                    final item = order.items.first;
+                    final refresh = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (_) => UlasanScreen(
+                          productName: item.product?.name ?? 'Eco Enzim',
+                          orderId: order.id.toString(),
+                          productId: item.product?.id ?? 0,
+                          existingRating: item.existingRating,
+                          existingComment: item.existingComment,
+                          existingTags: item.existingTags,
+                        ),
+                      ),
+                    );
+                    if (refresh == true) {
+                      onRefresh();
+                    }
+                  } else {
+                    _showProductSelectionSheet(context, order, onRefresh);
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green500,
                   foregroundColor: Colors.white,
@@ -467,8 +516,9 @@ class _OrderActions extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('Ulasan',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                child: Text(
+                    order.items.every((item) => item.isReviewed) ? 'Ubah Ulasan' : 'Beri Ulasan',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -541,15 +591,190 @@ class _OrderActions extends StatelessWidget {
         );
     }
   }
+
+  void _showProductSelectionSheet(BuildContext context, OrderModel order, VoidCallback onRefresh) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (subCtx) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4.5,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const Text(
+                'Pilih Produk untuk Diulas',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.text1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: order.items.length,
+                  separatorBuilder: (_, __) => const Divider(color: AppColors.divider),
+                  itemBuilder: (ctx, idx) {
+                    final item = order.items[idx];
+                    final prod = item.product;
+                    if (prod == null) return const SizedBox.shrink();
+                    final imageUrl = prod.image.isNotEmpty
+                        ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
+                        : null;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              color: AppColors.green50,
+                              child: imageUrl != null
+                                  ? Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.image_outlined,
+                                        color: AppColors.green500,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.image_outlined,
+                                      color: AppColors.green500,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  prod.name,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.text1,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  item.isReviewed ? 'Sudah Diulas' : 'Belum Diulas',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: item.isReviewed ? AppColors.green700 : Colors.orange[800],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          item.isReviewed
+                              ? OutlinedButton(
+                                  onPressed: () async {
+                                    Navigator.of(subCtx).pop();
+                                    final refresh = await Navigator.of(context).push<bool>(
+                                      MaterialPageRoute(
+                                        builder: (_) => UlasanScreen(
+                                          productName: prod.name,
+                                          orderId: order.id.toString(),
+                                          productId: prod.id,
+                                          existingRating: item.existingRating,
+                                          existingComment: item.existingComment,
+                                          existingTags: item.existingTags,
+                                        ),
+                                      ),
+                                    );
+                                    if (refresh == true) {
+                                      onRefresh();
+                                    }
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(color: AppColors.green500),
+                                    foregroundColor: AppColors.green500,
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  child: const Text(
+                                    'Ubah',
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                  ),
+                                )
+                              : ElevatedButton(
+                                  onPressed: () async {
+                                    Navigator.of(subCtx).pop();
+                                    final refresh = await Navigator.of(context).push<bool>(
+                                      MaterialPageRoute(
+                                        builder: (_) => UlasanScreen(
+                                          productName: prod.name,
+                                          orderId: order.id.toString(),
+                                          productId: prod.id,
+                                        ),
+                                      ),
+                                    );
+                                    if (refresh == true) {
+                                      onRefresh();
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.green500,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  child: const Text(
+                                    'Beri',
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 // ── Empty state ───────────────────────────────
 class _EmptyOrders extends StatelessWidget {
-  final OrderStatus status;
+  final OrderStatus? status;
   const _EmptyOrders({required this.status});
 
   @override
   Widget build(BuildContext context) {
+    final label = status?.label.toLowerCase() ?? 'transaksi';
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -560,7 +785,7 @@ class _EmptyOrders extends StatelessWidget {
             child: const Icon(Icons.shopping_bag_outlined, size: 36, color: AppColors.green500),
           ),
           const SizedBox(height: 16),
-          Text('Belum ada pesanan ${status.label.toLowerCase()}',
+          Text('Belum ada $label',
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600,
                   color: AppColors.text1)),
           const SizedBox(height: 6),

@@ -7,9 +7,9 @@ import '../widgets/sub_page_appbar.dart';
 import '../widgets/purchase_bottom_sheet.dart';
 import '../services/format_helper.dart';
 import '../widgets/zoomable_image_dialog.dart';
-import 'widgets/spec_card.dart';
 import 'widgets/review_tile.dart';
 import 'widgets/sentimen_ai_card.dart';
+import '../services/api_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -25,12 +25,56 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final _pageController = PageController();
   int _qty = 1;
 
+  bool _reviewsLoading = true;
+  double _avgRating = 0.0;
+  int _totalReviews = 0;
+  double _positif = 0.0;
+  double _netral = 0.0;
+  double _negatif = 0.0;
+  List<Review> _fetchedReviews = [];
+
   @override
   void initState() {
     super.initState();
     CartState.instance.addListener(_refreshBadge);
     if (widget.product.stock <= 0) {
       _qty = 0;
+    }
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    setState(() => _reviewsLoading = true);
+    final summary = await ApiService.getProductReviewSummary(widget.product.id);
+    if (!mounted) return;
+    if (summary != null) {
+      final rawComments = summary['comments'] as Map<String, dynamic>? ?? {};
+      final List<Review> allReviews = [];
+      
+      if (rawComments.containsKey('positif')) {
+        final list = rawComments['positif'] as List? ?? [];
+        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x))));
+      }
+      if (rawComments.containsKey('netral')) {
+        final list = rawComments['netral'] as List? ?? [];
+        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x))));
+      }
+      if (rawComments.containsKey('negatif')) {
+        final list = rawComments['negatif'] as List? ?? [];
+        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x))));
+      }
+
+      setState(() {
+        _avgRating = (summary['average_rating'] as num?)?.toDouble() ?? 0.0;
+        _totalReviews = (summary['total_review'] as num?)?.toInt() ?? 0;
+        _positif = ((summary['positif'] as num?)?.toDouble() ?? 0.0) / 100.0;
+        _netral = ((summary['netral'] as num?)?.toDouble() ?? 0.0) / 100.0;
+        _negatif = ((summary['negatif'] as num?)?.toDouble() ?? 0.0) / 100.0;
+        _fetchedReviews = allReviews;
+        _reviewsLoading = false;
+      });
+    } else {
+      setState(() => _reviewsLoading = false);
     }
   }
 
@@ -39,16 +83,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   // Dummy gambar carousel (placeholder)
   static const _imageCount = 1;
 
-  // Dummy ulasan
-  static const _reviews = [
-    Review(name: 'Siti Rahma',    rating: 5, comment: 'Produknya bagus sekali, aroma segar dan terasa manfaatnya untuk tanaman saya!', date: '2 hari lalu'),
-    Review(name: 'Budi Santoso',  rating: 4, comment: 'Kualitas oke, pengiriman cepat. Akan beli lagi.', date: '1 minggu lalu'),
-    Review(name: 'Dewi Lestari',  rating: 5, comment: 'Sudah pakai beberapa kali, hasilnya luar biasa untuk pupuk organik.', date: '2 minggu lalu'),
-  ];
-
   static String _fmt(int price) => formatPrice(price);
-
-  double get _avgRating => _reviews.map((r) => r.rating).reduce((a, b) => a + b) / _reviews.length;
 
   void _addToCart() {
     final currentQty = CartState.instance.qty(widget.product.id);
@@ -314,7 +349,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               size: 18, color: const Color(0xFFFFC107),
                             )),
                             const SizedBox(width: 6),
-                            Text('${_avgRating.toStringAsFixed(1)} (${_reviews.length} ulasan)',
+                            Text('${_avgRating.toStringAsFixed(1)} ($_totalReviews ulasan)',
                                 style: TextStyle(fontSize: 13, color: Colors.grey[600])),
                           ],
                         ),
@@ -325,86 +360,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
                         const SizedBox(height: 8),
                         Text(
-                          // TODO: ganti dengan deskripsi lengkap produk
-                          '${p.description}. Produk eco enzim berkualitas tinggi yang ramah lingkungan dan bermanfaat untuk berbagai keperluan rumah tangga maupun pertanian.',
+                          p.description,
                           style: const TextStyle(fontSize: 13, color: Color(0xFF555555), height: 1.6),
                         ),
-                        const SizedBox(height: 16),
-                        // Spesifikasi
-                        const Text('Spesifikasi',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
-                        const SizedBox(height: 12),
-                        GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: 2.3,
-                          children: const [
-                            SpecCard(label: 'Volume', value: '1 Liter', icon: Icons.scale_outlined),
-                            SpecCard(label: 'Kemasan', value: 'Botol HDPE', icon: Icons.inventory_2_outlined),
-                            SpecCard(label: 'Expired', value: '2 Tahun', icon: Icons.calendar_today_outlined),
-                            SpecCard(label: 'Sertifikat', value: 'Organik', icon: Icons.verified_user_outlined),
-                          ],
-                        ),
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 12),
 
-                  // ── Qty selector ──────────────────────────
-                  Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Row(
-                      children: [
-                        const Text('Jumlah', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A))),
-                        const Spacer(),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.green500),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () { if (_qty > 1) setState(() => _qty--); },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  child: Icon(Icons.remove, size: 16,
-                                      color: _qty > 1 ? AppColors.green500 : Colors.grey[300]),
-                                ),
-                              ),
-                              Text('$_qty', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.green500)),
-                              GestureDetector(
-                                onTap: () {
-                                  if (_qty < p.stock) {
-                                    setState(() => _qty++);
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Batas pembelian maksimum tercapai (${p.stock} item)'),
-                                        behavior: SnackBarBehavior.floating,
-                                        backgroundColor: Colors.orange[800],
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  child: Icon(Icons.add, size: 16, color: AppColors.green500),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
 
-                  const SizedBox(height: 12),
 
                   // ── Ulasan ────────────────────────────────
                   Container(
@@ -428,70 +393,94 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                         const SizedBox(height: 14),
 
-                        // ── Sentimen AI ─────────────────
-                        SentimenAI(),
-
-                        const SizedBox(height: 16),
-                        const Divider(height: 1, color: AppColors.divider),
-                        const SizedBox(height: 14),
-
-                        // Ringkasan rating
-                        Row(
-                          children: [
-                            Column(
-                              children: [
-                                Text(_avgRating.toStringAsFixed(1),
-                                    style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w800, color: AppColors.green500)),
-                                Row(
-                                  children: List.generate(5, (i) => Icon(
-                                    i < _avgRating.round() ? Icons.star_rounded : Icons.star_outline_rounded,
-                                    size: 14, color: const Color(0xFFFFC107),
-                                  )),
-                                ),
-                                const SizedBox(height: 4),
-                                Text('${_reviews.length} ulasan',
-                                    style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                              ],
+                        if (_reviewsLoading)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24),
+                              child: CircularProgressIndicator(color: AppColors.green500),
                             ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                children: List.generate(5, (i) {
-                                  final star = 5 - i;
-                                  final count = _reviews.where((r) => r.rating == star).length;
-                                  final pct = _reviews.isEmpty ? 0.0 : count / _reviews.length;
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2),
-                                    child: Row(
-                                      children: [
-                                        Text('$star', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                                        const SizedBox(width: 4),
-                                        const Icon(Icons.star_rounded, size: 11, color: Color(0xFFFFC107)),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(4),
-                                            child: LinearProgressIndicator(
-                                              value: pct,
-                                              backgroundColor: const Color(0xFFF0F0F0),
-                                              valueColor: const AlwaysStoppedAnimation(AppColors.green500),
-                                              minHeight: 6,
+                          )
+                        else ...[
+                          // ── Sentimen AI ─────────────────
+                          SentimenAI(
+                            positif: _positif,
+                            netral: _netral,
+                            negatif: _negatif,
+                          ),
+
+                          const SizedBox(height: 16),
+                          const Divider(height: 1, color: AppColors.divider),
+                          const SizedBox(height: 14),
+
+                          // Ringkasan rating
+                          Row(
+                            children: [
+                              Column(
+                                children: [
+                                  Text(_avgRating.toStringAsFixed(1),
+                                      style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w800, color: AppColors.green500)),
+                                  Row(
+                                    children: List.generate(5, (i) => Icon(
+                                      i < _avgRating.round() ? Icons.star_rounded : Icons.star_outline_rounded,
+                                      size: 14, color: const Color(0xFFFFC107),
+                                    )),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text('$_totalReviews ulasan',
+                                      style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                                ],
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  children: List.generate(5, (i) {
+                                    final star = 5 - i;
+                                    final count = _fetchedReviews.where((r) => r.rating == star).length;
+                                    final pct = _fetchedReviews.isEmpty ? 0.0 : count / _fetchedReviews.length;
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 2),
+                                      child: Row(
+                                        children: [
+                                          Text('$star', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                                          const SizedBox(width: 4),
+                                          const Icon(Icons.star_rounded, size: 11, color: Color(0xFFFFC107)),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(4),
+                                              child: LinearProgressIndicator(
+                                                value: pct,
+                                                backgroundColor: const Color(0xFFF0F0F0),
+                                                valueColor: const AlwaysStoppedAnimation(AppColors.green500),
+                                                minHeight: 6,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text('$count', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                                      ],
-                                    ),
-                                  );
-                                }),
+                                          const SizedBox(width: 6),
+                                          Text('$count', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        const Divider(height: 1, color: Color(0xFFF0F0F0)),
-                        ..._reviews.map((r) => ReviewTile(review: r)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                          if (_fetchedReviews.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child: Center(
+                                child: Text(
+                                  'Belum ada ulasan untuk produk ini',
+                                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                                ),
+                              ),
+                            )
+                          else
+                            ..._fetchedReviews.map((r) => ReviewTile(review: r)),
+                        ],
                       ],
                     ),
                   ),

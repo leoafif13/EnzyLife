@@ -14,6 +14,7 @@ class ReviewController extends Controller
     {
         $request->validate([
             'pemesanan_id' => 'required|exists:pemesanan,id',
+            'produk_id' => 'required|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
             'komentar_aroma' => 'required|string|min:3',
             'komentar_pengiriman' => 'nullable|string',
@@ -39,47 +40,60 @@ class ReviewController extends Controller
             ], 400);
         }
 
-        // hanya sekali review
-        if ($pemesanan->review) {
+        // verifikasi produk adalah bagian dari pesanan
+        $hasProduct = $pemesanan->detailPemesanan()->where('produk_id', $request->produk_id)->exists();
+        if (!$hasProduct) {
             return response()->json([
                 'success' => false,
-                'message' => 'Pesanan sudah direview'
+                'message' => 'Produk tidak ditemukan dalam pesanan ini'
             ], 400);
         }
 
-        $produkId = $pemesanan
-            ->detailPemesanan
-            ->first()
-            ->produk_id;
+        try {
+            $response = Http::timeout(3)->post(
+                'http://127.0.0.1:8001/predict',
+                [
+                    'komentar' => $request->komentar_aroma
+                ]
+            );
 
-        $response = Http::post(
-            'http://127.0.0.1:8001/predict',
-            [
-                'komentar' => $request->komentar_aroma
-            ]
-        );
-
-        if (!$response->successful()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memproses analisis sentimen'
-            ], 500);
+            if ($response->successful()) {
+                $sentiment = $response->json();
+                $sentimentLabel = $sentiment['label'];
+                $sentimentScore = $sentiment['score'];
+            } else {
+                $sentimentLabel = $request->rating >= 4 ? 'positif' : ($request->rating == 3 ? 'netral' : 'negatif');
+                $sentimentScore = 100.0;
+            }
+        } catch (\Exception $e) {
+            $sentimentLabel = $request->rating >= 4 ? 'positif' : ($request->rating == 3 ? 'netral' : 'negatif');
+            $sentimentScore = 100.0;
         }
 
-        $sentiment = $response->json();
+        $review = Review::where('pemesanan_id', $pemesanan->id)
+            ->where('produk_id', $request->produk_id)
+            ->first();
 
-        $review = Review::create([
-            'user_id' => auth()->id(),
-            'pemesanan_id' => $pemesanan->id,
-            'produk_id' => $produkId,
-
-            'rating' => $request->rating,
-
-            'komentar_aroma' => $request->komentar_aroma,
-            'komentar_pengiriman' => $request->komentar_pengiriman,
-            'sentiment_score' => $sentiment['score'],
-            'sentiment_label' => $sentiment['label'],
-        ]);
+        if ($review) {
+            $review->update([
+                'rating' => $request->rating,
+                'komentar_aroma' => $request->komentar_aroma,
+                'komentar_pengiriman' => $request->komentar_pengiriman,
+                'sentiment_score' => $sentimentScore,
+                'sentiment_label' => $sentimentLabel,
+            ]);
+        } else {
+            $review = Review::create([
+                'user_id' => auth()->id(),
+                'pemesanan_id' => $pemesanan->id,
+                'produk_id' => $request->produk_id,
+                'rating' => $request->rating,
+                'komentar_aroma' => $request->komentar_aroma,
+                'komentar_pengiriman' => $request->komentar_pengiriman,
+                'sentiment_score' => $sentimentScore,
+                'sentiment_label' => $sentimentLabel,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -90,7 +104,7 @@ class ReviewController extends Controller
 
     public function sentimentByProduct($produkId)
     {
-        $reviews = Review::where('produk_id', $produkId)->get();
+        $reviews = Review::with('user')->where('produk_id', $produkId)->get();
 
         $total = $reviews->count();
 
@@ -120,40 +134,46 @@ class ReviewController extends Controller
             'netral' => round(($netral / $total) * 100, 1),
             'negatif' => round(($negatif / $total) * 100, 1),
 
-        'comments' => [
-            'positif' => $reviews
-                ->where('sentiment_label', 'positif')
-                ->map(fn ($review) => [
-                    'rating' => $review->rating,
-                    'komentar' => $review->komentar_aroma,
-                    'tanggal' => $review->created_at->format('d-m-Y'),
-                ])
-                ->values(),
+            'comments' => [
+                'positif' => $reviews
+                    ->where('sentiment_label', 'positif')
+                    ->map(fn ($review) => [
+                        'nama_user' => $review->user->name ?? 'Anonim',
+                        'rating' => $review->rating,
+                        'komentar' => $review->komentar_aroma,
+                        'komentar_pengiriman' => $review->komentar_pengiriman,
+                        'tanggal' => $review->created_at->format('d-m-Y'),
+                    ])
+                    ->values(),
 
-            'netral' => $reviews
-                ->where('sentiment_label', 'netral')
-                ->map(fn ($review) => [
-                    'rating' => $review->rating,
-                    'komentar' => $review->komentar_aroma,
-                    'tanggal' => $review->created_at->format('d-m-Y'),
-                ])
-                ->values(),
+                'netral' => $reviews
+                    ->where('sentiment_label', 'netral')
+                    ->map(fn ($review) => [
+                        'nama_user' => $review->user->name ?? 'Anonim',
+                        'rating' => $review->rating,
+                        'komentar' => $review->komentar_aroma,
+                        'komentar_pengiriman' => $review->komentar_pengiriman,
+                        'tanggal' => $review->created_at->format('d-m-Y'),
+                    ])
+                    ->values(),
 
-            'negatif' => $reviews
-                ->where('sentiment_label', 'negatif')
-                ->map(fn ($review) => [
-                    'rating' => $review->rating,
-                    'komentar' => $review->komentar_aroma,
-                    'tanggal' => $review->created_at->format('d-m-Y'),
-                ])
-                ->values(),
-            ]   
+                'negatif' => $reviews
+                    ->where('sentiment_label', 'negatif')
+                    ->map(fn ($review) => [
+                        'nama_user' => $review->user->name ?? 'Anonim',
+                        'rating' => $review->rating,
+                        'komentar' => $review->komentar_aroma,
+                        'komentar_pengiriman' => $review->komentar_pengiriman,
+                        'tanggal' => $review->created_at->format('d-m-Y'),
+                    ])
+                    ->values(),
+            ]
         ]);
     }
 
     public function reviewSummary($produkId)
     {
-        $reviews = Review::where('produk_id', $produkId)->get();
+        $reviews = Review::with('user')->where('produk_id', $produkId)->get();
 
         $total = $reviews->count();
 
@@ -194,8 +214,10 @@ class ReviewController extends Controller
                 'positif' => $reviews
                     ->where('sentiment_label', 'positif')
                     ->map(fn ($review) => [
+                        'nama_user' => $review->user->name ?? 'Anonim',
                         'rating' => $review->rating,
                         'komentar' => $review->komentar_aroma,
+                        'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
                     ])
                     ->values(),
@@ -203,8 +225,10 @@ class ReviewController extends Controller
                 'netral' => $reviews
                     ->where('sentiment_label', 'netral')
                     ->map(fn ($review) => [
+                        'nama_user' => $review->user->name ?? 'Anonim',
                         'rating' => $review->rating,
                         'komentar' => $review->komentar_aroma,
+                        'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
                     ])
                     ->values(),
@@ -212,8 +236,10 @@ class ReviewController extends Controller
                 'negatif' => $reviews
                     ->where('sentiment_label', 'negatif')
                     ->map(fn ($review) => [
+                        'nama_user' => $review->user->name ?? 'Anonim',
                         'rating' => $review->rating,
                         'komentar' => $review->komentar_aroma,
+                        'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
                     ])
                     ->values(),

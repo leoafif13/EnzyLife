@@ -246,20 +246,23 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
                         query: _query,
                         filter: _filter,
                       )
-                    : ListView(
+                    : ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                         physics: const BouncingScrollPhysics(),
-                        children: [
-                          ...visibleContent,
-                          if (showLoadingFooter)
-                            const Padding(
+                        itemCount: visibleContent.length + (showLoadingFooter ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index < visibleContent.length) {
+                            return visibleContent[index];
+                          } else {
+                            return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 16),
                               child: Center(
                                 child: CircularProgressIndicator(),
                               ),
-                            ),
-                        ],
+                            );
+                          }
+                        },
                       ),
           ),
         ],

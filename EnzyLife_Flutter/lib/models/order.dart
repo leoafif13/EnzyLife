@@ -9,6 +9,10 @@ class OrderItemModel {
   final int price;
   final int subtotal;
   final Product? product;
+  final bool isReviewed;
+  final int? existingRating;
+  final String? existingComment;
+  final String? existingTags;
 
   OrderItemModel({
     required this.id,
@@ -16,15 +20,28 @@ class OrderItemModel {
     required this.price,
     required this.subtotal,
     this.product,
+    required this.isReviewed,
+    this.existingRating,
+    this.existingComment,
+    this.existingTags,
   });
 
-  factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+  factory OrderItemModel.fromJson(Map<String, dynamic> json, {Map<String, dynamic>? reviewData}) {
+    final isReviewed = reviewData != null;
+    final int? existingRating = reviewData != null ? (reviewData['rating'] as num?)?.toInt() : null;
+    final String? existingComment = reviewData != null ? reviewData['komentar_aroma'] : null;
+    final String? existingTags = reviewData != null ? reviewData['komentar_pengiriman'] : null;
+
     return OrderItemModel(
       id: json['id'] ?? 0,
       quantity: json['kuantitas'] ?? 0,
       price: double.parse((json['harga'] ?? 0).toString()).toInt(),
       subtotal: double.parse((json['subtotal'] ?? 0).toString()).toInt(),
       product: json['produk'] != null ? Product.fromJson(json['produk']) : null,
+      isReviewed: isReviewed,
+      existingRating: existingRating,
+      existingComment: existingComment,
+      existingTags: existingTags,
     );
   }
 }
@@ -38,6 +55,10 @@ class OrderModel {
   final String createdAt;
   final List<OrderItemModel> items;
   final String? snapToken;
+  final bool isReviewed;
+  final int? existingRating;
+  final String? existingComment;
+  final String? existingTags;
 
   OrderModel({
     required this.id,
@@ -48,6 +69,10 @@ class OrderModel {
     required this.createdAt,
     required this.items,
     this.snapToken,
+    required this.isReviewed,
+    this.existingRating,
+    this.existingComment,
+    this.existingTags,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -56,6 +81,27 @@ class OrderModel {
     if (json['pembayaran'] != null) {
       token = json['pembayaran']['snap_token'];
     }
+
+    var reviewsList = json['reviews'] as List? ?? [];
+    Map<int, Map<String, dynamic>> reviewsByProduct = {};
+    for (var r in reviewsList) {
+      if (r != null && r['produk_id'] != null) {
+        reviewsByProduct[(r['produk_id'] as num).toInt()] = Map<String, dynamic>.from(r);
+      }
+    }
+
+    var items = itemsList.map((e) {
+      final prodId = e['produk_id'] ?? 0;
+      final reviewData = reviewsByProduct[prodId];
+      return OrderItemModel.fromJson(e, reviewData: reviewData);
+    }).toList();
+
+    final reviewJson = json['review'] ?? (reviewsList.isNotEmpty ? reviewsList.first : null);
+    final isReviewed = reviewJson != null;
+    final int? existingRating = reviewJson != null ? (reviewJson['rating'] as num?)?.toInt() : null;
+    final String? existingComment = reviewJson != null ? reviewJson['komentar_aroma'] : null;
+    final String? existingTags = reviewJson != null ? reviewJson['komentar_pengiriman'] : null;
+
     return OrderModel(
       id: json['id'] ?? 0,
       totalHarga: double.parse((json['total_harga'] ?? 0).toString()).toInt(),
@@ -63,8 +109,12 @@ class OrderModel {
       jenisCod: json['jenis_cod'],
       statusPemesanan: json['status_pemesanan'] ?? 'MENUNGGU_PEMBAYARAN',
       createdAt: json['created_at'] ?? '',
-      items: itemsList.map((e) => OrderItemModel.fromJson(e)).toList(),
+      items: items,
       snapToken: token,
+      isReviewed: isReviewed,
+      existingRating: existingRating,
+      existingComment: existingComment,
+      existingTags: existingTags,
     );
   }
 

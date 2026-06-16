@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import '../../app_color.dart';
 
 class SentimenAI extends StatelessWidget {
-  const SentimenAI({super.key});
+  final double positif;
+  final double netral;
+  final double negatif;
 
-  // TODO: ganti dengan data dari API analisis sentimen
-  static const _positif = 0.72;
-  static const _netral  = 0.19;
-  static const _negatif = 0.09;
+  const SentimenAI({
+    super.key,
+    required this.positif,
+    required this.netral,
+    required this.negatif,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,28 +53,28 @@ class SentimenAI extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Mayoritas pembeli memberikan ulasan ${_positif >= 0.6 ? "positif" : "beragam"} terhadap produk ini.',
+            'Mayoritas pembeli memberikan ulasan ${positif >= 0.6 ? "positif" : "beragam"} terhadap produk ini.',
             style: TextStyle(fontSize: 12, color: Colors.grey[600], height: 1.4),
           ),
           const SizedBox(height: 12),
           // Bar sentimen
           SentimenBar(
             label: 'Positif',
-            value: _positif,
+            value: positif,
             color: AppColors.green500,
             icon: Icons.sentiment_satisfied_alt_rounded,
           ),
           const SizedBox(height: 8),
           SentimenBar(
             label: 'Netral',
-            value: _netral,
+            value: netral,
             color: const Color(0xFFFFB300),
             icon: Icons.sentiment_neutral_rounded,
           ),
           const SizedBox(height: 8),
           SentimenBar(
             label: 'Negatif',
-            value: _negatif,
+            value: negatif,
             color: Colors.red[400]!,
             icon: Icons.sentiment_dissatisfied_rounded,
           ),

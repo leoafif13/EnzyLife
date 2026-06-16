@@ -7,6 +7,8 @@ class Product {
   final String image;
   final bool isPopular;
   final int salesCount;
+  final double ratingAvg;
+  final int ratingCount;
 
   const Product({
     required this.id,
@@ -17,6 +19,8 @@ class Product {
     required this.image,
     this.isPopular = false,
     this.salesCount = 0,
+    this.ratingAvg = 0.0,
+    this.ratingCount = 0,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,8 @@ class Product {
       image: json['gambar'] ?? '',
       isPopular: json['is_popular'] ?? false,
       salesCount: double.parse((json['sales_count'] ?? 0).toString()).toInt(),
+      ratingAvg: double.parse((json['rating_avg'] ?? 0.0).toString()),
+      ratingCount: int.parse((json['rating_count'] ?? 0).toString()),
     );
   }
 }

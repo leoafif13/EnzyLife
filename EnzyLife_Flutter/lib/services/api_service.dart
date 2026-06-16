@@ -73,6 +73,7 @@ class ApiService {
     String? sortBy,
     String? sortOrder,
     String? search,
+    int? rating,
   }) async {
     try {
       String url = '$_baseUrl/products?page=$page&per_page=$perPage';
@@ -80,6 +81,9 @@ class ApiService {
       if (sortOrder != null) url += '&sort_order=$sortOrder';
       if (search != null && search.isNotEmpty) {
         url += '&search=${Uri.encodeComponent(search)}';
+      }
+      if (rating != null) {
+        url += '&rating=$rating';
       }
 
       final response = await http.get(
@@ -381,6 +385,59 @@ class ApiService {
       return null;
     } catch (e) {
       print('Error cancelOrder: $e');
+      return null;
+    }
+  }
+
+  // =====================================================
+  // SUBMIT REVIEW / ULASAN
+  // =====================================================
+  static Future<Map<String, dynamic>?> submitReview({
+    required int orderId,
+    required int productId,
+    required int rating,
+    required String komentarAroma,
+    String? komentarPengiriman,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/review'),
+        headers: await _authHeaders(),
+        body: {
+          'pemesanan_id': orderId.toString(),
+          'produk_id': productId.toString(),
+          'rating': rating.toString(),
+          'komentar_aroma': komentarAroma,
+          'komentar_pengiriman': komentarPengiriman ?? '',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 400 || response.statusCode == 500) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error submitReview: $e');
+      return null;
+    }
+  }
+
+  // =====================================================
+  // GET PRODUCT REVIEW SUMMARY
+  // =====================================================
+  static Future<Map<String, dynamic>?> getProductReviewSummary(int productId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/produk/$productId/review-summary'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error getProductReviewSummary: $e');
       return null;
     }
   }

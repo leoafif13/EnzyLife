@@ -64,7 +64,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
           _MenuSection(title: 'Akun Saya', items: [
             _MenuItem(icon: Icons.person_outline_rounded,   label: 'Edit Profil',        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfilScreen()))),
             _MenuItem(icon: Icons.lock_outline_rounded,     label: 'Ubah Password',      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UbahPasswordScreen()))),
-            _MenuItem(icon: Icons.shopping_bag_outlined,    label: 'Riwayat Pembelian',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()))),
+            _MenuItem(icon: Icons.shopping_bag_outlined,    label: 'Riwayat Belanja',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()))),
           ]),
           const SizedBox(height: 12),
           _MenuSection(title: 'Lainnya', items: [

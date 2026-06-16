@@ -118,13 +118,11 @@ class CheckoutController extends Controller
         ], 500);
     }
 }
-
 public function history()
 {
-    // Auto-expire unpaid online orders older than 24 hours globally
     Pemesanan::expireUnpaidOrders();
 
-    $orders = Pemesanan::with(['detailPemesanan.produk', 'pembayaran'])
+    $orders = Pemesanan::with(['detailPemesanan.produk', 'pembayaran', 'review', 'reviews'])
         ->where('user_id', auth()->id())
         ->orderBy('created_at', 'desc')
         ->get();
@@ -134,7 +132,6 @@ public function history()
         'data' => $orders
     ]);
 }
-
 public function cancel($id)
 {
     $pemesanan = Pemesanan::where('user_id', auth()->id())
