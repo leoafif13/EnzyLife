@@ -12,6 +12,11 @@ class Product extends Model
         'deskripsi',
         'stok',
         'gambar',
+        'spesifikasi',
+    ];
+
+    protected $casts = [
+        'spesifikasi' => 'array',
     ];
 
     public function detailPemesanan()

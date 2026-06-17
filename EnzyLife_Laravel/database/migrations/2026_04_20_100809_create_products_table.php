@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('deskripsi');
             $table->integer('stok');
             $table->string('gambar');
+            $table->json('spesifikasi')->nullable();
             $table->timestamps();
         });
     }

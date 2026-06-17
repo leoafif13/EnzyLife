@@ -9,6 +9,7 @@ import '../services/format_helper.dart';
 import '../widgets/zoomable_image_dialog.dart';
 import 'widgets/review_tile.dart';
 import 'widgets/sentimen_ai_card.dart';
+import 'widgets/spec_card.dart';
 import '../services/api_service.dart';
 import 'semua_ulasan_page.dart';
 
@@ -80,6 +81,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _refreshBadge() => setState(() {});
+
+  IconData _getSpecIcon(String key) {
+    final lowerKey = key.toLowerCase();
+    if (lowerKey.contains('vol') || lowerKey.contains('isi') || lowerKey.contains('ukuran')) {
+      return Icons.opacity_rounded;
+    } else if (lowerKey.contains('kemas') || lowerKey.contains('wadah')) {
+      return Icons.inventory_2_rounded;
+    } else if (lowerKey.contains('kadal') || lowerKey.contains('expired') || lowerKey.contains('exp') || lowerKey.contains('waktu') || lowerKey.contains('simpan')) {
+      return Icons.calendar_today_rounded;
+    } else if (lowerKey.contains('arom') || lowerKey.contains('bau') || lowerKey.contains('wangi')) {
+      return Icons.local_florist_rounded;
+    } else if (lowerKey.contains('bahan') || lowerKey.contains('komposisi')) {
+      return Icons.science_rounded;
+    } else if (lowerKey.contains('fermentasi') || lowerKey.contains('lama')) {
+      return Icons.hourglass_empty_rounded;
+    }
+    return Icons.info_outline_rounded;
+  }
 
   // Dummy gambar carousel (placeholder)
   static const _imageCount = 1;
@@ -363,6 +382,89 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Text(
                           p.description,
                           style: const TextStyle(fontSize: 13, color: Color(0xFF555555), height: 1.6),
+                        ),
+                        Builder(
+                          builder: (context) {
+                            final Map<String, dynamic> activeSpecs = {};
+                            if (p.spesifikasi != null) {
+                              p.spesifikasi!.forEach((key, val) {
+                                if (val != null &&
+                                    val.toString().trim().isNotEmpty &&
+                                    val.toString().trim().toLowerCase() != 'null') {
+                                  activeSpecs[key] = val;
+                                }
+                              });
+                            }
+
+                            if (activeSpecs.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 16),
+                                const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                                const SizedBox(height: 16),
+                                const Text('Spesifikasi Produk',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
+                                const SizedBox(height: 12),
+                                Column(
+                                  children: List.generate(
+                                    (activeSpecs.length / 2).ceil(),
+                                    (index) {
+                                      final i = index * 2;
+                                      final key1 = activeSpecs.keys.elementAt(i);
+                                      final val1 = activeSpecs[key1]?.toString() ?? '';
+
+                                      final hasSecond = i + 1 < activeSpecs.length;
+                                      final key2 = hasSecond ? activeSpecs.keys.elementAt(i + 1) : null;
+                                      final val2 = hasSecond ? activeSpecs[key2]?.toString() ?? '' : '';
+
+                                      return Padding(
+                                        padding: EdgeInsets.only(bottom: index == (activeSpecs.length / 2).ceil() - 1 ? 0 : 10),
+                                        child: IntrinsicHeight(
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                            children: hasSecond
+                                                ? [
+                                                    Expanded(
+                                                      child: SpecCard(
+                                                        label: key1,
+                                                        value: val1,
+                                                        icon: _getSpecIcon(key1),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    Expanded(
+                                                      child: SpecCard(
+                                                        label: key2!,
+                                                        value: val2,
+                                                        icon: _getSpecIcon(key2),
+                                                      ),
+                                                    ),
+                                                  ]
+                                                : [
+                                                    const Spacer(flex: 1),
+                                                    Expanded(
+                                                      flex: 2,
+                                                      child: SpecCard(
+                                                        label: key1,
+                                                        value: val1,
+                                                        icon: _getSpecIcon(key1),
+                                                      ),
+                                                    ),
+                                                    const Spacer(flex: 1),
+                                                  ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),

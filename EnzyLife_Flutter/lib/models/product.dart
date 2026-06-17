@@ -9,6 +9,7 @@ class Product {
   final int salesCount;
   final double ratingAvg;
   final int ratingCount;
+  final Map<String, dynamic>? spesifikasi;
 
   const Product({
     required this.id,
@@ -21,6 +22,7 @@ class Product {
     this.salesCount = 0,
     this.ratingAvg = 0.0,
     this.ratingCount = 0,
+    this.spesifikasi,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class Product {
       salesCount: double.parse((json['sales_count'] ?? 0).toString()).toInt(),
       ratingAvg: double.parse((json['rating_avg'] ?? 0.0).toString()),
       ratingCount: int.parse((json['rating_count'] ?? 0).toString()),
+      spesifikasi: json['spesifikasi'] is Map ? Map<String, dynamic>.from(json['spesifikasi']) : null,
     );
   }
 }

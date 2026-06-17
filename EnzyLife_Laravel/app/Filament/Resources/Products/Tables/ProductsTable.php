@@ -22,6 +22,15 @@ class ProductsTable
                     ->money('IDR'),
                 Tables\Columns\TextColumn::make('deskripsi')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('spesifikasi.Volume')
+                    ->label('Volume'),
+                Tables\Columns\TextColumn::make('spesifikasi.Bahan')
+                    ->label('Bahan Utama')
+                    ->limit(30),
+                Tables\Columns\TextColumn::make('spesifikasi.Lama Fermentasi')
+                    ->label('Lama Fermentasi'),
+                Tables\Columns\TextColumn::make('spesifikasi.Masa Simpan')
+                    ->label('Masa Simpan'),
                 Tables\Columns\TextColumn::make('stok')
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('gambar')
