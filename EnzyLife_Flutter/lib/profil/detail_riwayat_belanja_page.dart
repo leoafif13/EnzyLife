@@ -305,6 +305,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                           existingRating: item.existingRating,
                           existingComment: item.existingComment,
                           existingTags: item.existingTags,
+                          isPickup: _order.metodePembayaran == 'COD' && _order.jenisCod == 'AMBIL_TEMPAT',
                         ),
                       ),
                     );
@@ -327,7 +328,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Text(
-                    _order.items.every((item) => item.isReviewed) ? 'Ubah Ulasan' : 'Beri Ulasan',
+                    _order.items.every((item) => item.isReviewed) ? 'Lihat Ulasan' : 'Beri Ulasan',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               ),
             ),
@@ -805,6 +806,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                                           existingRating: item.existingRating,
                                           existingComment: item.existingComment,
                                           existingTags: item.existingTags,
+                                          isPickup: order.metodePembayaran == 'COD' && order.jenisCod == 'AMBIL_TEMPAT',
                                         ),
                                       ),
                                     );
@@ -819,7 +821,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
                                   child: const Text(
-                                    'Ubah',
+                                    'Lihat',
                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                                   ),
                                 )
@@ -832,6 +834,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                                           productName: prod.name,
                                           orderId: order.id.toString(),
                                           productId: prod.id,
+                                          isPickup: order.metodePembayaran == 'COD' && order.jenisCod == 'AMBIL_TEMPAT',
                                         ),
                                       ),
                                     );

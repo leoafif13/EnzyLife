@@ -499,6 +499,7 @@ class _OrderActions extends StatelessWidget {
                           existingRating: item.existingRating,
                           existingComment: item.existingComment,
                           existingTags: item.existingTags,
+                          isPickup: order.metodePembayaran == 'COD' && order.jenisCod == 'AMBIL_TEMPAT',
                         ),
                       ),
                     );
@@ -517,7 +518,7 @@ class _OrderActions extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: Text(
-                    order.items.every((item) => item.isReviewed) ? 'Ubah Ulasan' : 'Beri Ulasan',
+                    order.items.every((item) => item.isReviewed) ? 'Lihat Ulasan' : 'Beri Ulasan',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               ),
             ),
@@ -707,6 +708,7 @@ class _OrderActions extends StatelessWidget {
                                           existingRating: item.existingRating,
                                           existingComment: item.existingComment,
                                           existingTags: item.existingTags,
+                                          isPickup: order.metodePembayaran == 'COD' && order.jenisCod == 'AMBIL_TEMPAT',
                                         ),
                                       ),
                                     );
@@ -721,7 +723,7 @@ class _OrderActions extends StatelessWidget {
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
                                   child: const Text(
-                                    'Ubah',
+                                    'Lihat',
                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                                   ),
                                 )
@@ -734,6 +736,7 @@ class _OrderActions extends StatelessWidget {
                                           productName: prod.name,
                                           orderId: order.id.toString(),
                                           productId: prod.id,
+                                          isPickup: order.metodePembayaran == 'COD' && order.jenisCod == 'AMBIL_TEMPAT',
                                         ),
                                       ),
                                     );

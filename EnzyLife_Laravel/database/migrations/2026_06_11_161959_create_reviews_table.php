@@ -19,13 +19,14 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('pemesanan_id')
-                ->unique()
                 ->constrained('pemesanan')
                 ->cascadeOnDelete();
 
             $table->foreignId('produk_id')
                 ->constrained('products')
                 ->cascadeOnDelete();
+
+            $table->unique(['pemesanan_id', 'produk_id']);
 
             $table->tinyInteger('rating');
 
