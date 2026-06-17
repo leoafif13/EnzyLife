@@ -9,7 +9,7 @@ use App\Filament\Resources\Ulasans\Pages\ViewUlasan;
 use App\Filament\Resources\Ulasans\Schemas\UlasanForm;
 use App\Filament\Resources\Ulasans\Schemas\UlasanInfolist;
 use App\Filament\Resources\Ulasans\Tables\UlasansTable;
-use App\Models\Ulasan;
+use App\Models\Review;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

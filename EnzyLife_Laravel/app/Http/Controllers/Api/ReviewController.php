@@ -62,12 +62,12 @@ class ReviewController extends Controller
                 $sentimentLabel = $sentiment['label'];
                 $sentimentScore = $sentiment['score'];
             } else {
-                $sentimentLabel = $request->rating >= 4 ? 'positif' : ($request->rating == 3 ? 'netral' : 'negatif');
-                $sentimentScore = 100.0;
+                $sentimentLabel = null;
+                $sentimentScore = null;
             }
         } catch (\Exception $e) {
-            $sentimentLabel = $request->rating >= 4 ? 'positif' : ($request->rating == 3 ? 'netral' : 'negatif');
-            $sentimentScore = 100.0;
+            $sentimentLabel = null;
+            $sentimentScore = null;
         }
 
         $review = Review::where('pemesanan_id', $pemesanan->id)
@@ -104,7 +104,10 @@ class ReviewController extends Controller
 
     public function sentimentByProduct($produkId)
     {
-        $reviews = Review::with('user')->where('produk_id', $produkId)->get();
+        $reviews = Review::with('user')
+            ->where('produk_id', $produkId)
+            ->whereNotNull('sentiment_label')
+            ->get();
 
         $total = $reviews->count();
 
@@ -173,7 +176,10 @@ class ReviewController extends Controller
 
     public function reviewSummary($produkId)
     {
-        $reviews = Review::with('user')->where('produk_id', $produkId)->get();
+        $reviews = Review::with('user')
+            ->where('produk_id', $produkId)
+            ->whereNotNull('sentiment_label')
+            ->get();
 
         $total = $reviews->count();
 
@@ -244,6 +250,47 @@ class ReviewController extends Controller
                     ])
                     ->values(),
             ]
+        ]);
+    }
+
+    public function reanalyze()
+    {
+        $reviews = Review::whereNull('sentiment_label')
+            ->get();
+
+        $processed = 0;
+
+        foreach ($reviews as $review) {
+
+            try {
+
+                $response = Http::timeout(5)->post(
+                    'http://127.0.0.1:8001/predict',
+                    [
+                        'komentar' => $review->komentar_aroma
+                    ]
+                );
+
+                if ($response->successful()) {
+
+                    $sentiment = $response->json();
+
+                    $review->update([
+                        'sentiment_label' => $sentiment['label'],
+                        'sentiment_score' => $sentiment['score'],
+                    ]);
+
+                    $processed++;
+                }
+
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'processed' => $processed
         ]);
     }
 }

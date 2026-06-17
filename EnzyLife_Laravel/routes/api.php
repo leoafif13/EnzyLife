@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/review', [ReviewController::class, 'store']);
         Route::get('/produk/{produk}/sentiment', [ReviewController::class, 'sentimentByProduct']);
         Route::get('/produk/{produk}/review-summary', [ReviewController::class, 'reviewSummary']);
+        Route::post('/reviews/reanalyze', [ReviewController::class, 'reanalyze']);
     });
 });
 
