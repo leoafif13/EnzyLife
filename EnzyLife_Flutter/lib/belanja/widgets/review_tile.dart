@@ -4,21 +4,25 @@ class Review {
   final String name, comment, date;
   final String? shippingComment;
   final int rating;
+  final String? sentiment; // 'positif', 'netral', or 'negatif'
+
   const Review({
     required this.name,
     required this.rating,
     required this.comment,
     this.shippingComment,
     required this.date,
+    this.sentiment,
   });
 
-  factory Review.fromJson(Map<String, dynamic> json) {
+  factory Review.fromJson(Map<String, dynamic> json, {String? sentiment}) {
     return Review(
       name: json['nama_user'] ?? 'Anonim',
       rating: json['rating'] ?? 5,
       comment: json['komentar'] ?? '',
       shippingComment: json['komentar_pengiriman'],
       date: json['tanggal'] ?? '',
+      sentiment: sentiment ?? json['sentiment'],
     );
   }
 }

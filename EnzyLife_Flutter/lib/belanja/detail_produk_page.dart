@@ -10,6 +10,7 @@ import '../widgets/zoomable_image_dialog.dart';
 import 'widgets/review_tile.dart';
 import 'widgets/sentimen_ai_card.dart';
 import '../services/api_service.dart';
+import 'semua_ulasan_page.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -53,15 +54,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       
       if (rawComments.containsKey('positif')) {
         final list = rawComments['positif'] as List? ?? [];
-        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x))));
+        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x), sentiment: 'positif')));
       }
       if (rawComments.containsKey('netral')) {
         final list = rawComments['netral'] as List? ?? [];
-        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x))));
+        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x), sentiment: 'netral')));
       }
       if (rawComments.containsKey('negatif')) {
         final list = rawComments['negatif'] as List? ?? [];
-        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x))));
+        allReviews.addAll(list.map((x) => Review.fromJson(Map<String, dynamic>.from(x), sentiment: 'negatif')));
       }
 
       setState(() {
@@ -384,7 +385,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             const Text('Ulasan Pembeli',
                                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
                             TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => SemuaUlasanScreen(reviews: _fetchedReviews),
+                                  ),
+                                );
+                              },
                               style: TextButton.styleFrom(foregroundColor: AppColors.green500, padding: EdgeInsets.zero,
                                   minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                               child: const Text('Lihat semua', style: TextStyle(fontSize: 13)),
@@ -479,7 +486,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                             )
                           else
-                            ..._fetchedReviews.map((r) => ReviewTile(review: r)),
+                            ..._fetchedReviews.take(5).map((r) => ReviewTile(review: r)),
                         ],
                       ],
                     ),
