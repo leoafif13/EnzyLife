@@ -69,7 +69,8 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
     final filteredArtikelCount = _artikel.where((item) {
       if (_query.isEmpty) return true;
       return item.judul.toLowerCase().contains(_query.toLowerCase()) ||
-          item.ringkasan.toLowerCase().contains(_query.toLowerCase());
+          item.ringkasan.toLowerCase().contains(_query.toLowerCase()) ||
+          item.kategori.toLowerCase().contains(_query.toLowerCase());
     }).length;
 
     final filteredInfografikCount = _infografik.where((item) {
@@ -121,7 +122,8 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
       if (_query.isEmpty) return true;
 
       return item.judul.toLowerCase().contains(_query.toLowerCase()) ||
-          item.ringkasan.toLowerCase().contains(_query.toLowerCase());
+          item.ringkasan.toLowerCase().contains(_query.toLowerCase()) ||
+          item.kategori.toLowerCase().contains(_query.toLowerCase());
     }).toList();
 
     final filteredInfografik = _infografik.where((item) {
@@ -331,7 +333,7 @@ class _ArtikelCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      item.kategori.toUpperCase(),
+                      item.kategori.split(',').first.trim().toUpperCase(),
                       style: const TextStyle(
                         color: AppColors.green700,
                         fontSize: 9,

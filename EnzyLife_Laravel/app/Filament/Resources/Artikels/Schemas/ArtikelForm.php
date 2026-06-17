@@ -45,6 +45,12 @@ class ArtikelForm
                     ->label('Kategori')
                     ->placeholder('Contoh: Tips, Pertanian, Pengenalan')
                     ->maxLength(100),
+
+                Forms\Components\TextInput::make('tautan')
+                    ->label('Tautan / Link Artikel')
+                    ->url()
+                    ->placeholder('Contoh: https://example.com/artikel')
+                    ->maxLength(255),
             ]);
     }
 }

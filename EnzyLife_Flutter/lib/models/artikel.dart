@@ -7,6 +7,7 @@ class ArtikelModel {
   final String gambar;
   final String kategori;
   final String createdAt;
+  final String? tautan;
 
   ArtikelModel({
     required this.id,
@@ -16,6 +17,7 @@ class ArtikelModel {
     required this.gambar,
     required this.kategori,
     required this.createdAt,
+    this.tautan,
   });
 
   factory ArtikelModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,8 @@ class ArtikelModel {
       kategori: json['kategori'] ?? '',
 
       createdAt: json['created_at'] ?? '',
+
+      tautan: json['tautan'],
     );
   }
 }

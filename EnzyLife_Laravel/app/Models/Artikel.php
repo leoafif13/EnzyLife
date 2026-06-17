@@ -16,5 +16,6 @@ class Artikel extends Model
         'isi_konten',
         'gambar',
         'kategori',
+        'tautan',
     ];
 }

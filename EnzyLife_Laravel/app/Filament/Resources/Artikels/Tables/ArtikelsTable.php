@@ -39,7 +39,15 @@ class ArtikelsTable
                 Tables\Columns\TextColumn::make('kategori')
                     ->label('Kategori')
                     ->badge()
+                    ->separator(',')
                     ->color('success'),
+
+                Tables\Columns\TextColumn::make('tautan')
+                    ->label('Tautan / Link')
+                    ->url(fn ($record) => $record->tautan)
+                    ->openUrlInNewTab()
+                    ->placeholder('-')
+                    ->limit(30),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')

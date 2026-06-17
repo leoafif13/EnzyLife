@@ -16,43 +16,46 @@ class ArtikelSeeder extends Seeder
         DB::table('artikel')->insert([
 
             [
-                'judul' => 'Apa Itu Eco Enzyme dan Mengapa Semakin Populer?',
-                'ringkasan' => 'Eco enzyme mulai dikenal luas sebagai solusi ramah lingkungan yang murah dan mudah dibuat.',
-                'isi_konten' => 'Eco enzyme adalah cairan hasil fermentasi limbah organik seperti kulit buah dan sayuran yang dicampur dengan gula serta air. Dalam beberapa tahun terakhir, eco enzyme semakin populer karena dianggap sebagai solusi sederhana untuk mengurangi sampah organik rumah tangga sekaligus menghasilkan cairan multifungsi.
-Banyak orang awalnya menganggap eco enzyme hanya sekadar tren lingkungan. Namun setelah dicoba langsung, mereka mulai menyadari bahwa cairan ini benar-benar memiliki banyak manfaat praktis. Eco enzyme dapat digunakan sebagai pupuk alami, cairan pembersih lantai, penghilang bau, hingga campuran untuk perawatan tanaman.
-Proses pembuatannya pun relatif mudah. Bahan utama yang dibutuhkan hanyalah limbah organik segar, gula merah atau molase, dan air bersih. Semua bahan difermentasikan selama kurang lebih tiga bulan di wadah tertutup.
-Meski terlihat sederhana, proses fermentasi menghasilkan berbagai mikroorganisme dan enzim alami yang bermanfaat bagi lingkungan. Karena itu eco enzyme dianggap lebih aman dibanding banyak produk kimia rumah tangga.
-Selain membantu mengurangi limbah dapur, penggunaan eco enzyme juga mulai diterapkan di berbagai komunitas lingkungan, sekolah, dan program edukasi masyarakat sebagai bagian dari gaya hidup berkelanjutan.',
+                'judul' => 'Mengenal Ekoenzim: Cairan Ajaib dari Sampah Organik',
+                'ringkasan' => 'Ternyata sampah dapur bisa diubah jadi cairan pembersih serbaguna! Ketahui rahasia hemat dan ramah lingkungan dengan ekoenzim.',
+                'isi_konten' => 'Mengapa Anda harus mulai membuat ekoenzim hari ini?
+- **Hemat Pengeluaran**: Gantikan pembersih lantai, sabun cuci piring, dan detergen kimia di rumah Anda dengan cairan organik alami yang bebas biaya!
+- **Keluarga Lebih Sehat**: Katakan selamat tinggal pada paparan residu bahan kimia sintetis yang bisa mengiritasi kulit sensitif keluarga Anda.
+- **Aman Bagi Lingkungan**: Air sisa cucian ekoenzim justru membantu membersihkan ekosistem perairan dan tanah di sekitar rumah Anda.
+Tertarik untuk mengetahui sejarah lengkap serta pemanfaatan ekoenzim secara mendalam? Jangan lewatkan pembahasan ensiklopedia tepercaya di link berikut!',
                 'gambar' => 'artikel1.jpg',
-                'kategori' => 'Artikel',
+                'kategori' => 'Edukasi, Informasi',
+                'tautan' => 'https://id.wikipedia.org/wiki/Ekoenzim',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
 
             [
-                'judul' => '5 Kesalahan Umum Saat Membuat Eco Enzyme',
-                'ringkasan' => 'Banyak pemula gagal membuat eco enzyme karena kesalahan sederhana yang sebenarnya bisa dihindari.',
-                'isi_konten' => 'Membuat eco enzyme memang terlihat mudah, tetapi banyak orang gagal pada percobaan pertama karena kurang memahami proses fermentasi yang benar. Salah satu kesalahan paling umum adalah menggunakan bahan organik yang sudah membusuk. Padahal bahan yang terlalu busuk dapat menghasilkan aroma yang tidak normal dan merusak fermentasi.
-Kesalahan kedua adalah rasio bahan yang tidak sesuai. Eco enzyme memiliki perbandingan dasar 1:3:10, yaitu satu bagian gula, tiga bagian limbah organik, dan sepuluh bagian air. Jika perbandingan ini tidak tepat, proses fermentasi bisa terganggu.
-Selain itu, banyak orang menggunakan wadah terlalu penuh tanpa menyisakan ruang udara. Padahal selama fermentasi akan terbentuk gas yang cukup banyak. Jika wadah terlalu penuh, tutup bisa terbuka sendiri atau bahkan wadah rusak.
-Kesalahan lainnya adalah terlalu sering membuka wadah. Banyak pemula penasaran dan terus mengecek isi fermentasi setiap hari. Akibatnya bakteri dari luar masuk dan mengganggu proses alami di dalam wadah.
-Terakhir, kurang sabar juga menjadi masalah utama. Eco enzyme membutuhkan waktu minimal tiga bulan agar fermentasi matang sempurna. Membuka atau menggunakan cairan terlalu cepat biasanya menghasilkan kualitas yang kurang baik.',
+                'judul' => 'Rahasia Kebun Subur dan Bebas Hama dengan Eco-Enzyme Cair',
+                'ringkasan' => 'Bosan tanaman layu atau diserang hama? Ini dia cara ampuh menyuburkan tanaman hias secara organik menggunakan eco-enzyme!',
+                'isi_konten' => 'Ingin kebun atau tanaman hias Anda tumbuh subur, hijau royo-royo, dan terbebas dari hama tanpa pestisida kimia beracun? Eco-enzyme adalah jawabannya!
+- **Nutrisi Tanaman Alami**: Berfungsi sebagai pupuk organik cair yang sangat kaya akan nutrisi makro untuk mempercepat pertumbuhan daun dan akar.
+- **Pestisida Alami yang Ampuh**: Sifat asam organiknya ampuh mengusir hama tanaman pengganggu tanpa merusak keseimbangan ekosistem tanah.
+- **Sangat Mudah & Murah**: Hanya butuh sisa sayur/kulit buah segar, molase/gula merah, dan air bersih dengan perbandingan emas 1:3:10.
+Ingin tahu panduan praktis gaya hidup minim sampah dan pengolahan eco-enzyme selengkapnya? Baca tips berkebun organik di tautan resmi berikut!',
                 'gambar' => 'artikel2.jpg',
-                'kategori' => 'Artikel',
+                'kategori' => 'Eco Enzyme, Pertanian, Rumah Tangga',
+                'tautan' => 'https://zerowaste.id/zero-waste-lifestyle/eco-enzyme/',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
 
             [
-                'judul' => 'Workshop Eco Enzyme di Sekolah Mulai Diminati',
-                'ringkasan' => 'Program edukasi eco enzyme mulai diterapkan di berbagai sekolah sebagai bagian dari pendidikan lingkungan.',
-                'isi_konten' => 'Kesadaran terhadap pentingnya pengelolaan sampah organik mulai meningkat di lingkungan sekolah. Salah satu program yang kini banyak diterapkan adalah workshop pembuatan eco enzyme untuk siswa.
-Melalui kegiatan ini, siswa diajarkan bagaimana limbah dapur yang biasanya dibuang ternyata masih memiliki nilai guna tinggi. Kulit buah, sisa sayuran, dan bahan organik lainnya dapat diolah menjadi cairan fermentasi multifungsi yang ramah lingkungan.
-Beberapa sekolah bahkan menjadikan program ini sebagai proyek rutin bulanan. Selain mengurangi sampah kantin, kegiatan tersebut juga membantu siswa memahami konsep daur ulang dan keberlanjutan secara langsung.
-Guru pendamping mengaku siswa lebih antusias belajar ketika praktik dilakukan secara nyata dibanding hanya membaca teori di kelas. Mereka dapat melihat sendiri proses fermentasi dan perubahan yang terjadi dari waktu ke waktu.
-Program seperti ini dinilai efektif membangun kebiasaan peduli lingkungan sejak usia dini. Banyak orang tua siswa juga mulai tertarik mencoba membuat eco enzyme di rumah setelah melihat hasil karya anak-anak mereka.',
+                'judul' => 'Manfaat Hebat Eco-Enzyme Bagi Lingkungan dan Kesehatan',
+                'ringkasan' => 'Ingin tahu apa saja manfaat medis dan ekologis dari eco-enzyme? Yuk pelajari kegunaan cairan serbaguna ini bagi tubuh dan lingkungan sekitar!',
+                'isi_konten' => 'Eco-enzyme tidak hanya membantu melestarikan bumi kita, tetapi juga memiliki peranan penting bagi kebersihan harian keluarga Anda:
+- **Pembersih Serbaguna**: Alternatif pembersih lantai, kompor, toilet, hingga detergen pakaian ramah lingkungan dengan sifat antibakteri alami.
+- **Detoksifikasi Lingkungan**: Membantu menurunkan angka kuman udara, menjernihkan air tercemar, dan mereduksi tumpukan sampah makanan di TPA.
+- **Keamanan Penggunaan**: Pelajari batasan dan cara aman penggunaannya agar tidak menimbulkan iritasi pada kulit sensitif keluarga Anda.
+Hindari kesalahan fatal dalam pengaplikasiannya dengan membaca ulasan kesehatan dan petunjuk medis tepercaya di tautan resmi berikut!',
                 'gambar' => 'artikel3.jpg',
-                'kategori' => 'Artikel',
+                'kategori' => 'Edukasi, Kesehatan, Lingkungan',
+                'tautan' => 'https://www.halodoc.com/artikel/mengenal-eco-enzyme-dan-manfaatnya-bagi-lingkungan',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

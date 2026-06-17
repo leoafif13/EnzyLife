@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/artikel.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
@@ -9,6 +10,25 @@ class DetailArtikelPage extends StatelessWidget {
   final ArtikelModel item;
   const DetailArtikelPage({super.key, required this.item});
 
+  Future<void> _launchURL(BuildContext context, String urlString) async {
+    try {
+      final Uri url = Uri.parse(urlString.trim());
+      final bool launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw 'Could not launch $urlString';
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Tidak dapat membuka link: $urlString'),
+            backgroundColor: Colors.red[800],
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final body = item.isiKonten;
@@ -16,7 +36,7 @@ class DetailArtikelPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: SubPageAppBar(
-        title: item.kategori,
+        title: item.kategori.split(',').first.trim(),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -60,7 +80,7 @@ class DetailArtikelPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        item.kategori,
+                        item.kategori.split(',').first.trim(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -155,8 +175,13 @@ class DetailArtikelPage extends StatelessWidget {
                   // Tags
                   Wrap(
                     spacing: 8, runSpacing: 8,
-                    children: ['Eco Enzim', item.kategori, 'EnzyLife']
-                        .map((tag) => Container(
+                    children: {
+                      ...item.kategori
+                          .split(',')
+                          .map((t) => t.trim())
+                          .where((t) => t.isNotEmpty),
+                      'EnzyLife',
+                    }.map((tag) => Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                               decoration: BoxDecoration(
                                 color: AppColors.bgPage,
@@ -168,6 +193,29 @@ class DetailArtikelPage extends StatelessWidget {
                             ))
                         .toList(),
                   ),
+                  if (item.tautan != null &&
+                      item.tautan!.trim().isNotEmpty &&
+                      item.tautan!.trim().toLowerCase() != 'null') ...[
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _launchURL(context, item.tautan!),
+                        icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                        label: const Text('Baca Selengkapnya di Sumber Resmi',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.green500,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -199,6 +247,26 @@ class _ArticleBody extends StatelessWidget {
   final String body;
   const _ArticleBody({required this.body});
 
+  TextSpan _parseInlineMarkdown(String text, TextStyle baseStyle) {
+    final spans = <TextSpan>[];
+    final regExp = RegExp(r'\*\*(.*?)\*\*');
+    int start = 0;
+    for (final match in regExp.allMatches(text)) {
+      if (match.start > start) {
+        spans.add(TextSpan(text: text.substring(start, match.start), style: baseStyle));
+      }
+      spans.add(TextSpan(
+        text: match.group(1),
+        style: baseStyle.copyWith(fontWeight: FontWeight.bold),
+      ));
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start), style: baseStyle));
+    }
+    return TextSpan(children: spans);
+  }
+
   @override
   Widget build(BuildContext context) {
     final lines = body.trim().split('\n');
@@ -223,16 +291,26 @@ class _ArticleBody extends StatelessWidget {
             children: [
               Container(width: 5, height: 5, margin: const EdgeInsets.only(top: 7, right: 8),
                   decoration: const BoxDecoration(color: AppColors.green500, shape: BoxShape.circle)),
-              Expanded(child: Text(line.substring(2),
-                  style: const TextStyle(fontSize: 13, color: AppColors.text2, height: 1.6))),
+              Expanded(
+                child: RichText(
+                  text: _parseInlineMarkdown(
+                    line.substring(2),
+                    const TextStyle(fontSize: 13, color: AppColors.text2, height: 1.6),
+                  ),
+                ),
+              ),
             ],
           ),
         ));
       } else {
         widgets.add(Padding(
           padding: const EdgeInsets.only(bottom: 4),
-          child: Text(line,
-              style: const TextStyle(fontSize: 13, color: AppColors.text2, height: 1.7)),
+          child: RichText(
+            text: _parseInlineMarkdown(
+              line,
+              const TextStyle(fontSize: 13, color: AppColors.text2, height: 1.7),
+            ),
+          ),
         ));
       }
     }
