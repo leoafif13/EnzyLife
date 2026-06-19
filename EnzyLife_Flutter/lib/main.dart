@@ -68,17 +68,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-
-  final _pages = <Widget>[
-    HomeScreen(),
-    EducationScreen(),
-    BelanjaScreen(),
-    ProfilScreen(),
-  ];
+  final List<bool> _activatedPages = [true, false, false, false];
 
   void _onTabTap(int index) {
     setState(() {
       _selectedIndex = index;
+      _activatedPages[index] = true;
     });
   }
 
@@ -104,7 +99,12 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: [
+          const HomeScreen(),
+          _activatedPages[1] ? const EducationScreen() : const SizedBox.shrink(),
+          _activatedPages[2] ? const BelanjaScreen() : const SizedBox.shrink(),
+          _activatedPages[3] ? const ProfilScreen() : const SizedBox.shrink(),
+        ],
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
@@ -139,8 +139,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = await AuthService.getUser();
 
     if (user != null) {
+      final rawName = user['name']?.toString().trim() ?? '';
       setState(() {
-        userName = user['name'];
+        userName = (rawName.isEmpty || rawName == '-') ? 'Pengguna Baru' : rawName;
       });
     }
   }

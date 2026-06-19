@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../services/midtrans_helper.dart';
 import '../services/format_helper.dart';
 import '../widgets/purchase_bottom_sheet.dart';
+import '../services/invoice_helper.dart';
 import 'ulasan_page.dart';
 import 'riwayat_belanja_page.dart';
 
@@ -137,7 +138,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
     }
   }
 
-  Future<void> _cancelOrder(BuildContext context) async {
+  Future<void> _cancelOrder() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -263,63 +264,106 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
           );
         }
 
-        return Row(
+        return Column(
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  final product = firstItem?.product;
-                  if (product != null) {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                      ),
-                      builder: (_) => PurchaseBottomSheet(product: product),
-                    );
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.green500),
-                  foregroundColor: AppColors.green500,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      final product = firstItem?.product;
+                      if (product != null) {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                          ),
+                          builder: (_) => PurchaseBottomSheet(product: product),
+                        );
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.green500),
+                      foregroundColor: AppColors.green500,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Beli lagi',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
                 ),
-                child: const Text('Beli lagi',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (_order.items.length == 1) {
+                        final item = _order.items.first;
+                        final refresh = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            builder: (_) => UlasanScreen(
+                              productName: item.product?.name ?? 'Eco Enzim',
+                              orderId: _order.id.toString(),
+                              productId: item.product?.id ?? 0,
+                              existingRating: item.existingRating,
+                              existingComment: item.existingComment,
+                              existingTags: item.existingTags,
+                              isPickup: _order.metodePembayaran == 'COD' && _order.jenisCod == 'AMBIL_TEMPAT',
+                            ),
+                          ),
+                        );
+                        if (refresh == true) {
+                          setState(() => _hasPaid = true);
+                          _reloadOrder();
+                        }
+                      } else {
+                        _showProductSelectionSheet(context, _order, () {
+                          setState(() => _hasPaid = true);
+                          _reloadOrder();
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.green500,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                        _order.items.every((item) => item.isReviewed) ? 'Lihat Ulasan' : 'Beri Ulasan',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (_order.items.length == 1) {
-                    final item = _order.items.first;
-                    final refresh = await Navigator.of(context).push<bool>(
-                      MaterialPageRoute(
-                        builder: (_) => UlasanScreen(
-                          productName: item.product?.name ?? 'Eco Enzim',
-                          orderId: _order.id.toString(),
-                          productId: item.product?.id ?? 0,
-                          existingRating: item.existingRating,
-                          existingComment: item.existingComment,
-                          existingTags: item.existingTags,
-                          isPickup: _order.metodePembayaran == 'COD' && _order.jenisCod == 'AMBIL_TEMPAT',
-                        ),
-                      ),
-                    );
-                    if (refresh == true) {
-                      setState(() => _hasPaid = true);
-                      _reloadOrder();
-                    }
-                  } else {
-                    _showProductSelectionSheet(context, _order, () {
-                      setState(() => _hasPaid = true);
-                      _reloadOrder();
-                    });
-                  }
-                },
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        setState(() => _isLoading = true);
+                        try {
+                          await InvoiceHelper.printInvoice(_order);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Gagal mencetak invoice: $e'),
+                                backgroundColor: Colors.red[800],
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isLoading = false);
+                          }
+                        }
+                      },
+                icon: const Icon(Icons.print_rounded, size: 16),
+                label: const Text('Cetak Invoice', style: TextStyle(fontWeight: FontWeight.w600)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green500,
                   foregroundColor: Colors.white,
@@ -327,9 +371,6 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(
-                    _order.items.every((item) => item.isReviewed) ? 'Lihat Ulasan' : 'Beri Ulasan',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -348,7 +389,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
               if (canCancel)
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: _isLoading ? null : () => _cancelOrder(context),
+                    onPressed: _isLoading ? null : _cancelOrder,
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: Colors.red[300]!),
                       foregroundColor: Colors.red[400],
@@ -368,6 +409,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                     onPressed: _isLoading
                         ? null
                         : () async {
+                            final messenger = ScaffoldMessenger.of(context);
                             if (_order.snapToken != null) {
                               setState(() => _isLoading = true);
                               await MidtransPayHelper.pay(_order.snapToken!);
@@ -376,7 +418,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                               if (verifyRes != null && verifyRes['success'] == true) {
                                 _reloadOrder();
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                messenger.showSnackBar(
                                   SnackBar(
                                     content: Text(verifyRes?['message'] ?? 'Pembayaran belum diselesaikan atau sedang diproses.'),
                                     backgroundColor: Colors.orange[850],
@@ -661,29 +703,48 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
             const SizedBox(height: 16),
 
             // Rincian Pembayaran Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.bgCard,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Rincian Pembayaran',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.text1,
-                    ),
+            Builder(
+              builder: (context) {
+                final int subtotal = _order.items.fold(0, (sum, item) => sum + item.subtotal);
+                final int ongkir = _order.jenisCod == 'BAYAR_DI_RUMAH' ? 15000 : 0;
+                const int biayaAdmin = 2000;
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgCard,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: AppColors.cardShadow,
                   ),
-                  const SizedBox(height: 14),
-                  _InfoRow(label: 'Total Belanja', value: _fmt(_order.totalHarga), isBold: true),
-                ],
-              ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Rincian Pembayaran',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.text1,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _InfoRow(label: 'Subtotal Belanja', value: _fmt(subtotal)),
+                      const SizedBox(height: 8),
+                      _InfoRow(
+                        label: 'Ongkos Kirim', 
+                        value: ongkir > 0 ? _fmt(ongkir) : 'Gratis',
+                        valueColor: ongkir == 0 ? AppColors.green500 : null,
+                      ),
+                      const SizedBox(height: 8),
+                      _InfoRow(label: 'Biaya Admin', value: _fmt(biayaAdmin)),
+                      const SizedBox(height: 8),
+                      const Divider(color: AppColors.divider),
+                      const SizedBox(height: 8),
+                      _InfoRow(label: 'Total Pembayaran', value: _fmt(_order.totalHarga), isBold: true),
+                    ],
+                  ),
+                );
+              }
             ),
           ],
         ),
@@ -872,11 +933,13 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
   final bool isBold;
+  final Color? valueColor;
 
   const _InfoRow({
     required this.label,
     required this.value,
     this.isBold = false,
+    this.valueColor,
   });
 
   @override
@@ -897,7 +960,7 @@ class _InfoRow extends StatelessWidget {
           style: TextStyle(
             fontSize: isBold ? 15 : 13,
             fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-            color: isBold ? AppColors.green500 : AppColors.text1,
+            color: valueColor ?? (isBold ? AppColors.green500 : AppColors.text1),
           ),
         ),
       ],

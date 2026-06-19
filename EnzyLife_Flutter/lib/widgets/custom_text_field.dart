@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int maxLines;
   final bool readOnly;
+  final TextInputAction? textInputAction;
 
   const CustomTextField({
     super.key,
@@ -18,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.maxLines = 1,
     this.readOnly = false,
+    this.textInputAction,
   });
 
   @override
@@ -29,6 +31,7 @@ class CustomTextField extends StatelessWidget {
       TextField(
         controller: controller, keyboardType: keyboardType, maxLines: maxLines,
         readOnly: readOnly,
+        textInputAction: textInputAction,
         style: const TextStyle(fontSize: 13, color: AppColors.text1),
         decoration: InputDecoration(
           hintText: hint,

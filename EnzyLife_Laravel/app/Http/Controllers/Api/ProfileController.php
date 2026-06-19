@@ -21,7 +21,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:13',
+            'phone' => 'nullable|string|max:15',
             'address' => 'nullable|string',
             'postal_code' => 'nullable|string|max:5',
             'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -43,6 +43,30 @@ class ProfileController extends Controller
         return response()->json([
             'message' => 'Profil berhasil diperbarui',
             'user' => $user
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Password lama salah.'
+            ], 400);
+        }
+
+        $user->forceFill([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ])->save();
+
+        return response()->json([
+            'message' => 'Password berhasil diperbarui.'
         ]);
     }
 }

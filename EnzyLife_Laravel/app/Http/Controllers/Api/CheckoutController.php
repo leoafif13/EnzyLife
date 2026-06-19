@@ -28,7 +28,7 @@ class CheckoutController extends Controller
 
     try {
 
-        $totalHarga = 0;
+        $subtotal = 0;
 
         foreach ($request->items as $item) {
 
@@ -42,8 +42,13 @@ class CheckoutController extends Controller
                 ], 400);
             }
 
-            $totalHarga += $produk->harga * $item['qty'];
+            $subtotal += $produk->harga * $item['qty'];
         }
+
+        // Tambah biaya admin/pajak Rp 2.000 dan ongkir Rp 15.000 jika diantar ke rumah
+        $ongkir = ($request->jenis_cod === 'BAYAR_DI_RUMAH') ? 15000 : 0;
+        $biayaAdmin = 2000;
+        $totalHarga = $subtotal + $ongkir + $biayaAdmin;
 
         $pemesanan = Pemesanan::create([
             'user_id' => auth()->id(),

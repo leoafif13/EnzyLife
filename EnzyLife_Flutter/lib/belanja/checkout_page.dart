@@ -10,6 +10,7 @@ import '../services/midtrans_helper.dart';
 import '../services/format_helper.dart';
 import '../widgets/custom_text_field.dart';
 import 'widgets/method_tile.dart';
+import '../profil/edit_profil_page.dart';
 
 
 class CheckoutPage extends StatefulWidget {
@@ -105,8 +106,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Future<void> _bayar() async {
     if (_method == _DeliveryMethod.diantar) {
-      if (_namaController.text.isEmpty || _alamatController.text.isEmpty ||
-          _kotaController.text.isEmpty || _teleponController.text.isEmpty) {
+      if (_namaController.text.trim().isEmpty || _alamatController.text.trim().isEmpty ||
+          _kotaController.text.trim().isEmpty || _teleponController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: const Text('Lengkapi alamat pengiriman terlebih dahulu'),
           backgroundColor: Colors.red[400],
@@ -115,19 +116,146 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ));
         return;
       }
+
+      if (_namaController.text.trim() == 'Pengguna Baru') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text('Nama penerima tidak boleh "Pengguna Baru"'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ));
+        return;
+      }
+
+      final cleanPhone = _teleponController.text.replaceAll(RegExp(r'\D'), '');
+      if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text('Nomor telepon tidak valid (minimal 10 digit, maksimal 15 digit)'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ));
+        return;
+      }
+
+      if (_kodeposController.text.trim().isNotEmpty) {
+        final cleanZip = _kodeposController.text.trim();
+        if (cleanZip.length != 5 || int.tryParse(cleanZip) == null) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text('Kode pos harus terdiri dari 5 digit angka'),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ));
+          return;
+        }
+      }
     }
+
+    // Tampilkan dialog konfirmasi sebelum memproses pesanan
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: const [
+              Icon(Icons.shopping_bag_outlined, color: AppColors.green500),
+              SizedBox(width: 10),
+              Text(
+                'Konfirmasi Pesanan',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppColors.text1,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Apakah semua data pengiriman dan belanjaan Anda sudah benar?',
+                style: TextStyle(fontSize: 13, color: AppColors.text2, height: 1.5),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.green50,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Total Pembayaran:',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.text1),
+                    ),
+                    Text(
+                      _fmt(_grandTotal),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.green500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey[600],
+              ),
+              child: const Text('Batal', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.green500,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Ya, Buat Pesanan', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
     setState(() => _isLoading = true);
 
     try {
       // Jika diantar, update data profil user terlebih dahulu agar tersimpan di backend
       if (_method == _DeliveryMethod.diantar) {
         final addressFull = '${_alamatController.text}, ${_kotaController.text}';
-        await ApiService.updateProfile(
+        final updateSuccess = await ApiService.updateProfile(
           name: _namaController.text,
           phone: _teleponController.text,
           address: addressFull,
           postalCode: _kodeposController.text,
         );
+        if (!updateSuccess) {
+          setState(() => _isLoading = false);
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text('Gagal memperbarui profil alamat di server. Silakan coba lagi.'),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ));
+          return;
+        }
       }
 
       // Map item pesanan untuk request body
@@ -142,13 +270,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
       final String apiMetodePembayaran =
           _paymentMethod == 'COD (Bayar di Tempat)' ? 'COD' : 'ONLINE';
 
-      // Map jenis COD jika COD dipilih
-      String? apiJenisCod;
-      if (apiMetodePembayaran == 'COD') {
-        apiJenisCod = _method == _DeliveryMethod.ambilSendiri
-            ? 'AMBIL_TEMPAT'
-            : 'BAYAR_DI_RUMAH';
-      }
+      // Map jenis pengambilan/pengiriman (AMBIL_TEMPAT atau BAYAR_DI_RUMAH)
+      final String apiJenisCod = _method == _DeliveryMethod.ambilSendiri
+          ? 'AMBIL_TEMPAT'
+          : 'BAYAR_DI_RUMAH';
 
       final res = await ApiService.checkout(
         items: requestItems,
@@ -365,7 +490,78 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           label: 'Diantar ke Rumah',
                           desc: 'Ongkos kirim ${_fmt(_ongkir)}',
                           selected: _method == _DeliveryMethod.diantar,
-                          onTap: () => setState(() => _method = _DeliveryMethod.diantar),
+                          onTap: () async {
+                            final hasName = _namaController.text.trim().isNotEmpty &&
+                                _namaController.text.trim() != 'Pengguna Baru';
+                            final hasPhone = _teleponController.text.trim().isNotEmpty;
+                            final hasAddress = _alamatController.text.trim().isNotEmpty;
+
+                            if (!hasName || !hasPhone || !hasAddress) {
+                              final navigator = Navigator.of(context);
+                              final toEdit = await showDialog<bool>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (ctx) => AlertDialog(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  title: Row(
+                                    children: const [
+                                      Icon(Icons.info_outline_rounded, color: AppColors.green500),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Profil Belum Lengkap',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: AppColors.text1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  content: const Text(
+                                    'Data alamat dan nomor telepon Anda masih kosong! Silakan lengkapi data profil Anda terlebih dahulu untuk menggunakan layanan pengantaran.',
+                                    style: TextStyle(fontSize: 13, color: AppColors.text2, height: 1.5),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(ctx).pop(false),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.grey[600],
+                                      ),
+                                      child: const Text('Batal', style: TextStyle(fontWeight: FontWeight.w600)),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.of(ctx).pop(true),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.green500,
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                      child: const Text('Lengkapi Profil', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (toEdit == true) {
+                                if (!mounted) return;
+                                await navigator.push(
+                                  MaterialPageRoute(builder: (_) => const EditProfilScreen()),
+                                );
+                                await _loadUserProfile();
+                                
+                                final updatedName = _namaController.text.trim();
+                                final updatedPhone = _teleponController.text.trim();
+                                final updatedAddress = _alamatController.text.trim();
+                                if (updatedName.isNotEmpty && updatedName != 'Pengguna Baru' &&
+                                    updatedPhone.isNotEmpty && updatedAddress.isNotEmpty) {
+                                  setState(() => _method = _DeliveryMethod.diantar);
+                                }
+                              }
+                            } else {
+                              setState(() => _method = _DeliveryMethod.diantar);
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -407,27 +603,53 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             title: 'Alamat Pengiriman',
                             child: Column(
                               children: [
-                                CustomTextField(controller: _namaController, label: 'Nama Penerima',
-                                    hint: 'Masukkan nama penerima', icon: Icons.person_outline_rounded),
+                                CustomTextField(
+                                  controller: _namaController,
+                                  label: 'Nama Penerima',
+                                  hint: 'Masukkan nama penerima',
+                                  icon: Icons.person_outline_rounded,
+                                  textInputAction: TextInputAction.next,
+                                ),
                                 const SizedBox(height: 12),
-                                CustomTextField(controller: _teleponController, label: 'Nomor Telepon',
-                                    hint: 'Masukkan nomor telepon', icon: Icons.phone_outlined,
-                                    keyboardType: TextInputType.phone),
+                                CustomTextField(
+                                  controller: _teleponController,
+                                  label: 'Nomor Telepon',
+                                  hint: 'Masukkan nomor telepon',
+                                  icon: Icons.phone_outlined,
+                                  keyboardType: TextInputType.phone,
+                                  textInputAction: TextInputAction.next,
+                                ),
                                 const SizedBox(height: 12),
-                                CustomTextField(controller: _alamatController, label: 'Alamat Lengkap',
-                                    hint: 'Nama jalan, nomor, RT/RW', icon: Icons.home_outlined,
-                                    maxLines: 2),
+                                CustomTextField(
+                                  controller: _alamatController,
+                                  label: 'Alamat Lengkap',
+                                  hint: 'Nama jalan, nomor, RT/RW',
+                                  icon: Icons.home_outlined,
+                                  maxLines: 2,
+                                  textInputAction: TextInputAction.next,
+                                ),
                                 const SizedBox(height: 12),
                                 Row(
                                   children: [
                                     Expanded(flex: 2,
-                                      child: CustomTextField(controller: _kotaController, label: 'Kota',
-                                          hint: 'Kota/Kabupaten', icon: Icons.location_city_outlined, readOnly: true)),
+                                      child: CustomTextField(
+                                        controller: _kotaController,
+                                        label: 'Kota',
+                                        hint: 'Kota/Kabupaten',
+                                        icon: Icons.location_city_outlined,
+                                        readOnly: true,
+                                        textInputAction: TextInputAction.next,
+                                      )),
                                     const SizedBox(width: 12),
                                     Expanded(
-                                      child: CustomTextField(controller: _kodeposController, label: 'Kode Pos',
-                                          hint: '00000', icon: Icons.markunread_mailbox_outlined,
-                                          keyboardType: TextInputType.number)),
+                                      child: CustomTextField(
+                                        controller: _kodeposController,
+                                        label: 'Kode Pos',
+                                        hint: '00000',
+                                        icon: Icons.markunread_mailbox_outlined,
+                                        keyboardType: TextInputType.number,
+                                        textInputAction: TextInputAction.done,
+                                      )),
                                   ],
                                 ),
                               ],

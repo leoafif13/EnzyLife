@@ -18,9 +18,11 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final rawName = json['name']?.toString().trim() ?? '';
+    final displayName = (rawName.isEmpty || rawName == '-') ? 'Pengguna Baru' : rawName;
     return UserModel(
       id: json['id'],
-      name: json['name'] ?? '',
+      name: displayName,
       email: json['email'] ?? '',
       phone: json['phone'],
       address: json['address'],
