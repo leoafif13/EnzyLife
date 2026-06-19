@@ -6,6 +6,7 @@ import '../main.dart';
 import '../services/auth_service.dart';
 import 'verification_page.dart';
 import '../belanja/belanja_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -130,6 +131,85 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Terjadi error: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final googleSignIn = GoogleSignIn(
+        clientId: '446261249929-lrlmjp2qmsieej3vbgd9r0pc44vfi1gf.apps.googleusercontent.com',
+      );
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken ?? googleAuth.accessToken;
+
+      if (idToken == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal mendapatkan token Google. Silakan coba lagi.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final result = await AuthService.loginWithGoogle(idToken);
+
+      if (result['token'] != null) {
+        await AuthService.saveToken(result['token']);
+        await AuthService.saveUser(result['user']);
+        await CartState.instance.loadCartForUser();
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login Google berhasil'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+          (route) => false,
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Login Google gagal'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Terjadi kesalahan saat masuk Google: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } finally {
       if (mounted) {
@@ -445,9 +525,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                 width: double.infinity,
                                 height: 50,
                                 child: OutlinedButton(
-                                  onPressed: () {
-                                    // TODO: implementasi Google Sign-In
-                                  },
+                                  onPressed: _isLoading ? null : _handleGoogleLogin,
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
                                     foregroundColor: AppColors.text1,

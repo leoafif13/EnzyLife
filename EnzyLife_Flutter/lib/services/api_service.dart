@@ -289,6 +289,34 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> updatePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl/profile/password'),
+        headers: await _authHeaders(),
+        body: {
+          'current_password': oldPassword,
+          'password': newPassword,
+          'password_confirmation': confirmPassword,
+        },
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'Password berhasil diperbarui'};
+      } else {
+        return {'success': false, 'message': data['message'] ?? 'Gagal mengubah password'};
+      }
+    } catch (e) {
+      print('Error updatePassword: $e');
+      return {'success': false, 'message': 'Gagal menghubungkan ke server.'};
+    }
+  }
+
   // =====================================================
   // CHECKOUT / PEMESANAN
   // =====================================================

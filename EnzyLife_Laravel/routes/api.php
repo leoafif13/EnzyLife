@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ReviewController;
 
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login/google', [AuthController::class, 'loginGoogle']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
 Route::post('/password/reset', [AuthController::class, 'resetPassword']);
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/profile', [ProfileController::class, 'show']);
         Route::put('/profile', [ProfileController::class, 'update']);
+        Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 
         Route::post('/checkout', [CheckoutController::class, 'checkout']);
         Route::get('/orders', [CheckoutController::class, 'history']);

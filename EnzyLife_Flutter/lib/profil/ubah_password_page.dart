@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
+import '../services/api_service.dart';
 
 class UbahPasswordScreen extends StatefulWidget {
   const UbahPasswordScreen({super.key});
@@ -28,7 +29,59 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
   }
 
   Future<void> _simpan() async {
-    if (_newController.text != _confirmController.text) {
+    final oldPassword = _oldController.text;
+    final newPassword = _newController.text;
+    final confirmPassword = _confirmController.text;
+
+    if (oldPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Password lama tidak boleh kosong'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (newPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Password baru tidak boleh kosong'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Password baru minimal harus 8 karakter'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (newPassword == oldPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Password baru tidak boleh sama dengan password lama'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Konfirmasi password tidak cocok'),
@@ -39,19 +92,37 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
       );
       return;
     }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1)); // TODO: request API ubah password
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Password berhasil diubah'),
-        backgroundColor: AppColors.green500,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+    final result = await ApiService.updatePassword(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
     );
-    Navigator.of(context).pop();
+    setState(() => _isLoading = false);
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Password berhasil diubah'),
+          backgroundColor: AppColors.green500,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      Navigator.of(context).pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Gagal mengubah password'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
   }
 
   @override

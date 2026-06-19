@@ -2,6 +2,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'onboarding_screen.dart';
+import 'services/auth_service.dart';
+import 'auth/login_page.dart';
+import 'auth/verification_page.dart';
+import 'main.dart';
 
 class SplashScreen extends StatefulWidget {
   final Widget nextScreen;
@@ -13,6 +17,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
+  Widget? _resolvedNextScreen;
   late AnimationController _entryController;
   late AnimationController _bubbleController;
   late AnimationController _pulseController;
@@ -31,6 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    _checkAuthAndVerification();
 
     // Entry animations controller
     _entryController = AnimationController(
@@ -137,8 +143,76 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(milliseconds: 3200), () => _navigate());
   }
 
+  Future<void> _checkAuthAndVerification() async {
+    final token = await AuthService.getToken();
+    if (token == null) {
+      if (mounted) {
+        setState(() {
+          _resolvedNextScreen = const LoginScreen();
+        });
+      }
+      return;
+    }
+
+    try {
+      final user = await AuthService.fetchUserProfile();
+      if (user != null) {
+        if (user['unauthorized'] == true) {
+          if (mounted) {
+            setState(() {
+              _resolvedNextScreen = const LoginScreen();
+            });
+          }
+        } else {
+          // Simpan data user terbaru secara lokal
+          await AuthService.saveUser(user);
+          if (mounted) {
+            setState(() {
+              if (user['email_verified_at'] == null) {
+                _resolvedNextScreen = VerificationScreen(email: user['email'] ?? '');
+              } else {
+                _resolvedNextScreen = const MainScreen();
+              }
+            });
+          }
+        }
+      } else {
+        // Jika offline atau error jaringan, gunakan cache lokal
+        final cachedUser = await AuthService.getUser();
+        if (mounted) {
+          setState(() {
+            if (cachedUser != null) {
+              if (cachedUser['email_verified_at'] == null) {
+                _resolvedNextScreen = VerificationScreen(email: cachedUser['email'] ?? '');
+              } else {
+                _resolvedNextScreen = const MainScreen();
+              }
+            } else {
+              _resolvedNextScreen = const LoginScreen();
+            }
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _resolvedNextScreen = const LoginScreen();
+        });
+      }
+    }
+  }
+
   Future<void> _navigate() async {
     if (!mounted) return;
+
+    // Tunggu jika proses async _checkAuthAndVerification belum selesai (maksimal 10 detik/100 retries)
+    int retries = 0;
+    while (_resolvedNextScreen == null && retries < 100) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      retries++;
+    }
+
+    final nextScreen = _resolvedNextScreen ?? const LoginScreen();
 
     final prefs = await SharedPreferences.getInstance();
     final onboardingDone = prefs.getBool('onboarding_done') ?? false;
@@ -146,8 +220,8 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     final destination = onboardingDone
-        ? widget.nextScreen
-        : OnboardingScreen(nextScreen: widget.nextScreen);
+        ? nextScreen
+        : OnboardingScreen(nextScreen: nextScreen);
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use App\Mail\SendOTPMail;
 
 class AuthController extends Controller
@@ -194,5 +196,75 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Password Anda berhasil diperbarui. Silakan login kembali.',
         ]);
+    }
+
+    public function loginGoogle(Request $request)
+    {
+        $request->validate([
+            'id_token' => 'required|string',
+        ]);
+
+        $token = $request->id_token;
+
+        try {
+            // Coba verifikasi sebagai id_token dahulu
+            $response = Http::get('https://oauth2.googleapis.com/tokeninfo', [
+                'id_token' => $token,
+            ]);
+
+            // Jika gagal, coba verifikasi sebagai access_token
+            if ($response->failed()) {
+                $response = Http::get('https://oauth2.googleapis.com/tokeninfo', [
+                    'access_token' => $token,
+                ]);
+            }
+
+            if ($response->failed()) {
+                return response()->json([
+                    'message' => 'Token Google tidak valid atau kedaluwarsa'
+                ], 400);
+            }
+
+            $payload = $response->json();
+
+            if (!isset($payload['email'])) {
+                return response()->json([
+                    'message' => 'Token tidak memiliki informasi email'
+                ], 400);
+            }
+
+            $email = $payload['email'];
+            $name = $payload['name'] ?? explode('@', $email)[0];
+
+            $user = User::where('email', $email)->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => Hash::make(Str::random(24)),
+                    'email_verified_at' => now(),
+                ]);
+            } else {
+                if ($user->email_verified_at === null) {
+                    $user->email_verified_at = now();
+                    $user->save();
+                }
+            }
+
+            $token = $user->createToken('flutter-app')->plainTextToken;
+
+            return response()->json([
+                'token' => $token,
+                'user'  => $user,
+                'needs_verification' => false,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error saat login Google: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Gagal memproses login Google'
+            ], 500);
+        }
     }
 }

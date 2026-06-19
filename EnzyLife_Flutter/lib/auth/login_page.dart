@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import 'verification_page.dart';
 import 'forgot_password_page.dart';
 import '../belanja/belanja_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -146,6 +147,91 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     }
   }
 
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final googleSignIn = GoogleSignIn(
+        clientId: '446261249929-lrlmjp2qmsieej3vbgd9r0pc44vfi1gf.apps.googleusercontent.com',
+        scopes: ['email', 'profile'],
+      );
+
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken ?? googleAuth.accessToken;
+
+      if (idToken == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Gagal mendapatkan token Google. Silakan coba lagi.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final result = await AuthService.loginWithGoogle(idToken);
+
+      if (result['token'] != null) {
+        await AuthService.saveToken(result['token']);
+        await AuthService.saveUser(result['user']);
+        await CartState.instance.loadCartForUser();
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Login Google berhasil'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+          (route) => false,
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Login Google gagal'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Terjadi kesalahan saat masuk Google: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,6 +262,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         isLoading: _isLoading,
                         onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
                         onLogin: _handleLogin,
+                        onGoogleLogin: _handleGoogleLogin,
                       ),
                     ),
                   ),
@@ -264,6 +351,7 @@ class _FormCard extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTogglePassword;
   final VoidCallback onLogin;
+  final VoidCallback onGoogleLogin;
 
   const _FormCard({
     required this.emailController,
@@ -272,6 +360,7 @@ class _FormCard extends StatelessWidget {
     required this.isLoading,
     required this.onTogglePassword,
     required this.onLogin,
+    required this.onGoogleLogin,
   });
 
   @override
@@ -370,11 +459,7 @@ class _FormCard extends StatelessWidget {
             width: double.infinity,
             height: 50,
             child: OutlinedButton(
-              onPressed: () {
-                // TODO: implementasi Google Sign-In
-                // Tambahkan package: google_sign_in: ^6.x.x di pubspec.yaml
-                // lalu panggil GoogleSignIn().signIn()
-              },
+              onPressed: isLoading ? null : onGoogleLogin,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: Colors.grey[300]!),
                 foregroundColor: AppColors.text1,

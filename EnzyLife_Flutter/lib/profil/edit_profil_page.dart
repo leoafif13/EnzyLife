@@ -22,6 +22,7 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
   final _kodePosController = TextEditingController();
 
   bool _isLoading = false;
+  bool _isProfileLoading = true;
 
   @override
   void initState() {
@@ -30,21 +31,24 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
   }
 
   Future<void> _loadProfile() async {
-
+    setState(() => _isProfileLoading = true);
     final result = await ApiService.getProfile();
 
-    if (result == null || !mounted) return;
+    if (!mounted) return;
+
+    if (result == null) {
+      setState(() => _isProfileLoading = false);
+      return;
+    }
 
     setState(() {
-
       user = result;
-
       _namaController.text = result.name;
       _emailController.text = result.email;
       _noHpController.text = result.phone ?? '';
       _alamatController.text = result.address ?? '';
       _kodePosController.text = result.postalCode ?? '';
-
+      _isProfileLoading = false;
     });
   }
 
@@ -59,11 +63,66 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
   }
 
   Future<void> _simpan() async {
+    final cleanName = _namaController.text.trim();
+    if (cleanName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Nama Lengkap tidak boleh kosong'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (cleanName == 'Pengguna Baru' || cleanName == '-') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Silakan masukkan nama lengkap asli Anda'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    final phone = _noHpController.text.trim();
+    if (phone.isNotEmpty) {
+      final cleanPhone = phone.replaceAll(RegExp(r'\D'), '');
+      if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Nomor HP tidak valid (minimal 10 digit, maksimal 15 digit)'),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+        return;
+      }
+    }
+
+    final zip = _kodePosController.text.trim();
+    if (zip.isNotEmpty) {
+      if (zip.length != 5 || int.tryParse(zip) == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Kode pos harus terdiri dari 5 digit angka'),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+        return;
+      }
+    }
 
     setState(() => _isLoading = true);
 
     final success = await ApiService.updateProfile(
-      name: _namaController.text,
+      name: cleanName,
       phone: _noHpController.text,
       address: _alamatController.text,
       postalCode: _kodePosController.text,
@@ -74,17 +133,20 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
     if (!mounted) return;
 
     if (!success) {
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gagal memperbarui profil'),
+        SnackBar(
+          content: const Text('Gagal memperbarui profil di server. Silakan coba lagi.'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
-
       return;
     }
 
     await ApiService.getProfile();
+
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -120,10 +182,31 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: const SubPageAppBar(title: 'Edit Profil'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
+      body: _isProfileLoading
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 60),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: AppColors.green500),
+                    SizedBox(height: 16),
+                    Text(
+                      'Memuat profil Anda...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.green900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
             // Avatar
             Center(
               child: Stack(

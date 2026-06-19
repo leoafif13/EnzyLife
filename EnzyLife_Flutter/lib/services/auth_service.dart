@@ -38,6 +38,25 @@ class AuthService {
     await prefs.remove('user'); 
   }
 
+  static Future<Map<String, dynamic>?> fetchUserProfile() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/user'),
+        headers: await _headers(auth: true),
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 401) {
+        await removeToken();
+        return {'unauthorized': true};
+      }
+    } catch (e) {
+      // Kesalahan jaringan
+    }
+    return null;
+  }
+
   // ── Headers ────────────────────────────────
   static Future<Map<String, String>> _headers({
     bool auth = false,
@@ -241,6 +260,34 @@ class AuthService {
       return {
         'success': false,
         'message': 'Gagal menghubungkan ke server.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> loginWithGoogle(String idToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/login/google'),
+        headers: await _headers(),
+        body: jsonEncode({
+          'id_token': idToken,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return data;
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Login Google gagal',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Tidak dapat terhubung ke server',
       };
     }
   }
