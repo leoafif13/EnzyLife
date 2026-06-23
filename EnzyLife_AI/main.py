@@ -1,5 +1,3 @@
-from urllib import response
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
@@ -107,10 +105,12 @@ def chat(data: ChatRequest):
             "reply": response.text
         }
 
-    except Exception:
+    except Exception as e:
+
+        print("ERROR:", e)
 
         return {
-            "reply": "Maaf, chatbot sedang mengalami gangguan."
+            "reply": str(e)
         }
 
 def load_knowledge():
