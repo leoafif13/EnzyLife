@@ -7,8 +7,9 @@ use App\Http\Controllers\Api\InfografikController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\ChatbotController;
 
-
+Route::get('/chatbot/products', [ChatbotController::class, 'products']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/google', [AuthController::class, 'loginGoogle']);
 Route::post('/register', [AuthController::class, 'register']);
@@ -43,6 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/produk/{produk}/sentiment', [ReviewController::class, 'sentimentByProduct']);
         Route::get('/produk/{produk}/review-summary', [ReviewController::class, 'reviewSummary']);
         Route::post('/reviews/reanalyze', [ReviewController::class, 'reanalyze']);
+
+
     });
 });
 
