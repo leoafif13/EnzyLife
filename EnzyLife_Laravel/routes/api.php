@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ChatbotController;
 
 Route::get('/chatbot/products', [ChatbotController::class, 'products']);
+Route::post('/chatbot', [ChatbotController::class, 'chat']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/google', [AuthController::class, 'loginGoogle']);
 Route::post('/register', [AuthController::class, 'register']);

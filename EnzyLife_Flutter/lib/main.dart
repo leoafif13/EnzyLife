@@ -15,6 +15,7 @@ import 'edukasi/detail_artikel_page.dart';
 import 'edukasi/detail_infografik_page.dart';
 import 'widgets/page_header_card.dart';
 import 'splash_screen.dart';
+import 'widgets/chatbot_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,13 +98,25 @@ class _MainScreenState extends State<MainScreen> {
         onCartTap: _openCart,
         onMenuTap: _openMenu,
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: Stack(
+        // clipBehavior none agar popup chatbot bisa muncul
+        // melampaui batas body tanpa terpotong
+        clipBehavior: Clip.none,
         children: [
-          const HomeScreen(),
-          _activatedPages[1] ? const EducationScreen() : const SizedBox.shrink(),
-          _activatedPages[2] ? const BelanjaScreen() : const SizedBox.shrink(),
-          _activatedPages[3] ? const ProfilScreen() : const SizedBox.shrink(),
+          // Positioned.fill memastikan IndexedStack
+          // mendapat constraint yang tepat dari Stack
+          Positioned.fill(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: [
+                const HomeScreen(),
+                _activatedPages[1] ? const EducationScreen() : const SizedBox.shrink(),
+                _activatedPages[2] ? const BelanjaScreen() : const SizedBox.shrink(),
+                _activatedPages[3] ? const ProfilScreen() : const SizedBox.shrink(),
+              ],
+            ),
+          ),
+          const ChatbotWidget(),
         ],
       ),
       bottomNavigationBar: AppBottomNavBar(

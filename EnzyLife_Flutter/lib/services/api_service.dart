@@ -469,4 +469,37 @@ class ApiService {
       return null;
     }
   }
+
+  // =====================================================
+  // CHATBOT
+  // =====================================================
+  static Future<String?> sendChat(String message) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/chatbot'),
+        headers: await _authHeaders(),
+        body: {
+          'message': message,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['reply'];
+      }
+      
+      // Jika statusnya 500 karena AI server mati, kita decode pesan error ramah dari Laravel
+      try {
+        final errorData = jsonDecode(response.body);
+        if (errorData != null && errorData['reply'] != null) {
+          return errorData['reply'];
+        }
+      } catch (_) {}
+      
+      return null;
+    } catch (e) {
+      print('Error sendChat: $e');
+      return null;
+    }
+  }
 }
