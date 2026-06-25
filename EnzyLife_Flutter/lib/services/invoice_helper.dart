@@ -118,7 +118,7 @@ class InvoiceHelper {
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.end,
                           children: [
-                            _buildPdfMetaRow('Tanggal:', order.createdAt.split('T')[0]),
+                            _buildPdfMetaRow('Tanggal:', formatDate(order.createdAt.split('T')[0])),
                             _buildPdfMetaRow('Status Pesanan:', order.statusDescription),
                             _buildPdfMetaRow('Metode Bayar:', order.metodePembayaran),
                           ],

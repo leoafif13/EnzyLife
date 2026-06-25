@@ -3,7 +3,9 @@ import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../models/infografik.dart';
 import '../services/api_service.dart';
+import '../services/format_helper.dart';
 import '../widgets/zoomable_image_dialog.dart';
+import '../widgets/chatbot_widget.dart';
 
 // ══════════════════════════════════════════════
 //  DetailInfografikPage
@@ -26,7 +28,10 @@ class DetailInfografikPage extends StatelessWidget {
       appBar: const SubPageAppBar(
         title: 'Infografik',
       ),
-      body: SingleChildScrollView(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +73,7 @@ class DetailInfografikPage extends StatelessWidget {
                           size: 13, color: AppColors.green500),
                       const SizedBox(width: 4),
                       Text(
-                        item.createdAt.split('T')[0],
+                        formatDate(item.createdAt.split('T')[0]),
                           style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                       const SizedBox(width: 16),
                       const Icon(Icons.image_outlined,
@@ -163,7 +168,10 @@ class DetailInfografikPage extends StatelessWidget {
           ],
         ),
       ),
-    );
+      const ChatbotWidget(),
+    ],
+  ),
+);
   }
 }
 
@@ -226,7 +234,7 @@ class _RekomendasiCard extends StatelessWidget {
                             size: 11, color: Colors.grey[400]),
                         const SizedBox(width: 3),
                         Text(
-                          item.createdAt.split('T')[0],
+                          formatDate(item.createdAt.split('T')[0]),
                             style: TextStyle(fontSize: 11, color: Colors.grey[400])),
                         const Spacer(),
                         const Text('Lihat →',

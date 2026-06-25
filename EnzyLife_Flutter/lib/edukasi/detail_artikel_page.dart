@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/artikel.dart';
+import '../services/format_helper.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/zoomable_image_dialog.dart';
+import '../widgets/chatbot_widget.dart';
 
 
 class DetailArtikelPage extends StatelessWidget {
@@ -38,7 +40,10 @@ class DetailArtikelPage extends StatelessWidget {
       appBar: SubPageAppBar(
         title: item.kategori.split(',').first.trim(),
       ),
-      body: SingleChildScrollView(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -129,7 +134,7 @@ class DetailArtikelPage extends StatelessWidget {
                     children: [
                       _MetaBadge(icon: Icons.person_outline, label: 'Admin'),
                       const SizedBox(width: 12),
-                      _MetaBadge(icon: Icons.calendar_today_outlined, label: item.createdAt.split('T')[0]),
+                      _MetaBadge(icon: Icons.calendar_today_outlined, label: formatDate(item.createdAt.split('T')[0])),
                     ],
                   ),
 
@@ -222,7 +227,10 @@ class DetailArtikelPage extends StatelessWidget {
           ],
         ),
       ),
-    );
+      const ChatbotWidget(),
+    ],
+  ),
+);
   }
 }
 

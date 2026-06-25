@@ -9,6 +9,7 @@ import 'profil/profil_page.dart';
 import 'belanja/shopping_cart.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
+import 'services/format_helper.dart';
 import 'models/artikel.dart';
 import 'models/infografik.dart';
 import 'edukasi/detail_artikel_page.dart';
@@ -591,7 +592,7 @@ class _InfografikCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      infografik.createdAt.split('T')[0],
+                      formatDate(infografik.createdAt.split('T')[0]),
                       style: TextStyle(fontSize: 10, color: Colors.grey[400]),
                     ),
                   ],

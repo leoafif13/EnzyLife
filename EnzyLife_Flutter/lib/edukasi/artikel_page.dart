@@ -8,6 +8,8 @@ import 'detail_infografik_page.dart';
 import '../models/artikel.dart';
 import '../models/infografik.dart';
 import '../services/api_service.dart';
+import '../services/format_helper.dart';
+import '../widgets/chatbot_widget.dart';
 
 // ══════════════════════════════════════════════
 //  Filter enum
@@ -154,7 +156,10 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: const SubPageAppBar(title: 'Artikel & Infografik'),
-      body: Column(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Column(
         children: [
           // ── Header card ──────────────────────
           Container(
@@ -269,7 +274,10 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
           ),
         ],
       ),
-    );
+      const ChatbotWidget(),
+    ],
+  ),
+);
   }
 }
 
@@ -380,7 +388,7 @@ class _ArtikelCard extends StatelessWidget {
                       const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.text3),
                       const SizedBox(width: 4),
                       Text(
-                        item.createdAt.split('T')[0],
+                        formatDate(item.createdAt.split('T')[0]),
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
@@ -520,7 +528,7 @@ class _InfografikCard extends StatelessWidget {
                         const Icon(Icons.calendar_today_outlined, size: 10, color: AppColors.text3),
                         const SizedBox(width: 4),
                         Text(
-                          item.createdAt.split('T')[0],
+                          formatDate(item.createdAt.split('T')[0]),
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
