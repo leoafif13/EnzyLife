@@ -9,6 +9,7 @@ import '../services/format_helper.dart';
 import '../widgets/search_bar_field.dart';
 import '../widgets/page_header_card.dart';
 import '../widgets/purchase_bottom_sheet.dart';
+import '../widgets/chatbot_widget.dart';
 
 // ── Status pesanan ────────────────────────────
 enum OrderStatus { dipesan, dikirim, selesai }
@@ -123,7 +124,10 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
       appBar: const SubPageAppBar(
         title: 'Riwayat Belanja',
       ),
-      body: Column(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Column(
         children: [
           // Header card
           const Padding(
@@ -191,7 +195,10 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
           ),
         ],
       ),
-    );
+      const ChatbotWidget(),
+    ],
+  ),
+);
   }
 }
 
@@ -222,14 +229,7 @@ class _OrderCard extends StatelessWidget {
         ? 'http://127.0.0.1:8000/gambar/produk/${firstItem.product!.image.split('/').last}'
         : null;
 
-    String dateStr = order.createdAt;
-    if (order.createdAt.contains('T')) {
-      final parts = order.createdAt.split('T');
-      final datePart = parts[0];
-      final timePart = parts[1].split('.')[0];
-      final timeFormatted = timePart.length >= 5 ? timePart.substring(0, 5) : timePart;
-      dateStr = '$datePart $timeFormatted';
-    }
+    final dateStr = formatDate(order.createdAt);
 
     return GestureDetector(
       onTap: () async {
@@ -308,12 +308,7 @@ class _OrderCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
-                      Text(firstItem?.product?.description ?? 'Eco enzyme premium quality',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

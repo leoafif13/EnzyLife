@@ -185,8 +185,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     color: Colors.white,
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: 260,
+                        AspectRatio(
+                          aspectRatio: 1.0,
                           child: PageView.builder(
                             controller: _pageController,
                             itemCount: _imageCount,
@@ -251,7 +251,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ),
                               ],
                             ),
-                          ),
+                        ),
                         ),
                         // Dot indicator
                         Padding(
