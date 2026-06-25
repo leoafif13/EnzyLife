@@ -536,9 +536,10 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      SizedBox(
-                                        width: 20, height: 20,
-                                        child: CustomPaint(painter: _GoogleLogoPainter()),
+                                      Image.asset(
+                                        'assets/images/google_logo.png',
+                                        width: 20,
+                                        height: 20,
                                       ),
                                       const SizedBox(width: 12),
                                       const Text('Lanjutkan dengan Google',
@@ -697,27 +698,4 @@ class _InputField extends StatelessWidget {
     );
   }
 }
-
-// ── Google logo painter ───────────────────────
-class _GoogleLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double c = size.width / 2;
-    final double r = size.width * 0.38;
-    final rect = Rect.fromCircle(center: Offset(c, c), radius: r);
-
-    Paint stroke(Color color) => Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(rect, 3.93, 1.57, false, stroke(const Color(0xFF4285F4)));
-    canvas.drawArc(rect, 5.50, 0.79, false, stroke(const Color(0xFFFBBC05)));
-    canvas.drawArc(rect, 0.00, 1.57, false, stroke(const Color(0xFF34A853)));
-    canvas.drawArc(rect, 1.57, 2.36, false, stroke(const Color(0xFFEA4335)));
-  }
-
-  @override
-  bool shouldRepaint(_GoogleLogoPainter _) => false;
-}
+
