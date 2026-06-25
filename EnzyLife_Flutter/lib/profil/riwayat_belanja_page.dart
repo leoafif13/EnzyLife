@@ -3,6 +3,7 @@ import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import 'ulasan_page.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../models/order.dart';
 import 'detail_riwayat_belanja_page.dart';
 import '../services/format_helper.dart';
@@ -63,6 +64,7 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
   @override
   void initState() {
     super.initState();
+    AuthService.incrementMenuVisit('Riwayat');
     _loadHistory();
   }
 

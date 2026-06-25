@@ -4,6 +4,7 @@ import '../widgets/sub_page_appbar.dart';
 import '../widgets/page_header_card.dart';
 import '../widgets/search_bar_field.dart';
 import '../widgets/chatbot_widget.dart';
+import '../services/auth_service.dart';
 
 // ══════════════════════════════════════════════
 //  FAQ Screen
@@ -142,6 +143,12 @@ class _FaqScreenState extends State<FaqScreen> {
           'Karena Eco Enzim dibuat dari limbah organik yang didaur ulang dan dapat menggantikan sebagian penggunaan bahan kimia rumah tangga sehingga membantu mengurangi pencemaran lingkungan.',
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    AuthService.incrementMenuVisit('FAQ');
+  }
 
   @override
   void dispose() {

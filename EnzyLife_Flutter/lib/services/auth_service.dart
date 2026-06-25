@@ -32,6 +32,15 @@ class AuthService {
     return jsonDecode(userString);
   }
 
+  static Future<void> incrementMenuVisit(String label) async {
+    final user = await getUser();
+    final userId = user?['id']?.toString() ?? 'guest';
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'menu_visits_${userId}_$label';
+    final current = prefs.getInt(key) ?? 0;
+    await prefs.setInt(key, current + 1);
+  }
+
   static Future<void> removeToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');

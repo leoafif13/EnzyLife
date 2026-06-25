@@ -14,9 +14,14 @@ import 'models/artikel.dart';
 import 'models/infografik.dart';
 import 'edukasi/detail_artikel_page.dart';
 import 'edukasi/detail_infografik_page.dart';
+import 'edukasi/artikel_page.dart';
+import 'edukasi/kalkulator_page.dart';
+import 'edukasi/faq_page.dart';
+import 'profil/riwayat_belanja_page.dart';
 import 'widgets/page_header_card.dart';
 import 'splash_screen.dart';
 import 'widgets/chatbot_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +82,11 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
       _activatedPages[index] = true;
     });
+    if (index == 2) {
+      AuthService.incrementMenuVisit('Belanja');
+    } else if (index == 3) {
+      AuthService.incrementMenuVisit('Profil');
+    }
   }
 
   // Buka keranjang dari mana saja
@@ -110,7 +120,9 @@ class _MainScreenState extends State<MainScreen> {
             child: IndexedStack(
               index: _selectedIndex,
               children: [
-                const HomeScreen(),
+                HomeScreen(
+                  onTabSelected: _onTabTap,
+                ),
                 _activatedPages[1] ? const EducationScreen() : const SizedBox.shrink(),
                 _activatedPages[2] ? const BelanjaScreen() : const SizedBox.shrink(),
                 _activatedPages[3] ? const ProfilScreen() : const SizedBox.shrink(),
@@ -130,7 +142,8 @@ class _MainScreenState extends State<MainScreen> {
 
 //  HomeScreen
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Function(int)? onTabSelected;
+  const HomeScreen({super.key, this.onTabSelected});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -147,6 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     loadUser();
     _loadContent();
+    _loadAndSortFavorites();
   }
 
   Future<void> loadUser() async {
@@ -179,12 +193,56 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  static const _favorites = [
+  static const _candidateFavorites = [
     _FavoriteData(label: 'Artikel', icon: Icons.article_outlined),
     _FavoriteData(label: 'Kalkulator',   icon: Icons.calculate_outlined),
-    _FavoriteData(label: 'Produk',  icon: Icons.eco_outlined),
+    _FavoriteData(label: 'FAQ',   icon: Icons.help_outline_rounded),
+    _FavoriteData(label: 'Belanja',  icon: Icons.eco_outlined),
+    _FavoriteData(label: 'Riwayat',  icon: Icons.history_rounded),
     _FavoriteData(label: 'Profil',   icon: Icons.person_outline),
   ];
+
+  List<_FavoriteData> _favorites = _candidateFavorites.take(4).toList();
+
+  Future<void> _loadAndSortFavorites() async {
+    final user = await AuthService.getUser();
+    final userId = user?['id']?.toString() ?? 'guest';
+    final prefs = await SharedPreferences.getInstance();
+
+    final List<_FavoriteData> list = List.from(_candidateFavorites);
+    final Map<_FavoriteData, int> visitCounts = {};
+
+    for (var item in list) {
+      final key = 'menu_visits_${userId}_${item.label}';
+      visitCounts[item] = prefs.getInt(key) ?? 0;
+    }
+
+    list.sort((a, b) {
+      final countA = visitCounts[a] ?? 0;
+      final countB = visitCounts[b] ?? 0;
+      if (countA != countB) {
+        return countB.compareTo(countA); // Descending
+      }
+      return _candidateFavorites.indexOf(a).compareTo(_candidateFavorites.indexOf(b));
+    });
+
+    if (mounted) {
+      setState(() {
+        _favorites = list.take(4).toList();
+      });
+    }
+  }
+
+  Future<void> _incrementVisit(String label) async {
+    final user = await AuthService.getUser();
+    final userId = user?['id']?.toString() ?? 'guest';
+    final prefs = await SharedPreferences.getInstance();
+
+    final key = 'menu_visits_${userId}_$label';
+    final current = prefs.getInt(key) ?? 0;
+    await prefs.setInt(key, current + 1);
+    await _loadAndSortFavorites();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +281,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: _favorites.map((f) => _FavoriteItem(data: f)).toList(),
+                  children: _favorites.map((f) => _FavoriteItem(
+                    data: f,
+                    onTap: () async {
+                      await _incrementVisit(f.label);
+                      if (!context.mounted) return;
+                      
+                      if (f.label == 'Artikel') {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const ArtikelScreen()),
+                        );
+                      } else if (f.label == 'Kalkulator') {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const KalkulatorScreen()),
+                        );
+                      } else if (f.label == 'FAQ') {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const FaqScreen()),
+                        );
+                      } else if (f.label == 'Belanja') {
+                        widget.onTabSelected?.call(2);
+                      } else if (f.label == 'Riwayat') {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
+                        );
+                      } else if (f.label == 'Profil') {
+                        widget.onTabSelected?.call(3);
+                      }
+                    },
+                  )).toList(),
                 ),
               ],
             ),
@@ -373,12 +459,13 @@ class _FavoriteData {
 
 class _FavoriteItem extends StatelessWidget {
   final _FavoriteData data;
-  const _FavoriteItem({required this.data});
+  final VoidCallback onTap;
+  const _FavoriteItem({required this.data, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         width: 80,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),

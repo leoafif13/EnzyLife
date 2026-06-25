@@ -9,6 +9,7 @@ import '../models/artikel.dart';
 import '../models/infografik.dart';
 import '../services/api_service.dart';
 import '../services/format_helper.dart';
+import '../services/auth_service.dart';
 import '../widgets/chatbot_widget.dart';
 
 // ══════════════════════════════════════════════
@@ -47,6 +48,7 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
   @override
   void initState() {
     super.initState();
+    AuthService.incrementMenuVisit('Artikel');
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     fetchArtikel();
