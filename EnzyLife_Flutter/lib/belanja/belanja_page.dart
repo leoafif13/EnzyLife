@@ -25,6 +25,7 @@ class BelanjaScreen extends StatefulWidget {
 class _BelanjaScreenState extends State<BelanjaScreen> {
   final _searchController = TextEditingController();
   String _query = '';
+  Timer? _searchDebounce;
 
   List<Product> _products = [];
   bool _isLoading = true;
@@ -445,6 +446,7 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _carouselTimer?.cancel();
     _pageController.dispose();
     CartState.instance.removeListener(_refresh);
@@ -553,10 +555,12 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
                         onChanged: (v) {
                           setState(() {
                             _query = v;
-                            _page = 1;
-                            _hasMore = true;
                           });
-                          fetchProducts();
+                          _searchDebounce?.cancel();
+                          _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                            if (!mounted) return;
+                            fetchProducts();
+                          });
                         },
                         style: const TextStyle(fontSize: 14, color: AppColors.text1),
                         decoration: InputDecoration(

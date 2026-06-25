@@ -53,27 +53,27 @@ class SentimenAI extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Mayoritas pembeli memberikan ulasan ${positif >= 0.6 ? "positif" : "beragam"} terhadap produk ini.',
+            'Mayoritas pembeli menyukai aroma produk ini${positif >= 0.6 ? " dan memberikan ulasan yang positif" : ", meski ulasan beragam"}.',
             style: TextStyle(fontSize: 12, color: Colors.grey[600], height: 1.4),
           ),
           const SizedBox(height: 12),
           // Bar sentimen
           SentimenBar(
-            label: 'Positif',
+            label: 'Aroma Disukai',
             value: positif,
             color: AppColors.green500,
-            icon: Icons.sentiment_satisfied_alt_rounded,
+            icon: Icons.local_florist_rounded,
           ),
           const SizedBox(height: 8),
           SentimenBar(
-            label: 'Netral',
+            label: 'Aroma Biasa',
             value: netral,
             color: const Color(0xFFFFB300),
-            icon: Icons.sentiment_neutral_rounded,
+            icon: Icons.spa_rounded,
           ),
           const SizedBox(height: 8),
           SentimenBar(
-            label: 'Negatif',
+            label: 'Kurang Disukai',
             value: negatif,
             color: Colors.red[400]!,
             icon: Icons.sentiment_dissatisfied_rounded,
@@ -112,7 +112,7 @@ class SentimenBar extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         SizedBox(
-          width: 55,
+          width: 90,
           child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.text1, fontWeight: FontWeight.w600)),
         ),
         Expanded(
