@@ -261,7 +261,7 @@ class _CartScreenState extends State<CartScreen> {
                           child: Text(
                             _checked.isEmpty
                                 ? 'Pilih produk dulu'
-                                : 'Checkout (${_checked.length})',
+                                : 'Lanjutkan Pembayaran (${_checked.length})',
                             style: const TextStyle(fontSize: 15,
                                 fontWeight: FontWeight.w700),
                           ),
