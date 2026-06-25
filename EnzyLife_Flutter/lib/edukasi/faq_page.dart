@@ -3,6 +3,7 @@ import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/page_header_card.dart';
 import '../widgets/search_bar_field.dart';
+import '../widgets/chatbot_widget.dart';
 
 // ══════════════════════════════════════════════
 //  FAQ Screen
@@ -161,7 +162,10 @@ class _FaqScreenState extends State<FaqScreen> {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: const SubPageAppBar(title: 'FAQ'),
-      body: Column(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Column(
         children: [
           // ── Sticky Header Card ──────────────────
           Container(
@@ -257,7 +261,10 @@ class _FaqScreenState extends State<FaqScreen> {
           ),
         ],
       ),
-    );
+      const ChatbotWidget(),
+    ],
+  ),
+);
   }
 }
 

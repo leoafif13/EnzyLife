@@ -160,7 +160,14 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
               top: _isOpen ? chatTop : _position!.dy,
               width: _isOpen ? chatWidth : 56,
               height: _isOpen ? chatHeight : 56,
-              child: ClipRect(
+              child: OverflowBox(
+                alignment: _isSnappedToRight
+                    ? Alignment.bottomRight
+                    : Alignment.bottomLeft,
+                minWidth: 0,
+                maxWidth: _isOpen ? chatWidth : 56,
+                minHeight: 0,
+                maxHeight: _isOpen ? chatHeight : 56,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   transitionBuilder: (child, animation) {
@@ -168,14 +175,20 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
                       opacity: animation,
                       child: ScaleTransition(
                         scale: animation,
-                        alignment: _isSnappedToRight ? Alignment.bottomRight : Alignment.bottomLeft,
+                        alignment: _isSnappedToRight
+                            ? Alignment.bottomRight
+                            : Alignment.bottomLeft,
                         child: child,
                       ),
                     );
                   },
-                  child: _isOpen 
-                      ? _buildChatWindow(chatWidth, chatHeight, key: const ValueKey('chat_window')) 
-                      : _buildFloatingButton(key: const ValueKey('floating_button'), bodyWidth: bodyWidth, bodyHeight: bodyHeight),
+                  child: _isOpen
+                      ? _buildChatWindow(chatWidth, chatHeight,
+                          key: const ValueKey('chat_window'))
+                      : _buildFloatingButton(
+                          key: const ValueKey('floating_button'),
+                          bodyWidth: bodyWidth,
+                          bodyHeight: bodyHeight),
                 ),
               ),
             ),
@@ -215,20 +228,14 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
           color: Colors.white,
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.green500, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.green900.withValues(alpha: 0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: ClipOval(
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.contain,
+          child: Image.asset(
+            'assets/images/Ai-logo.png',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Padding(
+              padding: const EdgeInsets.all(10),
+              child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
             ),
           ),
         ),
@@ -244,13 +251,7 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: AppColors.cardShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -295,68 +296,76 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
           end: Alignment.bottomRight,
         ),
       ),
-      child: Row(
-        children: [
-          // Mini avatar
-          Container(
-            width: 36,
-            height: 36,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: ClipOval(
-              child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  fit: BoxFit.contain,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: 268,
+          child: Row(
+            children: [
+              // Mini avatar
+              Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Tanya Enzy",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/Ai-logo.png',
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+                    ),
                   ),
                 ),
-                Row(
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Pulsing online indicator
-                    const _PulseOnlineDot(),
-                    const SizedBox(width: 4),
                     const Text(
-                      "Online",
+                      "Tanya Enzy",
                       style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 11,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
+                    ),
+                    Row(
+                      children: [
+                        // Pulsing online indicator
+                        const _PulseOnlineDot(),
+                        const SizedBox(width: 4),
+                        const Text(
+                          "Online",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              // Close button
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                onPressed: () {
+                  setState(() {
+                    _isOpen = false;
+                  });
+                },
+              ),
+            ],
           ),
-          // Close button
-          IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
-            onPressed: () {
-              setState(() {
-                _isOpen = false;
-              });
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

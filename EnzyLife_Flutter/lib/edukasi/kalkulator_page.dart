@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/page_header_card.dart';
+import '../widgets/chatbot_widget.dart';
 
 class KalkulatorScreen extends StatefulWidget {
   const KalkulatorScreen({super.key});
@@ -31,7 +32,10 @@ class _KalkulatorScreenState extends State<KalkulatorScreen>
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: const SubPageAppBar(title: 'Kalkulator Eco Enzim'),
-      body: Column(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Column(
         children: [
           // Header card
           const Padding(
@@ -98,7 +102,10 @@ class _KalkulatorScreenState extends State<KalkulatorScreen>
           ),
         ],
       ),
-    );
+      const ChatbotWidget(),
+    ],
+  ),
+);
   }
 }
 

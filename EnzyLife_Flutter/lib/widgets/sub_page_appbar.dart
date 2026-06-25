@@ -13,12 +13,14 @@ class SubPageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
   final VoidCallback? onBack;
+  final bool showBackButton;
 
   const SubPageAppBar({
     super.key,
     required this.title,
     this.actions,
     this.onBack,
+    this.showBackButton = true,
   });
 
   @override
@@ -32,14 +34,17 @@ class SubPageAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 1,
       shadowColor: Colors.black12,
       centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          size: 18,
-          color: AppColors.text1,
-        ),
-        onPressed: onBack ?? () => Navigator.of(context).pop(),
-      ),
+      leading: showBackButton
+          ? IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 18,
+                color: AppColors.text1,
+              ),
+              onPressed: onBack ?? () => Navigator.of(context).pop(),
+            )
+          : null,
+      automaticallyImplyLeading: showBackButton,
       title: Text(
         title,
         style: const TextStyle(
