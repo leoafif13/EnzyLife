@@ -518,35 +518,36 @@ class _UlasanScreenState extends State<UlasanScreen> {
           ),
 
           // ── Tombol kirim ─────────────────────
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.bgCard,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12, offset: const Offset(0, -2))],
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : (_isReadOnly ? () => Navigator.of(context).pop() : _kirim),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isReadOnly ? Colors.grey[500] : AppColors.green500,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppColors.green500.withOpacity(0.5),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+          if (!_isReadOnly)
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.bgCard,
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12, offset: const Offset(0, -2))],
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _kirim,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.green500,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: AppColors.green500.withOpacity(0.5),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(width: 22, height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.5,
+                              color: Colors.white))
+                      : const Text('Kirim Ulasan',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
-                child: _isLoading
-                    ? const SizedBox(width: 22, height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2.5,
-                            color: Colors.white))
-                    : Text(_isReadOnly ? 'Ulasan Telah Dikirim (Kembali)' : 'Kirim Ulasan',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ),
             ),
-          ),
         ],
       ),
     );
