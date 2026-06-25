@@ -403,11 +403,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgPage,
-      appBar: const SubPageAppBar(title: 'Checkout'),
-      body: Column(
+    return PopScope(
+      canPop: !_isLoading,
+      child: Stack(
         children: [
+          Scaffold(
+            backgroundColor: AppColors.bgPage,
+            appBar: const SubPageAppBar(title: 'Checkout'),
+            body: Column(
+              children: [
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -764,6 +768,60 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ],
             ),
           ),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.4),
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Material(
+                      color: AppColors.bgCard,
+                      borderRadius: BorderRadius.circular(16),
+                      elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: CircularProgressIndicator(
+                                color: AppColors.green500,
+                                strokeWidth: 3,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              'Memproses Pesanan...',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.text1,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Mohon tunggu sebentar, jangan menutup atau kembali dari halaman ini.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

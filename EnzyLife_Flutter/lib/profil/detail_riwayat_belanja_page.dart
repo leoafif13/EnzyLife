@@ -462,14 +462,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
 
   @override
   Widget build(BuildContext context) {
-    String dateStr = _order.createdAt;
-    if (_order.createdAt.contains('T')) {
-      final parts = _order.createdAt.split('T');
-      final datePart = parts[0];
-      final timePart = parts[1].split('.')[0];
-      final timeFormatted = timePart.length >= 5 ? timePart.substring(0, 5) : timePart;
-      dateStr = '$datePart $timeFormatted';
-    }
+    final dateStr = formatDate(_order.createdAt);
 
     String paymentText = _order.metodePembayaran;
     if (_order.metodePembayaran == 'COD') {
@@ -486,13 +479,17 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
 
 
 
-    return Scaffold(
-      backgroundColor: AppColors.bgPage,
-      appBar: SubPageAppBar(
-        title: 'Detail Pesanan',
-        onBack: () => Navigator.of(context).pop(_hasPaid),
-      ),
-      body: SingleChildScrollView(
+    return PopScope(
+      canPop: !_isLoading,
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: AppColors.bgPage,
+            appBar: SubPageAppBar(
+              title: 'Detail Pesanan',
+              onBack: () => Navigator.of(context).pop(_hasPaid),
+            ),
+            body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,6 +745,60 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
             ),
           ],
         ),
+      ),
+          ),
+          if (_isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.4),
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Material(
+                      color: AppColors.bgCard,
+                      borderRadius: BorderRadius.circular(16),
+                      elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: CircularProgressIndicator(
+                                color: AppColors.green500,
+                                strokeWidth: 3,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              'Memproses...',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.text1,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Mohon tunggu sebentar, jangan menutup atau kembali dari halaman ini.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
