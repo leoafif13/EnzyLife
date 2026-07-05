@@ -192,6 +192,15 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           MaterialPageRoute(builder: (_) => const MainScreen()),
           (route) => false,
         );
+      } else if (result['needs_verification'] == true) {
+        // Fallback safety: tidak harusnya terjadi untuk Google login
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => VerificationScreen(email: result['user']?['email'] ?? ''),
+          ),
+          (route) => false,
+        );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

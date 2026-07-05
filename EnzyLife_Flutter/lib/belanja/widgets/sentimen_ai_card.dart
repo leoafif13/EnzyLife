@@ -5,12 +5,14 @@ class SentimenAI extends StatelessWidget {
   final double positif;
   final double netral;
   final double negatif;
+  final int totalReviews;
 
   const SentimenAI({
     super.key,
     required this.positif,
     required this.netral,
     required this.negatif,
+    this.totalReviews = 0,
   });
 
   @override
@@ -61,6 +63,7 @@ class SentimenAI extends StatelessWidget {
           SentimenBar(
             label: 'Aroma Disukai',
             value: positif,
+            count: (positif * totalReviews).round(),
             color: AppColors.green500,
             icon: Icons.local_florist_rounded,
           ),
@@ -68,6 +71,7 @@ class SentimenAI extends StatelessWidget {
           SentimenBar(
             label: 'Aroma Biasa',
             value: netral,
+            count: (netral * totalReviews).round(),
             color: const Color(0xFFFFB300),
             icon: Icons.spa_rounded,
           ),
@@ -75,6 +79,7 @@ class SentimenAI extends StatelessWidget {
           SentimenBar(
             label: 'Kurang Disukai',
             value: negatif,
+            count: (negatif * totalReviews).round(),
             color: Colors.red[400]!,
             icon: Icons.sentiment_dissatisfied_rounded,
           ),
@@ -87,12 +92,14 @@ class SentimenAI extends StatelessWidget {
 class SentimenBar extends StatelessWidget {
   final String label;
   final double value;
+  final int count;
   final Color color;
   final IconData icon;
   const SentimenBar({
     super.key,
     required this.label,
     required this.value,
+    this.count = 0,
     required this.color,
     required this.icon,
   });
@@ -151,8 +158,8 @@ class SentimenBar extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         SizedBox(
-          width: 36,
-          child: Text('$pct%', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color), textAlign: TextAlign.right),
+          width: 70,
+          child: Text('$pct% ($count)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color), textAlign: TextAlign.right),
         ),
       ],
     );

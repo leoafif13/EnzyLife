@@ -240,17 +240,20 @@ class AuthController extends Controller
 
             if (!$user) {
                 $user = User::create([
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => Hash::make(Str::random(24)),
+                    'name'              => $name,
+                    'email'             => $email,
+                    'password'          => Hash::make(Str::random(24)),
                     'email_verified_at' => now(),
                 ]);
             } else {
+                // User exist tapi belum verified (misalnya daftar manual dulu) → auto-verify via Google
                 if ($user->email_verified_at === null) {
-                    $user->email_verified_at = now();
-                    $user->save();
+                    $user->forceFill(['email_verified_at' => now()])->save();
                 }
             }
+
+            // Refresh agar data email_verified_at dipastikan terisi dari DB
+            $user->refresh();
 
             $token = $user->createToken('flutter-app')->plainTextToken;
 

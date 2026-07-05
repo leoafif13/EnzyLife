@@ -515,6 +515,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             positif: _positif,
                             netral: _netral,
                             negatif: _negatif,
+                            totalReviews: _totalReviews,
                           ),
 
                           const SizedBox(height: 16),
