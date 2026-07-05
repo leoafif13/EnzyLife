@@ -337,7 +337,7 @@ class _UlasanScreenState extends State<UlasanScreen> {
                           children: [
                             Icon(Icons.bubble_chart_outlined, color: AppColors.green500, size: 20),
                             SizedBox(width: 8),
-                            Text('Aroma Produk',
+                            Text('Produk',
                                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
                                     color: AppColors.text1)),
                           ],
@@ -383,7 +383,7 @@ class _UlasanScreenState extends State<UlasanScreen> {
                           }).toList(),
                         ),
                         const SizedBox(height: 16),
-                        const Text('Komentar Aroma',
+                        const Text('Komentar Produk',
                             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
                                 color: AppColors.text1)),
                         const SizedBox(height: 8),
@@ -395,7 +395,7 @@ class _UlasanScreenState extends State<UlasanScreen> {
                           enabled: !_isReadOnly,
                           style: const TextStyle(fontSize: 13, color: AppColors.text1),
                           decoration: InputDecoration(
-                            hintText: 'Bagaimana aroma eco enzyme menurutmu?\n(Contoh: Aromanya sangat segar dan alami)',
+                            hintText: 'Bagaimana produk eco enzyme menurutmu?\n(Contoh: Produk memiliki aroma yang sangat segar dan alami)',
                             hintStyle: TextStyle(color: Colors.grey[400],
                                 fontSize: 12, height: 1.5),
                             filled: true,

@@ -20,6 +20,8 @@ class UlasanResource extends Resource
 {
     protected static ?string $model = Review::class;
 
+    protected static ?int $navigationSort = 6;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $navigationLabel = 'Ulasan';
