@@ -230,7 +230,6 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
   }
 
   Widget _buildActions(BuildContext context) {
-    final firstItem = _order.items.isNotEmpty ? _order.items.first : null;
     final isCancelled = _order.statusPemesanan == 'DIBATALKAN';
 
     switch (_order.orderStatus) {
@@ -240,17 +239,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {
-                final product = firstItem?.product;
-                if (product != null) {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                    ),
-                    builder: (_) => PurchaseBottomSheet(product: product),
-                  );
-                }
+                _showBuyAgainSheet(context, _order);
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.green500),
@@ -271,17 +260,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      final product = firstItem?.product;
-                      if (product != null) {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                          ),
-                          builder: (_) => PurchaseBottomSheet(product: product),
-                        );
-                      }
+                      _showBuyAgainSheet(context, _order);
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.green500),
@@ -978,9 +957,158 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
       },
     );
   }
-}
+  }
 
-class _InfoRow extends StatelessWidget {
+  void _showBuyAgainSheet(BuildContext context, OrderModel order) {
+    if (order.items.length == 1) {
+      final product = order.items.first.product;
+      if (product != null) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          builder: (_) => PurchaseBottomSheet(product: product, initialQty: order.items.first.quantity),
+        );
+      }
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (subCtx) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4.5,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const Text(
+                'Pilih Produk untuk Dibeli Lagi',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.text1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: order.items.length,
+                  separatorBuilder: (_, __) => const Divider(color: AppColors.divider),
+                  itemBuilder: (ctx, idx) {
+                    final item = order.items[idx];
+                    final prod = item.product;
+                    if (prod == null) return const SizedBox.shrink();
+                    final imageUrl = prod.image.isNotEmpty
+                        ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
+                        : null;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              color: AppColors.green50,
+                              child: imageUrl != null
+                                  ? Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.image_outlined,
+                                        color: AppColors.green500,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.image_outlined,
+                                      color: AppColors.green500,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  prod.name,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.text1,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${item.quantity} x ${formatPrice(item.price)}',
+                                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(subCtx).pop();
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                                ),
+                                builder: (_) => PurchaseBottomSheet(product: prod, initialQty: item.quantity),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.green500,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Text(
+                              'Beli',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
   final bool isBold;

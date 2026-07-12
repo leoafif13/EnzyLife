@@ -127,6 +127,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
         return;
       }
 
+      if (_alamatController.text.trim().length < 10) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text('Alamat minimal 10 karakter'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ));
+        return;
+      }
+
+      if (_kotaController.text.trim().length < 3) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text('Kota minimal 3 karakter'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ));
+        return;
+      }
+
       final cleanPhone = _teleponController.text.replaceAll(RegExp(r'\D'), '');
       if (cleanPhone.length < 10 || cleanPhone.length > 15) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -415,7 +435,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         children: [
           Scaffold(
             backgroundColor: AppColors.bgPage,
-            appBar: const SubPageAppBar(title: 'Checkout'),
+            appBar: const SubPageAppBar(title: 'Pemesanan'),
             body: Column(
               children: [
           Expanded(
@@ -622,6 +642,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   label: 'Nama Penerima',
                                   hint: 'Masukkan nama penerima',
                                   icon: Icons.person_outline_rounded,
+                                  readOnly: true,
                                   textInputAction: TextInputAction.next,
                                 ),
                                 const SizedBox(height: 12),
@@ -630,6 +651,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   label: 'Nomor Telepon',
                                   hint: 'Masukkan nomor telepon',
                                   icon: Icons.phone_outlined,
+                                  readOnly: true,
                                   keyboardType: TextInputType.phone,
                                   textInputAction: TextInputAction.next,
                                 ),
@@ -639,6 +661,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   label: 'Alamat Lengkap',
                                   hint: 'Nama jalan, nomor, RT/RW',
                                   icon: Icons.home_outlined,
+                                  readOnly: true,
                                   maxLines: 2,
                                   textInputAction: TextInputAction.next,
                                 ),
@@ -662,9 +685,31 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                         hint: '00000',
                                         icon: Icons.markunread_mailbox_outlined,
                                         keyboardType: TextInputType.number,
+                                        readOnly: true,
                                         textInputAction: TextInputAction.done,
                                       )),
                                   ],
+                                ),
+                                const SizedBox(height: 12),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () async {
+                                      final navigator = Navigator.of(context);
+                                      await navigator.push(
+                                        MaterialPageRoute(builder: (_) => const EditProfilScreen()),
+                                      );
+                                      if (mounted) await _loadUserProfile();
+                                    },
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.green500,
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: const Text('Data tidak sesuai? ubah disini.',
+                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                  ),
                                 ),
                               ],
                             ),

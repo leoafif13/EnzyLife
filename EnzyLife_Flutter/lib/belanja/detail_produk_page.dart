@@ -141,7 +141,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
-    final cartQty = CartState.instance.totalItems;
+    final cartQty = CartState.instance.uniqueItems;
 
     return Scaffold(
       backgroundColor: AppColors.bgPage,

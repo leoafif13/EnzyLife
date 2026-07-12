@@ -119,6 +119,19 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
       }
     }
 
+    final cleanAddress = _alamatController.text.trim();
+    if (cleanAddress.isNotEmpty && cleanAddress.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Alamat minimal 10 karakter'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final success = await ApiService.updateProfile(
@@ -209,50 +222,28 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
                 children: [
             // Avatar
             Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 96, height: 96,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [AppColors.green500, AppColors.green700],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        getInitials(user?.name ?? ''),
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
+              child: Container(
+                width: 96, height: 96,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [AppColors.green500, AppColors.green700],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    getInitials(user?.name ?? ''),
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
                     ),
                   ),
-                  Positioned(
-                    bottom: 0, right: 0,
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        width: 30, height: 30,
-                        decoration: BoxDecoration(
-                          color: AppColors.green500,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: const Icon(Icons.camera_alt_outlined, size: 15, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text('Ketuk untuk ganti foto',
-                style: TextStyle(fontSize: 12, color: Colors.grey[500])),
 
             const SizedBox(height: 28),
 

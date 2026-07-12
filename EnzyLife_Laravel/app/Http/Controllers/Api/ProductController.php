@@ -92,7 +92,7 @@ class ProductController extends Controller
         $request->validate([
             'nama' => 'required',
             'harga' => 'required|integer',
-            'deskripsi' => 'required',
+            'deskripsi' => 'required|min:150|max:255',
             'stok' => 'required|integer',
             'gambar' => 'required'
         ]);
@@ -152,7 +152,7 @@ class ProductController extends Controller
         $request->validate([
             'nama' => 'required',
             'harga' => 'required|integer',
-            'deskripsi' => 'required',
+            'deskripsi' => 'required|min:30|max:255',
             'stok' => 'required|integer',
             'gambar' => 'required'
         ]);

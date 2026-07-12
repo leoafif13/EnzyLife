@@ -5,6 +5,7 @@ import '../widgets/page_header_card.dart';
 import '../widgets/search_bar_field.dart';
 import '../widgets/chatbot_widget.dart';
 import '../services/auth_service.dart';
+import '../widgets/expandable_tile.dart';
 
 // ══════════════════════════════════════════════
 //  FAQ Screen
@@ -259,9 +260,11 @@ class _FaqScreenState extends State<FaqScreen> {
                     physics: const BouncingScrollPhysics(),
                     itemCount: filteredFaq.length,
                     itemBuilder: (context, index) {
-                      return _FaqTile(
+                      return ExpandableTile(
                         key: ValueKey(filteredFaq[index].question),
-                        item: filteredFaq[index],
+                        title: filteredFaq[index].question,
+                        content: filteredFaq[index].answer,
+                        leading: const QBadge(),
                       );
                     },
                   ),
@@ -335,152 +338,6 @@ class _FaqCategoryChip extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Accordion Tile Widget ──────────────────────
-class _FaqTile extends StatefulWidget {
-  final _FaqItem item;
-  const _FaqTile({super.key, required this.item});
-
-  @override
-  State<_FaqTile> createState() => _FaqTileState();
-}
-
-class _FaqTileState extends State<_FaqTile> with SingleTickerProviderStateMixin {
-  bool _expanded = false;
-  late final AnimationController _ctrl;
-  late final Animation<double> _anim;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-    );
-    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  void _toggle() {
-    setState(() => _expanded = !_expanded);
-    _expanded ? _ctrl.forward() : _ctrl.reverse();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: AppColors.cardShadow,
-        border: Border.all(
-          color: _expanded ? AppColors.green200 : AppColors.border.withAlpha(80),
-          width: _expanded ? 1.2 : 1,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(
-                color: _expanded ? AppColors.green500 : Colors.transparent,
-                width: 4.5,
-              ),
-            ),
-          ),
-          child: Column(
-            children: [
-              InkWell(
-                onTap: _toggle,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                  child: Row(
-                    children: [
-                      // Question indicator bubble
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: _expanded ? AppColors.green500 : AppColors.green50,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Q',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: _expanded ? Colors.white : AppColors.green700,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          widget.item.question,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: _expanded ? FontWeight.w700 : FontWeight.w600,
-                            color: _expanded ? AppColors.green700 : AppColors.text1,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      AnimatedRotation(
-                        turns: _expanded ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 250),
-                        child: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: _expanded ? AppColors.green500 : Colors.grey[400],
-                          size: 22,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizeTransition(
-                sizeFactor: _anim,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(52, 4, 16, 16),
-                  color: AppColors.green50.withAlpha(100),
-                  child: widget.item.answer.isNotEmpty
-                      ? Text(
-                          widget.item.answer,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.text2,
-                            height: 1.6,
-                          ),
-                        )
-                      : Text(
-                          '📝 TODO: isi jawaban untuk pertanyaan ini',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange[700],
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

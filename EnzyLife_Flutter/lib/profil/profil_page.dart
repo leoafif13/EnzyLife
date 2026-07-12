@@ -216,52 +216,6 @@ String getInitials(String name) {
   return words[0][0].toUpperCase();
 }
 
-// ── Stats row (Disabled) ──────────────────────
-// class _StatsRow extends StatelessWidget {
-//   const _StatsRow();
-// 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       margin: const EdgeInsets.symmetric(horizontal: 20),
-//       padding: const EdgeInsets.symmetric(vertical: 16),
-//       decoration: BoxDecoration(
-//         color: AppColors.bgCard,
-//         borderRadius: BorderRadius.circular(16),
-//         boxShadow: AppColors.cardShadow,
-//       ),
-//       child: Row(
-//         children: [
-//           _Stat(value: '12', label: 'Artikel\nDibaca'),
-//           Container(width: 1, height: 36, color: AppColors.divider),
-//           _Stat(value: '5',  label: 'Produk\nDibeli'),
-//           Container(width: 1, height: 36, color: AppColors.divider),
-//           _Stat(value: '3',  label: 'Kalkulator\nDisimpan'),
-//         ],
-//       ),
-//     );
-//   }
-// }
-// 
-// class _Stat extends StatelessWidget {
-//   final String value, label;
-//   const _Stat({required this.value, required this.label});
-// 
-//   @override
-//   Widget build(BuildContext context) => Expanded(
-//     child: Column(
-//       children: [
-//         Text(value,
-//             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500)),
-//         const SizedBox(height: 4),
-//         Text(label,
-//             textAlign: TextAlign.center,
-//             style: TextStyle(fontSize: 11, color: Colors.grey[500], height: 1.3)),
-//       ],
-//     ),
-//   );
-// }
-
 // ── Menu section ──────────────────────────────
 class _MenuItem {
   final IconData icon;

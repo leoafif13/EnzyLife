@@ -27,7 +27,9 @@ class ProductForm
                 Forms\Components\Textarea::make('deskripsi')
                     ->label('Deskripsi Produk')
                     ->required()
-                    ->maxLength(255),
+                    ->minLength(30)
+                    ->maxLength(255)
+                    ->helperText('Minimal 30 karakter agar informasi produk cukup jelas.'),
 
                 Section::make('Spesifikasi Detail Produk')
                     ->description('Masukkan spesifikasi khusus untuk produk ini.')

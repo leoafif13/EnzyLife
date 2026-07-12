@@ -47,13 +47,32 @@ class TentangAplikasiScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
+            // Deskripsi aplikasi
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.bgCard,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: AppColors.cardShadow,
+              ),
+              child: const Text(
+                'EnzyLife adalah aplikasi belanja produk ramah lingkungan berbasis eco-enzim. '
+                'Kami membantu Anda menemukan produk daur ulang berkualitas sekaligus mengedukasi '
+                'cara mengubah limbah dapur menjadi cairan multiguna yang bermanfaat bagi rumah tangga.',
+                style: TextStyle(fontSize: 13, color: AppColors.text2, height: 1.6),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
             // Info aplikasi
             _InfoSection(
               title: 'Tentang',
               items: [
                 _InfoRow(label: 'Versi Aplikasi', value: '1.0.0'),
                 _InfoRow(label: 'Platform', value: 'Android & iOS'),
-                _InfoRow(label: 'Terakhir Diperbarui', value: 'April 2026'), // TODO
+                _InfoRow(label: 'Terakhir Diperbarui', value: 'Juli 2026'),
               ],
             ),
 
@@ -63,41 +82,9 @@ class TentangAplikasiScreen extends StatelessWidget {
               title: 'Pengembang',
               items: [
                 _InfoRow(label: 'Nama Tim', value: 'Tim EnzyLife'), // TODO
-                _InfoRow(label: 'Email', value: 'contact@enzylife.id'), // TODO
+                _InfoRow(label: 'Email', value: 'enzylifesupport@gmail.com'),
                 _InfoRow(label: 'Website', value: 'www.enzylife.id'), // TODO
               ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Links
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.bgCard,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow,
-              ),
-              child: Column(
-                children: [
-                  _LinkTile(
-                    icon: Icons.privacy_tip_outlined,
-                    label: 'Kebijakan Privasi',
-                    onTap: () {}, // TODO
-                  ),
-                  const Divider(height: 1, color: AppColors.divider, indent: 16, endIndent: 16),
-                  _LinkTile(
-                    icon: Icons.description_outlined,
-                    label: 'Syarat & Ketentuan',
-                    onTap: () {}, // TODO
-                  ),
-                  const Divider(height: 1, color: AppColors.divider, indent: 16, endIndent: 16),
-                  _LinkTile(
-                    icon: Icons.star_outline_rounded,
-                    label: 'Beri Rating di App Store',
-                    onTap: () {}, // TODO
-                  ),
-                ],
-              ),
             ),
 
             const SizedBox(height: 24),
@@ -174,36 +161,4 @@ class _InfoSection extends StatelessWidget {
 class _InfoRow {
   final String label, value;
   const _InfoRow({required this.label, required this.value});
-}
-
-class _LinkTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _LinkTile({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 36, height: 36,
-              decoration: BoxDecoration(
-                  color: AppColors.green50, borderRadius: BorderRadius.circular(10)),
-              child: Icon(icon, size: 18, color: AppColors.green500),
-            ),
-            const SizedBox(width: 14),
-            Expanded(child: Text(label,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500,
-                    color: AppColors.text1))),
-            Icon(Icons.chevron_right_rounded, size: 18, color: Colors.grey[300]),
-          ],
-        ),
-      ),
-    );
-  }
 }

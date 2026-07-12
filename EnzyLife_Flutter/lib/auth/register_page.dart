@@ -562,20 +562,22 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                               const SizedBox(height: 16),
 
-                              Wrap(
-                                alignment: WrapAlignment.center,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  Text('Sudah punya akun? ',
-                                      style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                                  GestureDetector(
-                                    onTap: () => Navigator.of(context).pushReplacement(
-                                        MaterialPageRoute(builder: (_) => const LoginScreen())),
-                                    child: const Text('Masuk',
-                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
-                                            color: AppColors.green500)),
-                                  ),
-                                ],
+                              Center(
+                                child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text('Sudah punya akun? ',
+                                        style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                                    GestureDetector(
+                                      onTap: () => Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(builder: (_) => const LoginScreen())),
+                                      child: const Text('Masuk',
+                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
+                                              color: AppColors.green500)),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
