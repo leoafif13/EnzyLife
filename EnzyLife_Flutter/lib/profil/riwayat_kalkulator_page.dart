@@ -139,19 +139,28 @@ class _HistoryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey[400]),
-                    const SizedBox(width: 4),
-                    Text(item.date,
-                        style: TextStyle(fontSize: 11, color: Colors.grey[400])),
-                  ],
+                Flexible(
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey[400]),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(item.date,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                      ),
+                    ],
+                  ),
                 ),
-                GestureDetector(
-                  onTap: () {}, // TODO: hitung ulang dengan input yang sama
-                  child: const Text('Hitung ulang →',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                          color: AppColors.green500)),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () {}, // TODO: hitung ulang dengan input yang sama
+                    child: const Text('Hitung ulang →',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                            color: AppColors.green500)),
+                  ),
                 ),
               ],
             ),

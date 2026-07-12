@@ -51,7 +51,8 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -231,6 +232,7 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

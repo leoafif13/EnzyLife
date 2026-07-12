@@ -94,22 +94,31 @@ class _SavedArticleCard extends StatelessWidget {
                       children: [
                         Icon(Icons.person_outline, size: 12, color: Colors.grey[400]),
                         const SizedBox(width: 3),
-                        Text(article.author,
-                            style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                        Flexible(
+                          child: Text(article.author,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                        ),
                         const Spacer(),
                         Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey[400]),
                         const SizedBox(width: 3),
-                        Text(article.date,
-                            style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                        Flexible(
+                          child: Text(article.date,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Baca selengkapnya →',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                                color: AppColors.green500)),
+                        Flexible(
+                          child: const Text('Baca selengkapnya →',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                                  color: AppColors.green500)),
+                        ),
                         GestureDetector(
                           onTap: () {}, // TODO: hapus dari tersimpan
                           child: Icon(Icons.bookmark_rounded,

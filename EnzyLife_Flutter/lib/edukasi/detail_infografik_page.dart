@@ -62,8 +62,10 @@ class DetailInfografikPage extends StatelessWidget {
                           color: AppColors.text1, height: 1.3)),
                   const SizedBox(height: 10),
                   // Meta: author + tanggal
-                  Row(
-                    children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
                       const Icon(Icons.person_outline, size: 14, color: AppColors.green500),
                       const SizedBox(width: 4),
                       Text('Admin',
@@ -81,6 +83,7 @@ class DetailInfografikPage extends StatelessWidget {
                       const SizedBox(width: 4), Text('1 gambar',
                           style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                     ],
+                    ),
                   ),
                 ],
               ),

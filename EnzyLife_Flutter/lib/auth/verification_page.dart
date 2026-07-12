@@ -285,12 +285,13 @@ class _VerificationScreenState extends State<VerificationScreen>
 
                               // OTP Inputs
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: List.generate(6, (index) {
-                                  return SizedBox(
-                                    width: 46,
-                                    height: 56,
-                                    child: TextField(
+                                  return Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                                      child: SizedBox(
+                                        height: 56,
+                                        child: TextField(
                                       controller: _otpControllers[index],
                                       focusNode: _focusNodes[index],
                                       keyboardType: TextInputType.number,
@@ -335,6 +336,8 @@ class _VerificationScreenState extends State<VerificationScreen>
                                         }
                                       },
                                     ),
+                                      ),
+                                      ),
                                   );
                                 }),
                               ),
@@ -507,37 +510,42 @@ class _LogoHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 76,
-          height: 76,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 20,
-                offset: const Offset(0, 6),
-              )
-            ],
-          ),
-          padding: const EdgeInsets.all(14),
-          child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(14),
+              child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'EnzyLife',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        const Text(
-          'EnzyLife',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -998,20 +998,26 @@ class _InfoRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isBold ? 14 : 13,
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w400,
-            color: isBold ? AppColors.text1 : Colors.grey[600],
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isBold ? 14 : 13,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w400,
+              color: isBold ? AppColors.text1 : Colors.grey[600],
+            ),
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isBold ? 15 : 13,
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-            color: valueColor ?? (isBold ? AppColors.green500 : AppColors.text1),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: isBold ? 15 : 13,
+              fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+              color: valueColor ?? (isBold ? AppColors.green500 : AppColors.text1),
+            ),
           ),
         ),
       ],

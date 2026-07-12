@@ -74,20 +74,23 @@ class ProductCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          product.stock > 0 ? 'Stok: ${product.stock}' : 'Stok Habis',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: product.stock > 0 ? AppColors.green500 : Colors.red,
+                        Flexible(
+                          child: Text(
+                            product.stock > 0 ? 'Stok: ${product.stock}' : 'Stok Habis',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: product.stock > 0 ? AppColors.green500 : Colors.red,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Text(
                           '|',
                           style: TextStyle(fontSize: 11, color: Colors.grey[300]),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
                         const SizedBox(width: 2),
                         Text(
@@ -98,21 +101,27 @@ class ProductCard extends StatelessWidget {
                             color: AppColors.text1,
                           ),
                         ),
-                        Text(
-                          ' (${product.ratingCount})',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.text3,
+                        Flexible(
+                          child: Text(
+                            ' (${product.ratingCount})',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.text3,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (product.salesCount > 0) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            '|  ${product.salesCount} terjual',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.text3,
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              '|  ${product.salesCount} terjual',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.text3,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -122,9 +131,12 @@ class ProductCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          fmtPrice(product.price),
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1),
+                        Flexible(
+                          child: Text(
+                            fmtPrice(product.price),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         Row(
                           children: [

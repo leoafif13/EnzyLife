@@ -271,12 +271,15 @@ class _SemuaUlasanScreenState extends State<SemuaUlasanScreen> {
                 // Baris judul + tombol sort + tombol reset
                 Row(
                   children: [
-                    const Text(
-                      'Filter Ulasan',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.text1,
+                    Expanded(
+                      child: const Text(
+                        'Filter Ulasan',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text1,
+                        ),
                       ),
                     ),
                     const Spacer(),

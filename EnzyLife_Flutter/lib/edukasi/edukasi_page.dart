@@ -64,7 +64,9 @@ class _EducationMenuModal extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: Container(
-          width: 230,
+          width: (MediaQuery.of(context).size.width - 24 < 230)
+              ? (MediaQuery.of(context).size.width - 24)
+              : 230,
           decoration: BoxDecoration(
             color: AppColors.bgCard,
             borderRadius: BorderRadius.circular(20),
@@ -148,15 +150,18 @@ class _EducationMenuModal extends StatelessWidget {
                             Icon(item.icon,
                                 size: 18, color: AppColors.green500),
                             const SizedBox(width: 12),
-                            Text(
-                              item.label,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.text1,
+                            Expanded(
+                              child: Text(
+                                item.label,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.text1,
+                                ),
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(width: 8),
                             const Icon(Icons.chevron_right_rounded,
                                 size: 16, color: AppColors.hint),
                           ],

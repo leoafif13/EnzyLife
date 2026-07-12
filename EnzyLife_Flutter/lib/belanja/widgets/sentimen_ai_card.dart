@@ -120,7 +120,7 @@ class SentimenBar extends StatelessWidget {
         const SizedBox(width: 10),
         SizedBox(
           width: 90,
-          child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.text1, fontWeight: FontWeight.w600)),
+          child: Text(label, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.text1, fontWeight: FontWeight.w600)),
         ),
         Expanded(
           child: Stack(
@@ -159,7 +159,7 @@ class SentimenBar extends StatelessWidget {
         const SizedBox(width: 12),
         SizedBox(
           width: 70,
-          child: Text('$pct% ($count)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color), textAlign: TextAlign.right),
+          child: Text('$pct% ($count)', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color), textAlign: TextAlign.right),
         ),
       ],
     );

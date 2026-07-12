@@ -130,10 +130,11 @@ class DetailArtikelPage extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   // Meta
-                  Row(
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
                     children: [
                       _MetaBadge(icon: Icons.person_outline, label: 'Admin'),
-                      const SizedBox(width: 12),
                       _MetaBadge(icon: Icons.calendar_today_outlined, label: formatDate(item.createdAt.split('T')[0])),
                     ],
                   ),

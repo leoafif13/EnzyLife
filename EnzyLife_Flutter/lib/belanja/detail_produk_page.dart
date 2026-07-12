@@ -340,8 +340,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(_fmt(p.price),
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500)),
+                            Flexible(
+                              child: Text(_fmt(p.price),
+                                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.green500),
+                                  overflow: TextOverflow.ellipsis),
+                            ),
+                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
@@ -369,8 +373,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               size: 18, color: const Color(0xFFFFC107),
                             )),
                             const SizedBox(width: 6),
-                            Text('${_avgRating.toStringAsFixed(1)} ($_totalReviews ulasan)',
-                                style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                            Flexible(
+                              child: Text('${_avgRating.toStringAsFixed(1)} ($_totalReviews ulasan)',
+                                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                                  overflow: TextOverflow.ellipsis),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),

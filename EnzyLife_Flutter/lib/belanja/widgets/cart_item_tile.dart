@@ -123,9 +123,12 @@ class CartItemTile extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Subtotal
-                          Text(
-                            'Subtotal: ${fmtPrice(product.price * qty)}',
-                            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                          Flexible(
+                            child: Text(
+                              'Subtotal: ${fmtPrice(product.price * qty)}',
+                              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           // Qty control
                           QtyControl(qty: qty, onAdd: onAdd, onRemove: onRemove),

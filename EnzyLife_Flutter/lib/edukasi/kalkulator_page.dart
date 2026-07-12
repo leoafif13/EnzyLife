@@ -524,12 +524,15 @@ class _TabPenggunaanState extends State<_TabPenggunaan> {
               children: [
                 const Icon(Icons.info_outline_rounded, size: 14, color: AppColors.green700),
                 const SizedBox(width: 6),
-                Text(
-                  _rasio[_jenisGunaan]!['label'] as String,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.green700,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    _rasio[_jenisGunaan]!['label'] as String,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.green700,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -649,7 +652,7 @@ class _DropdownField extends StatelessWidget {
                       children: [
                         Icon(_getItemIcon(v), size: 18, color: AppColors.green500),
                         const SizedBox(width: 10),
-                        Text(v),
+                        Expanded(child: Text(v, overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ))

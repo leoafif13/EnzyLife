@@ -201,7 +201,7 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
           Container(
             color: AppColors.bgPage,
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
-            child: Row(
+            child: Wrap(
               children: _Filter.values.map((f) {
                 final active = _filter == f;
                 final label  = f == _Filter.semua ? 'Semua'
@@ -389,12 +389,15 @@ class _ArtikelCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.text3),
                       const SizedBox(width: 4),
-                      Text(
-                        formatDate(item.createdAt.split('T')[0]),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.text3,
+                      Flexible(
+                        child: Text(
+                          formatDate(item.createdAt.split('T')[0]),
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.text3,
+                          ),
                         ),
                       ),
                       const Spacer(),
@@ -529,12 +532,15 @@ class _InfografikCard extends StatelessWidget {
                       children: [
                         const Icon(Icons.calendar_today_outlined, size: 10, color: AppColors.text3),
                         const SizedBox(width: 4),
-                        Text(
-                          formatDate(item.createdAt.split('T')[0]),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.text3,
+                        Flexible(
+                          child: Text(
+                            formatDate(item.createdAt.split('T')[0]),
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.text3,
+                            ),
                           ),
                         ),
                         const Spacer(),

@@ -562,8 +562,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                               const SizedBox(height: 16),
 
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   Text('Sudah punya akun? ',
                                       style: TextStyle(fontSize: 14, color: Colors.grey[600])),
@@ -610,14 +611,16 @@ class _TopSection extends StatelessWidget {
           child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
         ),
         const SizedBox(width: 12),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('EnzyLife',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
-            Text('Daftar dan mulai perjalananmu',
-                style: TextStyle(color: Colors.white70, fontSize: 12)),
-          ],
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('EnzyLife',
+                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
+              Text('Daftar dan mulai perjalananmu',
+                  style: TextStyle(color: Colors.white70, fontSize: 12)),
+            ],
+          ),
         ),
       ],
     );

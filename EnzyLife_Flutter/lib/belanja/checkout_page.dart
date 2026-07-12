@@ -163,12 +163,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
             children: const [
               Icon(Icons.shopping_bag_outlined, color: AppColors.green500),
               SizedBox(width: 10),
-              Text(
-                'Konfirmasi Pesanan',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.text1,
+              Flexible(
+                child: Text(
+                  'Konfirmasi Pesanan',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.text1,
+                  ),
                 ),
               ),
             ],
@@ -195,12 +197,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       'Total Pembayaran:',
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.text1),
                     ),
-                    Text(
-                      _fmt(_grandTotal),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.green500,
+                    Flexible(
+                      child: Text(
+                        _fmt(_grandTotal),
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.green500,
+                        ),
                       ),
                     ),
                   ],
@@ -458,12 +464,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(p.name, style: const TextStyle(fontSize: 13,
-                                        fontWeight: FontWeight.w600, color: AppColors.text1)),
+                                        fontWeight: FontWeight.w600, color: AppColors.text1),
+                                        maxLines: 2, overflow: TextOverflow.ellipsis),
                                     Text('${e.value}x · ${_fmt(p.price)}',
                                         style: TextStyle(fontSize: 12, color: Colors.grey[500])),
                                   ],
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               Text(_fmt(p.price * e.value),
                                   style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
                                       color: AppColors.text1)),
@@ -511,12 +519,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     children: const [
                                       Icon(Icons.info_outline_rounded, color: AppColors.green500),
                                       SizedBox(width: 10),
-                                      Text(
-                                        'Profil Belum Lengkap',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: AppColors.text1,
+                                      Flexible(
+                                        child: Text(
+                                          'Profil Belum Lengkap',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: AppColors.text1,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -861,12 +871,20 @@ class _PriceRow extends StatelessWidget {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: isBold ? 14 : 13,
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w400,
-            color: isBold ? AppColors.text1 : Colors.grey[600])),
-        Text(value, style: TextStyle(fontSize: isBold ? 16 : 13,
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
-            color: valueColor ?? (isBold ? AppColors.green500 : AppColors.text1))),
+        Flexible(
+          child: Text(label, style: TextStyle(fontSize: isBold ? 14 : 13,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w400,
+              color: isBold ? AppColors.text1 : Colors.grey[600])),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Text(value,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: isBold ? 16 : 13,
+              fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
+              color: valueColor ?? (isBold ? AppColors.green500 : AppColors.text1))),
+        ),
       ],
     ),
   );

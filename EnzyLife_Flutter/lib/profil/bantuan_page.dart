@@ -52,16 +52,20 @@ class BantuanScreen extends StatelessWidget {
                   const SizedBox(height: 14),
                   Row(
                     children: [
-                      _ContactButton(
-                        icon: Icons.chat_outlined,
-                        label: 'Live Chat',
-                        onTap: () {}, // TODO: buka live chat
+                      Flexible(
+                        child: _ContactButton(
+                          icon: Icons.chat_outlined,
+                          label: 'Live Chat',
+                          onTap: () {}, // TODO: buka live chat
+                        ),
                       ),
                       const SizedBox(width: 10),
-                      _ContactButton(
-                        icon: Icons.email_outlined,
-                        label: 'Email',
-                        onTap: () {}, // TODO: buka email
+                      Flexible(
+                        child: _ContactButton(
+                          icon: Icons.email_outlined,
+                          label: 'Email',
+                          onTap: () {}, // TODO: buka email
+                        ),
                       ),
                     ],
                   ),

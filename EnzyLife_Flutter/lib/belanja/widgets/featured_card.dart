@@ -124,12 +124,15 @@ class FeaturedCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              '|  ${product.salesCount} terjual',
-                              style: TextStyle(
-                                color: Colors.white.withAlpha(204),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                            Flexible(
+                              child: Text(
+                                '|  ${product.salesCount} terjual',
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(204),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],

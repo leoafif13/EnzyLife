@@ -54,13 +54,17 @@ class _AppHeaderState extends State<AppHeader> {
         children: [
           Image.asset('assets/images/logo.png', width: 32, height: 32),
           const SizedBox(width: 8),
-          const Text(
-            'EnzyLife',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF4CAF50),
-              letterSpacing: -0.3,
+          const Flexible(
+            child: Text(
+              'EnzyLife',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF4CAF50),
+                letterSpacing: -0.3,
+              ),
             ),
           ),
         ],

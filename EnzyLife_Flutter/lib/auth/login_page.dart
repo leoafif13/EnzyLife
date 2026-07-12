@@ -328,26 +328,31 @@ class _LogoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 88, height: 88,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 24, offset: const Offset(0, 8))],
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 88, height: 88,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 24, offset: const Offset(0, 8))],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+            ),
+            const SizedBox(height: 16),
+            const Text('EnzyLife',
+                style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+            const SizedBox(height: 6),
+            Text('Hidup sehat dimulai dari sini',
+                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14, letterSpacing: 0.2)),
+          ],
         ),
-        const SizedBox(height: 16),
-        const Text('EnzyLife',
-            style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-        const SizedBox(height: 6),
-        Text('Hidup sehat dimulai dari sini',
-            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14, letterSpacing: 0.2)),
-      ],
+      ),
     );
   }
 }
@@ -494,8 +499,9 @@ class _FormCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text('Belum punya akun? ', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
               GestureDetector(

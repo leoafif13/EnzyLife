@@ -143,7 +143,7 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
         );
 
         // Ukuran window chat yang ramping dan tinggi
-        const double chatWidth = 300.0;
+        final double chatWidth = (bodyWidth - 32 < 300.0) ? (bodyWidth - 32) : 300.0;
         final double chatHeight = (bodyHeight - 32 < 500) ? (bodyHeight - 32) : 500.0;
 
         // Koordinat penempatan chat window
@@ -165,9 +165,9 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
                     ? Alignment.bottomRight
                     : Alignment.bottomLeft,
                 minWidth: 0,
-                maxWidth: _isOpen ? chatWidth : 56,
+                maxWidth: chatWidth,
                 minHeight: 0,
-                maxHeight: _isOpen ? chatHeight : 56,
+                maxHeight: chatHeight,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   transitionBuilder: (child, animation) {
@@ -512,12 +512,17 @@ class _ChatbotWidgetState extends State<ChatbotWidget> {
             ),
           ),
           const SizedBox(width: 6),
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.green500,
-            child: IconButton(
-              icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
-              onPressed: _handleSend,
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: Material(
+              color: AppColors.green500,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: _handleSend,
+                child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+              ),
             ),
           ),
         ],

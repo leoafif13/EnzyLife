@@ -128,13 +128,18 @@ class _SelectedItem extends StatelessWidget {
       children: [
         Icon(item.icon, size: 20, color: Colors.white),
         const SizedBox(width: 4),
-        Text(
-          item.label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.1,
+        Flexible(
+          child: Text(
+            item.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.1,
+            ),
           ),
         ),
       ],

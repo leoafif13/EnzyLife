@@ -143,11 +143,18 @@ class _InfoSection extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(items[i].label,
-                            style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                        Text(items[i].value,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500,
-                                color: AppColors.text1)),
+                        Flexible(
+                          child: Text(items[i].label,
+                              style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(items[i].value,
+                              textAlign: TextAlign.right,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500,
+                                  color: AppColors.text1)),
+                        ),
                       ],
                     ),
                   ),

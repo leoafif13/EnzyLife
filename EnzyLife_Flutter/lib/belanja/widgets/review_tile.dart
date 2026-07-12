@@ -91,7 +91,10 @@ class ReviewTile extends StatelessWidget {
                       size: 12, color: const Color(0xFFFFC107),
                     )),
                     const SizedBox(width: 6),
-                    Text(review.date, style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                    Flexible(
+                      child: Text(review.date, overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                    ),
                   ]),
                 ],
               ),

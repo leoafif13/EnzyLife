@@ -280,10 +280,16 @@ class _SplashScreenState extends State<SplashScreen>
           ),
 
           // 3. Foreground content
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+          Positioned.fill(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                 // Animated Logo with Spinning Outer Ring & Pulse
                 AnimatedBuilder(
                   animation: Listenable.merge([_entryController, _pulseController]),
@@ -429,7 +435,12 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                 ),
-              ],
+                ],
+              ),
+                  ),
+                ),
+              );
+            },
             ),
           ),
         ],

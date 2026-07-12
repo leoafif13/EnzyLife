@@ -281,34 +281,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: _favorites.map((f) => _FavoriteItem(
-                    data: f,
-                    onTap: () async {
-                      await _incrementVisit(f.label);
-                      if (!context.mounted) return;
-                      
-                      if (f.label == 'Artikel') {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const ArtikelScreen()),
-                        );
-                      } else if (f.label == 'Kalkulator') {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const KalkulatorScreen()),
-                        );
-                      } else if (f.label == 'FAQ') {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const FaqScreen()),
-                        );
-                      } else if (f.label == 'Belanja') {
-                        widget.onTabSelected?.call(2);
-                      } else if (f.label == 'Riwayat') {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
-                        );
-                      } else if (f.label == 'Profil') {
-                        widget.onTabSelected?.call(3);
-                      }
-                    },
+                  children: _favorites.map((f) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: _FavoriteItem(
+                        data: f,
+                        onTap: () async {
+                          await _incrementVisit(f.label);
+                          if (!context.mounted) return;
+                          
+                          if (f.label == 'Artikel') {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ArtikelScreen()),
+                            );
+                          } else if (f.label == 'Kalkulator') {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const KalkulatorScreen()),
+                            );
+                          } else if (f.label == 'FAQ') {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const FaqScreen()),
+                            );
+                          } else if (f.label == 'Belanja') {
+                            widget.onTabSelected?.call(2);
+                          } else if (f.label == 'Riwayat') {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
+                            );
+                          } else if (f.label == 'Profil') {
+                            widget.onTabSelected?.call(3);
+                          }
+                        },
+                      ),
+                    ),
                   )).toList(),
                 ),
               ],
@@ -326,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const _SectionTitle(title: 'Artikel Terbaru'),
+                    const Expanded(child: _SectionTitle(title: 'Artikel Terbaru')),
                     TextButton(
                       onPressed: () {
                         // Navigate ke tab Edukasi (index 1)
@@ -386,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const _SectionTitle(title: 'Infografik Terbaru'),
+                    const Expanded(child: _SectionTitle(title: 'Infografik Terbaru')),
                     TextButton(
                       onPressed: () {
                         final mainState = context.findAncestorStateOfType<_MainScreenState>();
@@ -440,6 +445,8 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w700,
@@ -467,8 +474,7 @@ class _FavoriteItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 80,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
         decoration: BoxDecoration(
           color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(16),
@@ -692,4 +698,4 @@ class _InfografikCard extends StatelessWidget {
     );
   }
 }
-
+

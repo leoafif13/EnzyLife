@@ -351,9 +351,15 @@ class _OnboardingPage extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
           // Animated Artwork/Graphic Circle
           Transform.translate(
             offset: Offset(artworkParallax, 0),
@@ -491,7 +497,12 @@ class _OnboardingPage extends StatelessWidget {
               ),
             ),
           ),
-        ],
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

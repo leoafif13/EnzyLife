@@ -317,9 +317,12 @@ class _OrderCard extends StatelessWidget {
                           Text('${totalQty}pcs',
                               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
                                   color: AppColors.text2)),
-                          Text('Total: ${fmtPrice(order.totalHarga)}',
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                                  color: AppColors.text1)),
+                          Flexible(
+                            child: Text('Total: ${fmtPrice(order.totalHarga)}',
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                                    color: AppColors.text1)),
+                          ),
                         ],
                       ),
                     ],
@@ -335,8 +338,11 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Icon(Icons.schedule_outlined, size: 13, color: Colors.grey[400]),
                 const SizedBox(width: 4),
-                Text('Tanggal Pemesanan: $dateStr',
-                    style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                Flexible(
+                  child: Text('Tanggal Pemesanan: $dateStr',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                ),
               ],
             ),
 
