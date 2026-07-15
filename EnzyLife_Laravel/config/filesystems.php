@@ -41,7 +41,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://127.0.0.1:8000'), '/') . '/storage',
+            'url' => rtrim(env('APP_URL', 'https://undergo-refill-bonehead.ngrok-free.dev'), '/') . '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

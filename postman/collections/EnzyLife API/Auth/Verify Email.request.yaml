@@ -1,0 +1,50 @@
+$kind: http-request
+name: Verify Email
+method: POST
+url: '{{base_url}}/api/email/verify'
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{auth_token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "otp": "123456"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response success is true", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("success");
+          pm.expect(jsonData.success).to.eql(true);
+      });
+
+      pm.test("Response has message", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("message");
+          pm.expect(jsonData.message).to.be.a("string").and.not.empty;
+      });
+
+      pm.test("Response has verified user object", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("user");
+          pm.expect(jsonData.user).to.be.an("object");
+          pm.expect(jsonData.user.email_verified_at).to.not.be.null;
+      });
+
+      pm.test("Response time is less than 3000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(3000);
+      });

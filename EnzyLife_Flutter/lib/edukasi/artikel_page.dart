@@ -56,7 +56,8 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadMore();
     }
   }
@@ -92,7 +93,8 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
 
   Future<void> fetchArtikel() async {
     // Cache-first loading
-    if (ApiService.cachedArtikel.isNotEmpty || ApiService.cachedInfografik.isNotEmpty) {
+    if (ApiService.cachedArtikel.isNotEmpty ||
+        ApiService.cachedInfografik.isNotEmpty) {
       setState(() {
         _artikel = ApiService.cachedArtikel;
         _infografik = ApiService.cachedInfografik;
@@ -122,7 +124,6 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final filteredArtikel = _artikel.where((item) {
       if (_query.isEmpty) return true;
 
@@ -141,9 +142,7 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
     final List<Widget> content = [];
 
     if (_filter != _Filter.infografik) {
-      content.addAll(
-        filteredArtikel.map((item) => _ArtikelCard(item: item)),
-      );
+      content.addAll(filteredArtikel.map((item) => _ArtikelCard(item: item)));
     }
 
     if (_filter != _Filter.artikel) {
@@ -163,124 +162,142 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
         clipBehavior: Clip.none,
         children: [
           Column(
-        children: [
-          // ── Header card ──────────────────────
-          Container(
-            color: AppColors.bgPage,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: const PageHeaderCard(
-              badge: '📚  Artikel',
-              title: 'Artikel & Infografik',
-              subtitle: 'Kumpulan artikel dan infografik seputar Eco Enzim',
-              icon: Icons.article_outlined,
-            ),
-          ),
+            children: [
+              // ── Header card ──────────────────────
+              Container(
+                color: AppColors.bgPage,
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: const PageHeaderCard(
+                  badge: '📚  Artikel',
+                  title: 'Artikel & Infografik',
+                  subtitle: 'Kumpulan artikel dan infografik seputar Eco Enzim',
+                  icon: Icons.article_outlined,
+                ),
+              ),
 
-          // ── Search bar ───────────────────────
-          Container(
-            color: AppColors.bgPage,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            child: SearchBarField(
-              controller: _search,
-              hintText: 'Cari artikel atau infografik...',
-              onChanged: (v) => setState(() {
-                _query = v;
-                _limit = 5;
-              }),
-              showClearButton: _query.isNotEmpty,
-              onClear: () {
-                setState(() {
-                  _query = '';
-                  _limit = 5;
-                });
-                _search.clear();
-              },
-            ),
-          ),
-
-          // ── Filter tabs ──────────────────────
-          Container(
-            color: AppColors.bgPage,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
-            child: Wrap(
-              children: _Filter.values.map((f) {
-                final active = _filter == f;
-                final label  = f == _Filter.semua ? 'Semua'
-                             : f == _Filter.artikel ? 'Artikel' : 'Infografik';
-                final icon   = f == _Filter.semua ? Icons.grid_view_rounded
-                             : f == _Filter.artikel ? Icons.article_outlined
-                             : Icons.image_outlined;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: GestureDetector(
-                    onTap: () => setState(() {
-                      _filter = f;
+              // ── Search bar ───────────────────────
+              Container(
+                color: AppColors.bgPage,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: SearchBarField(
+                  controller: _search,
+                  hintText: 'Cari artikel atau infografik...',
+                  onChanged: (v) => setState(() {
+                    _query = v;
+                    _limit = 5;
+                  }),
+                  showClearButton: _query.isNotEmpty,
+                  onClear: () {
+                    setState(() {
+                      _query = '';
                       _limit = 5;
-                    }),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: active ? AppColors.green500 : AppColors.bgCard,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            color: active ? AppColors.green500 : AppColors.border),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(icon, size: 14,
-                              color: active ? Colors.white : AppColors.text2),
-                          const SizedBox(width: 5),
-                          Text(label,
-                              style: TextStyle(fontSize: 12,
-                                  fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                                  color: active ? Colors.white : AppColors.text2)),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
+                    });
+                    _search.clear();
+                  },
+                ),
+              ),
 
-          // ── List konten ──────────────────────
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : content.isEmpty
-                    ? _EmptyState(
-                        query: _query,
-                        filter: _filter,
-                      )
+              // ── Filter tabs ──────────────────────
+              Container(
+                color: AppColors.bgPage,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+                child: Wrap(
+                  children: _Filter.values.map((f) {
+                    final active = _filter == f;
+                    final label = f == _Filter.semua
+                        ? 'Semua'
+                        : f == _Filter.artikel
+                        ? 'Artikel'
+                        : 'Infografik';
+                    final icon = f == _Filter.semua
+                        ? Icons.grid_view_rounded
+                        : f == _Filter.artikel
+                        ? Icons.article_outlined
+                        : Icons.image_outlined;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => setState(() {
+                          _filter = f;
+                          _limit = 5;
+                        }),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: active
+                                ? AppColors.green500
+                                : AppColors.bgCard,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: active
+                                  ? AppColors.green500
+                                  : AppColors.border,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                icon,
+                                size: 14,
+                                color: active ? Colors.white : AppColors.text2,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                label,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: active
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: active
+                                      ? Colors.white
+                                      : AppColors.text2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+              // ── List konten ──────────────────────
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : content.isEmpty
+                    ? _EmptyState(query: _query, filter: _filter)
                     : ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                         physics: const BouncingScrollPhysics(),
-                        itemCount: visibleContent.length + (showLoadingFooter ? 1 : 0),
+                        itemCount:
+                            visibleContent.length + (showLoadingFooter ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (index < visibleContent.length) {
                             return visibleContent[index];
                           } else {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                              child: Center(child: CircularProgressIndicator()),
                             );
                           }
                         },
                       ),
+              ),
+            ],
           ),
+          const ChatbotWidget(),
         ],
       ),
-      const ChatbotWidget(),
-    ],
-  ),
-);
+    );
   }
 }
 
@@ -292,8 +309,9 @@ class _ArtikelCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _AnimatedPressCard(
-      onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => DetailArtikelPage(item: item))),
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => DetailArtikelPage(item: item))),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
@@ -307,11 +325,14 @@ class _ArtikelCard extends StatelessWidget {
           children: [
             // Thumbnail 16:9 with Hero
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Hero(
-                  tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
+                  tag:
+                      '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                   child: Image.network(
                     '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                     width: double.infinity,
@@ -338,7 +359,10 @@ class _ArtikelCard extends StatelessWidget {
                 children: [
                   // Category Tag above title
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.green50,
                       borderRadius: BorderRadius.circular(6),
@@ -388,7 +412,11 @@ class _ArtikelCard extends StatelessWidget {
                   // Metadata Row
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.text3),
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 12,
+                        color: AppColors.text3,
+                      ),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
@@ -426,12 +454,13 @@ class _ArtikelCard extends StatelessWidget {
 class _InfografikCard extends StatelessWidget {
   final InfografikModel item;
   const _InfografikCard({required this.item});
-  
+
   @override
   Widget build(BuildContext context) {
     return _AnimatedPressCard(
       onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => DetailInfografikPage(item: item))),
+        MaterialPageRoute(builder: (_) => DetailInfografikPage(item: item)),
+      ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
@@ -445,12 +474,15 @@ class _InfografikCard extends StatelessWidget {
           children: [
             // Thumbnail left with Hero
             ClipRRect(
-              borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(16),
+              ),
               child: SizedBox(
                 width: 105,
                 height: 135,
                 child: Hero(
-                  tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
+                  tag:
+                      '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                   child: Image.network(
                     '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                     fit: BoxFit.cover,
@@ -477,7 +509,10 @@ class _InfografikCard extends StatelessWidget {
                   children: [
                     // Badge info blue
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE3F2FD),
                         borderRadius: BorderRadius.circular(6),
@@ -485,12 +520,16 @@ class _InfografikCard extends StatelessWidget {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.image_outlined, size: 11, color: Color(0xFF1565C0)),
+                          Icon(
+                            Icons.image_outlined,
+                            size: 11,
+                            color: Color(0xFF1565C0),
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'INFOGRAFIK',
                             style: TextStyle(
-                              fontSize: 9, 
+                              fontSize: 9,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF1565C0),
                               letterSpacing: 0.5,
@@ -531,7 +570,11 @@ class _InfografikCard extends StatelessWidget {
                     // Footer Row
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today_outlined, size: 10, color: AppColors.text3),
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 10,
+                          color: AppColors.text3,
+                        ),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -571,10 +614,7 @@ class _AnimatedPressCard extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
 
-  const _AnimatedPressCard({
-    required this.child,
-    required this.onTap,
-  });
+  const _AnimatedPressCard({required this.child, required this.onTap});
 
   @override
   State<_AnimatedPressCard> createState() => _AnimatedPressCardState();
@@ -613,26 +653,39 @@ class _EmptyState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 72, height: 72,
-            decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
-            child: const Icon(Icons.search_off_rounded, size: 34, color: AppColors.green500),
+            width: 72,
+            height: 72,
+            decoration: const BoxDecoration(
+              color: AppColors.green50,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.search_off_rounded,
+              size: 34,
+              color: AppColors.green500,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             query.isNotEmpty
                 ? 'Tidak ada hasil untuk "$query"'
                 : filter == _Filter.artikel
-                    ? 'Belum ada artikel tersedia'
-                    : filter == _Filter.infografik
-                        ? 'Belum ada infografik tersedia'
-                        : 'Belum ada konten tersedia',
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-                color: AppColors.text1),
+                ? 'Belum ada artikel tersedia'
+                : filter == _Filter.infografik
+                ? 'Belum ada infografik tersedia'
+                : 'Belum ada konten tersedia',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text1,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
-          Text('Coba kata kunci lain atau ubah filter',
-              style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+          Text(
+            'Coba kata kunci lain atau ubah filter',
+            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+          ),
         ],
       ),
     );

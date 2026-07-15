@@ -1,0 +1,7 @@
+$kind: collection
+name: EnzyLife API
+variables:
+  base_url: ""
+  token: ""
+  pemesanan_id: ""
+  auth_token: ""
