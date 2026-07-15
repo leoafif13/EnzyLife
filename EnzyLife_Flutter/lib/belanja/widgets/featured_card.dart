@@ -21,7 +21,8 @@ class FeaturedCard extends StatelessWidget {
     return AnimatedPressCard(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => ProductDetailScreen(product: product, heroTag: heroTag),
+          builder: (_) =>
+              ProductDetailScreen(product: product, heroTag: heroTag),
         ),
       ),
       child: Container(
@@ -62,10 +63,13 @@ class FeaturedCard extends StatelessWidget {
                       child: Hero(
                         tag: heroTag,
                         child: Image.network(
-                          'http://127.0.0.1:8000/gambar/produk/${product.image.split('/').last}',
+                          'https://undergo-refill-bonehead.ngrok-free.dev/gambar/produk/${product.image.split('/').last}',
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) {
-                            return const Icon(Icons.image_not_supported, color: Colors.white);
+                            return const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.white,
+                            );
                           },
                         ),
                       ),
@@ -80,14 +84,21 @@ class FeaturedCard extends StatelessWidget {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withAlpha(51),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Text(
                                 '🔥 Terlaris',
-                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
@@ -116,9 +127,13 @@ class FeaturedCard extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              product.stock > 0 ? 'Stok: ${product.stock}' : 'Habis',
+                              product.stock > 0
+                                  ? 'Stok: ${product.stock}'
+                                  : 'Habis',
                               style: TextStyle(
-                                color: product.stock > 0 ? Colors.white.withAlpha(230) : Colors.red[100],
+                                color: product.stock > 0
+                                    ? Colors.white.withAlpha(230)
+                                    : Colors.red[100],
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -148,7 +163,11 @@ class FeaturedCard extends StatelessWidget {
                       color: Colors.white.withAlpha(38),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 20),
+                    child: const Icon(
+                      Icons.chevron_right_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),

@@ -8,11 +8,10 @@ import '../models/user.dart';
 import '../models/order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class ApiService {
-
   // Android Emulator
-  static const String _baseUrl = 'http://127.0.0.1:8000/api';
+  static const String _baseUrl =
+      'https://undergo-refill-bonehead.ngrok-free.dev/api';
 
   // Cache
   static List<Product> cachedProducts = [];
@@ -21,7 +20,6 @@ class ApiService {
   static UserModel? cachedUser;
 
   static Future<Map<String, String>> _authHeaders() async {
-
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
@@ -38,14 +36,12 @@ class ApiService {
 
   static Future<List<Product>> getProducts() async {
     try {
-
       final response = await http.get(
         Uri.parse('$_baseUrl/products'),
         headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
-
         final data = jsonDecode(response.body);
 
         final products = List<Product>.from(
@@ -58,9 +54,7 @@ class ApiService {
       }
 
       return [];
-
     } catch (e) {
-
       print('Error getProducts: $e');
 
       return [];
@@ -113,10 +107,7 @@ class ApiService {
           cachedProducts = products;
         }
 
-        return {
-          'products': products,
-          'last_page': lastPage,
-        };
+        return {'products': products, 'last_page': lastPage};
       }
       return {'products': <Product>[], 'last_page': 1};
     } catch (e) {
@@ -131,14 +122,12 @@ class ApiService {
 
   static Future<List<ArtikelModel>> getArtikel() async {
     try {
-
       final response = await http.get(
         Uri.parse('$_baseUrl/artikel'),
         headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
-
         final data = jsonDecode(response.body);
 
         final artikel = List<ArtikelModel>.from(
@@ -151,9 +140,7 @@ class ApiService {
       }
 
       return [];
-
     } catch (e) {
-
       print('Error getArtikel: $e');
 
       return [];
@@ -166,23 +153,19 @@ class ApiService {
 
   static Future<ArtikelModel?> getDetailArtikel(int id) async {
     try {
-
       final response = await http.get(
         Uri.parse('$_baseUrl/artikel/$id'),
         headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
-
         final data = jsonDecode(response.body);
 
         return ArtikelModel.fromJson(data['data']);
       }
 
       return null;
-
     } catch (e) {
-
       print('Error getDetailArtikel: $e');
 
       return null;
@@ -195,14 +178,12 @@ class ApiService {
 
   static Future<List<InfografikModel>> getInfografik() async {
     try {
-
       final response = await http.get(
         Uri.parse('$_baseUrl/infografik'),
         headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
-
         final List data = jsonDecode(response.body);
 
         final infografik = data
@@ -215,9 +196,7 @@ class ApiService {
       }
 
       return [];
-
     } catch (e) {
-
       print('Error getInfografik: $e');
 
       return [];
@@ -236,7 +215,6 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-
         final data = jsonDecode(response.body);
 
         final user = UserModel.fromJson(data['user']);
@@ -247,9 +225,7 @@ class ApiService {
       }
 
       return null;
-
     } catch (e) {
-
       print('Error getProfile: $e');
 
       return null;
@@ -266,7 +242,6 @@ class ApiService {
     String? address,
     String? postalCode,
   }) async {
-
     try {
       final response = await http.put(
         Uri.parse('$_baseUrl/profile'),
@@ -280,9 +255,7 @@ class ApiService {
       );
 
       return response.statusCode == 200;
-
     } catch (e) {
-
       print('Error updateProfile: $e');
 
       return false;
@@ -307,9 +280,15 @@ class ApiService {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? 'Password berhasil diperbarui'};
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Password berhasil diperbarui',
+        };
       } else {
-        return {'success': false, 'message': data['message'] ?? 'Gagal mengubah password'};
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Gagal mengubah password',
+        };
       }
     } catch (e) {
       print('Error updatePassword: $e');
@@ -340,10 +319,14 @@ class ApiService {
         }),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 400) {
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 400) {
         return jsonDecode(response.body);
       }
-      print('Checkout error status: ${response.statusCode}, body: ${response.body}');
+      print(
+        'Checkout error status: ${response.statusCode}, body: ${response.body}',
+      );
       return null;
     } catch (e) {
       print('Error checkout: $e');
@@ -380,7 +363,10 @@ class ApiService {
   // CONFIRM ORDER PAYMENT
   // =====================================================
 
-  static Future<Map<String, dynamic>?> payOrder(int orderId, {bool simulate = false}) async {
+  static Future<Map<String, dynamic>?> payOrder(
+    int orderId, {
+    bool simulate = false,
+  }) async {
     try {
       final headers = await _authHeaders();
       final body = simulate ? {'simulate': 'true'} : <String, String>{};
@@ -440,7 +426,10 @@ class ApiService {
         },
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 400 || response.statusCode == 500) {
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 400 ||
+          response.statusCode == 500) {
         return jsonDecode(response.body);
       }
       return null;
@@ -453,7 +442,9 @@ class ApiService {
   // =====================================================
   // GET PRODUCT REVIEW SUMMARY
   // =====================================================
-  static Future<Map<String, dynamic>?> getProductReviewSummary(int productId) async {
+  static Future<Map<String, dynamic>?> getProductReviewSummary(
+    int productId,
+  ) async {
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/produk/$productId/review-summary'),
@@ -478,16 +469,14 @@ class ApiService {
       final response = await http.post(
         Uri.parse('$_baseUrl/chatbot'),
         headers: await _authHeaders(),
-        body: {
-          'message': message,
-        },
+        body: {'message': message},
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['reply'];
       }
-      
+
       // Jika statusnya 500 karena AI server mati, kita decode pesan error ramah dari Laravel
       try {
         final errorData = jsonDecode(response.body);
@@ -495,7 +484,7 @@ class ApiService {
           return errorData['reply'];
         }
       } catch (_) {}
-      
+
       return null;
     } catch (e) {
       print('Error sendChat: $e');

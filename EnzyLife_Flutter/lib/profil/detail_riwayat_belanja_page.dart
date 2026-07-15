@@ -10,14 +10,14 @@ import '../services/invoice_helper.dart';
 import 'ulasan_page.dart';
 import 'riwayat_belanja_page.dart';
 
-
 class DetailRiwayatBelanjaPage extends StatefulWidget {
   final OrderModel order;
 
   const DetailRiwayatBelanjaPage({super.key, required this.order});
 
   @override
-  State<DetailRiwayatBelanjaPage> createState() => _DetailRiwayatBelanjaPageState();
+  State<DetailRiwayatBelanjaPage> createState() =>
+      _DetailRiwayatBelanjaPageState();
 }
 
 class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
@@ -48,23 +48,43 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
           context: context,
           barrierDismissible: false,
           builder: (_) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 72, height: 72,
-                  decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
-                  child: const Icon(Icons.check_circle_outline_rounded, size: 40, color: AppColors.green500),
+                  width: 72,
+                  height: 72,
+                  decoration: const BoxDecoration(
+                    color: AppColors.green50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 40,
+                    color: AppColors.green500,
+                  ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Pembayaran Berhasil!',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.text1)),
+                const Text(
+                  'Pembayaran Berhasil!',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.text1,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Pembayaran untuk pesanan #${_order.id} berhasil dikonfirmasi. Pesanan Anda akan segera diproses.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -90,11 +110,17 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.green500, foregroundColor: Colors.white,
+                      backgroundColor: AppColors.green500,
+                      foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('OK', style: TextStyle(fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
               ],
@@ -102,22 +128,33 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(res?['message'] ?? 'Gagal memproses pembayaran. Silakan coba lagi.'),
-          backgroundColor: Colors.red[400],
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              res?['message'] ??
+                  'Gagal memproses pembayaran. Silakan coba lagi.',
+            ),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
       }
     } catch (e) {
       setState(() => _isLoading = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Terjadi kesalahan: $e'),
-        backgroundColor: Colors.red[400],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Terjadi kesalahan: $e'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
     }
   }
 
@@ -143,9 +180,14 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Batalkan Pesanan?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        content: const Text('Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.',
-            style: TextStyle(fontSize: 13)),
+        title: const Text(
+          'Batalkan Pesanan?',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        content: const Text(
+          'Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.',
+          style: TextStyle(fontSize: 13),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -153,7 +195,10 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Ya, Batalkan', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Ya, Batalkan',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -176,10 +221,12 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
             content: Text(res['message'] ?? 'Pesanan berhasil dibatalkan'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
-        
+
         setState(() {
           _order = OrderModel(
             id: _order.id,
@@ -198,10 +245,15 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(res?['message'] ?? 'Gagal membatalkan pesanan. Silakan coba lagi.'),
+            content: Text(
+              res?['message'] ??
+                  'Gagal membatalkan pesanan. Silakan coba lagi.',
+            ),
             backgroundColor: Colors.red[400],
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -213,7 +265,9 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
           content: Text('Terjadi kesalahan: $e'),
           backgroundColor: Colors.red[400],
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     }
@@ -222,8 +276,12 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
   bool get _hasActions {
     if (_order.orderStatus == OrderStatus.selesai) return true;
     if (_order.orderStatus == OrderStatus.dipesan) {
-      final bool canPay = _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN' && _order.metodePembayaran == 'ONLINE';
-      final bool canCancel = (_order.metodePembayaran != 'ONLINE' || _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN');
+      final bool canPay =
+          _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN' &&
+          _order.metodePembayaran == 'ONLINE';
+      final bool canCancel =
+          (_order.metodePembayaran != 'ONLINE' ||
+          _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN');
       return canPay || canCancel;
     }
     return false;
@@ -245,10 +303,14 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                 side: const BorderSide(color: AppColors.green500),
                 foregroundColor: AppColors.green500,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('Beli lagi',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              child: const Text(
+                'Beli lagi',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
             ),
           );
         }
@@ -266,10 +328,17 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                       side: const BorderSide(color: AppColors.green500),
                       foregroundColor: AppColors.green500,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('Beli lagi',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'Beli lagi',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -287,7 +356,9 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                               existingRating: item.existingRating,
                               existingComment: item.existingComment,
                               existingTags: item.existingTags,
-                              isPickup: _order.metodePembayaran == 'COD' && _order.jenisCod == 'AMBIL_TEMPAT',
+                              isPickup:
+                                  _order.metodePembayaran == 'COD' &&
+                                  _order.jenisCod == 'AMBIL_TEMPAT',
                             ),
                           ),
                         );
@@ -307,11 +378,19 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
-                        _order.items.every((item) => item.isReviewed) ? 'Lihat Ulasan' : 'Beri Ulasan',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      _order.items.every((item) => item.isReviewed)
+                          ? 'Lihat Ulasan'
+                          : 'Beri Ulasan',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -342,13 +421,18 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                         }
                       },
                 icon: const Icon(Icons.print_rounded, size: 16),
-                label: const Text('Cetak Invoice', style: TextStyle(fontWeight: FontWeight.w600)),
+                label: const Text(
+                  'Cetak Invoice',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green500,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
@@ -359,8 +443,12 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
         return const SizedBox.shrink();
 
       case OrderStatus.dipesan:
-        final bool canPay = _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN' && _order.metodePembayaran == 'ONLINE';
-        final bool canCancel = (_order.metodePembayaran != 'ONLINE' || _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN');
+        final bool canPay =
+            _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN' &&
+            _order.metodePembayaran == 'ONLINE';
+        final bool canCancel =
+            (_order.metodePembayaran != 'ONLINE' ||
+            _order.statusPemesanan == 'MENUNGGU_PEMBAYARAN');
 
         if (canPay || canCancel) {
           return Row(
@@ -373,11 +461,16 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                       side: BorderSide(color: Colors.red[300]!),
                       foregroundColor: Colors.red[400],
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: const Text(
                       'Batalkan Pesanan',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -392,17 +485,26 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                             if (_order.snapToken != null) {
                               setState(() => _isLoading = true);
                               await MidtransPayHelper.pay(_order.snapToken!);
-                              final verifyRes = await ApiService.payOrder(_order.id, simulate: false);
+                              final verifyRes = await ApiService.payOrder(
+                                _order.id,
+                                simulate: false,
+                              );
                               setState(() => _isLoading = false);
-                              if (verifyRes != null && verifyRes['success'] == true) {
+                              if (verifyRes != null &&
+                                  verifyRes['success'] == true) {
                                 _reloadOrder();
                               } else {
                                 messenger.showSnackBar(
                                   SnackBar(
-                                    content: Text(verifyRes?['message'] ?? 'Pembayaran belum diselesaikan atau sedang diproses.'),
+                                    content: Text(
+                                      verifyRes?['message'] ??
+                                          'Pembayaran belum diselesaikan atau sedang diproses.',
+                                    ),
                                     backgroundColor: Colors.orange[850],
                                     behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
                                 );
                               }
@@ -415,7 +517,9 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: _isLoading
                         ? const SizedBox(
@@ -428,7 +532,10 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                           )
                         : const Text(
                             'Bayar Sekarang',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                   ),
                 ),
@@ -456,8 +563,6 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
       paymentText = 'Transfer / Online';
     }
 
-
-
     return PopScope(
       canPop: !_isLoading,
       child: Stack(
@@ -469,204 +574,284 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
               onBack: () => Navigator.of(context).pop(_hasPaid),
             ),
             body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.bgCard,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow,
-              ),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Pesanan #${_order.id}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.text1,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _order.statusBgColor,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          _order.statusDescription,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: _order.statusColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Divider(color: AppColors.divider),
-                  const SizedBox(height: 8),
-                  _InfoRow(label: 'Tanggal Pemesanan', value: dateStr),
-                  const SizedBox(height: 8),
-                  _InfoRow(label: 'Metode Pembayaran', value: paymentText),
-                  if (_hasActions) ...[
-                    const SizedBox(height: 12),
-                    const Divider(color: AppColors.divider),
-                    const SizedBox(height: 12),
-                    _buildActions(context),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // WhatsApp Alert (hanya jika DIKIRIM)
-            if (_order.statusPemesanan == 'DIKIRIM') ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF81C784)),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.chat_bubble_outline_rounded,
-                      color: Color(0xFF2E7D32),
-                      size: 24,
+                  // Status Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.bgCard,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: AppColors.cardShadow,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Pesanan #${_order.id}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.text1,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _order.statusBgColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _order.statusDescription,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: _order.statusColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(color: AppColors.divider),
+                        const SizedBox(height: 8),
+                        _InfoRow(label: 'Tanggal Pemesanan', value: dateStr),
+                        const SizedBox(height: 8),
+                        _InfoRow(
+                          label: 'Metode Pembayaran',
+                          value: paymentText,
+                        ),
+                        if (_hasActions) ...[
+                          const SizedBox(height: 12),
+                          const Divider(color: AppColors.divider),
+                          const SizedBox(height: 12),
+                          _buildActions(context),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // WhatsApp Alert (hanya jika DIKIRIM)
+                  if (_order.statusPemesanan == 'DIKIRIM') ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF81C784)),
+                      ),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Informasi Pengiriman',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1B5E20),
-                            ),
+                          const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            color: Color(0xFF2E7D32),
+                            size: 24,
                           ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            'Pesanan Anda sedang dalam proses pengiriman. Petugas kurir kami akan segera menghubungi Anda via WhatsApp melalui nomor telepon Anda yang terdaftar.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF1B5E20),
-                              height: 1.5,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Informasi Pengiriman',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF1B5E20),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Pesanan Anda sedang dalam proses pengiriman. Petugas kurir kami akan segera menghubungi Anda via WhatsApp melalui nomor telepon Anda yang terdaftar.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF1B5E20),
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 16),
                   ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
 
-            // Produk Dipesan Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.bgCard,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Produk Dipesan',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.text1,
+                  // Produk Dipesan Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.bgCard,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: AppColors.cardShadow,
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _order.items.length,
-                    separatorBuilder: (_, __) => const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4),
-                      child: Divider(color: AppColors.divider),
-                    ),
-                    itemBuilder: (context, idx) {
-                      final item = _order.items[idx];
-                      final prod = item.product;
-                      final imageUrl = (prod?.image != null && prod!.image.isNotEmpty)
-                          ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
-                          : null;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6.0),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Container(
-                                width: 56,
-                                height: 56,
-                                color: AppColors.green50,
-                                child: imageUrl != null
-                                    ? Image.network(
-                                        imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const Icon(
-                                          Icons.image_outlined,
-                                          color: AppColors.green500,
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.image_outlined,
-                                        color: AppColors.green500,
-                                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Produk Dipesan',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.text1,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _order.items.length,
+                          separatorBuilder: (_, __) => const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 4),
+                            child: Divider(color: AppColors.divider),
+                          ),
+                          itemBuilder: (context, idx) {
+                            final item = _order.items[idx];
+                            final prod = item.product;
+                            final imageUrl =
+                                (prod?.image != null && prod!.image.isNotEmpty)
+                                ? 'https://undergo-refill-bonehead.ngrok-free.dev/gambar/produk/${prod.image.split('/').last}'
+                                : null;
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6.0,
                               ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      width: 56,
+                                      height: 56,
+                                      color: AppColors.green50,
+                                      child: imageUrl != null
+                                          ? Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  const Icon(
+                                                    Icons.image_outlined,
+                                                    color: AppColors.green500,
+                                                  ),
+                                            )
+                                          : const Icon(
+                                              Icons.image_outlined,
+                                              color: AppColors.green500,
+                                            ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          prod?.name ?? 'Produk',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.text1,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${item.quantity} x ${_fmt(item.price)}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[500],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   Text(
-                                    prod?.name ?? 'Produk',
+                                    _fmt(item.subtotal),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.text1,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${item.quantity} x ${_fmt(item.price)}',
-                                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                                  ),
                                 ],
                               ),
-                            ),
-                            Text(
-                              _fmt(item.subtotal),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Rincian Pembayaran Card
+                  Builder(
+                    builder: (context) {
+                      final int subtotal = _order.items.fold(
+                        0,
+                        (sum, item) => sum + item.subtotal,
+                      );
+                      final int ongkir = _order.jenisCod == 'BAYAR_DI_RUMAH'
+                          ? 15000
+                          : 0;
+                      const int biayaAdmin = 2000;
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.bgCard,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: AppColors.cardShadow,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Rincian Pembayaran',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
                                 color: AppColors.text1,
                               ),
+                            ),
+                            const SizedBox(height: 14),
+                            _InfoRow(
+                              label: 'Subtotal Belanja',
+                              value: _fmt(subtotal),
+                            ),
+                            const SizedBox(height: 8),
+                            _InfoRow(
+                              label: 'Ongkos Kirim',
+                              value: ongkir > 0 ? _fmt(ongkir) : 'Gratis',
+                              valueColor: ongkir == 0
+                                  ? AppColors.green500
+                                  : null,
+                            ),
+                            const SizedBox(height: 8),
+                            _InfoRow(
+                              label: 'Biaya Admin',
+                              value: _fmt(biayaAdmin),
+                            ),
+                            const SizedBox(height: 8),
+                            const Divider(color: AppColors.divider),
+                            const SizedBox(height: 8),
+                            _InfoRow(
+                              label: 'Total Pembayaran',
+                              value: _fmt(_order.totalHarga),
+                              isBold: true,
                             ),
                           ],
                         ),
@@ -676,55 +861,6 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Rincian Pembayaran Card
-            Builder(
-              builder: (context) {
-                final int subtotal = _order.items.fold(0, (sum, item) => sum + item.subtotal);
-                final int ongkir = _order.jenisCod == 'BAYAR_DI_RUMAH' ? 15000 : 0;
-                const int biayaAdmin = 2000;
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgCard,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: AppColors.cardShadow,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Rincian Pembayaran',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.text1,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      _InfoRow(label: 'Subtotal Belanja', value: _fmt(subtotal)),
-                      const SizedBox(height: 8),
-                      _InfoRow(
-                        label: 'Ongkos Kirim', 
-                        value: ongkir > 0 ? _fmt(ongkir) : 'Gratis',
-                        valueColor: ongkir == 0 ? AppColors.green500 : null,
-                      ),
-                      const SizedBox(height: 8),
-                      _InfoRow(label: 'Biaya Admin', value: _fmt(biayaAdmin)),
-                      const SizedBox(height: 8),
-                      const Divider(color: AppColors.divider),
-                      const SizedBox(height: 8),
-                      _InfoRow(label: 'Total Pembayaran', value: _fmt(_order.totalHarga), isBold: true),
-                    ],
-                  ),
-                );
-              }
-            ),
-          ],
-        ),
-      ),
           ),
           if (_isLoading)
             Positioned.fill(
@@ -782,7 +918,11 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
     );
   }
 
-  void _showProductSelectionSheet(BuildContext context, OrderModel order, VoidCallback onRefresh) {
+  void _showProductSelectionSheet(
+    BuildContext context,
+    OrderModel order,
+    VoidCallback onRefresh,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -821,13 +961,14 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),
                   itemCount: order.items.length,
-                  separatorBuilder: (_, __) => const Divider(color: AppColors.divider),
+                  separatorBuilder: (_, __) =>
+                      const Divider(color: AppColors.divider),
                   itemBuilder: (ctx, idx) {
                     final item = order.items[idx];
                     final prod = item.product;
                     if (prod == null) return const SizedBox.shrink();
                     final imageUrl = prod.image.isNotEmpty
-                        ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
+                        ? 'https://undergo-refill-bonehead.ngrok-free.dev/gambar/produk/${prod.image.split('/').last}'
                         : null;
 
                     return Padding(
@@ -873,11 +1014,15 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  item.isReviewed ? 'Sudah Diulas' : 'Belum Diulas',
+                                  item.isReviewed
+                                      ? 'Sudah Diulas'
+                                      : 'Belum Diulas',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: item.isReviewed ? AppColors.green700 : Colors.orange[800],
+                                    color: item.isReviewed
+                                        ? AppColors.green700
+                                        : Colors.orange[800],
                                   ),
                                 ),
                               ],
@@ -888,47 +1033,69 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                               ? OutlinedButton(
                                   onPressed: () async {
                                     Navigator.of(subCtx).pop();
-                                    final refresh = await Navigator.of(context).push<bool>(
-                                      MaterialPageRoute(
-                                        builder: (_) => UlasanScreen(
-                                          productName: prod.name,
-                                          orderId: order.id.toString(),
-                                          productId: prod.id,
-                                          existingRating: item.existingRating,
-                                          existingComment: item.existingComment,
-                                          existingTags: item.existingTags,
-                                          isPickup: order.metodePembayaran == 'COD' && order.jenisCod == 'AMBIL_TEMPAT',
-                                        ),
-                                      ),
-                                    );
+                                    final refresh = await Navigator.of(context)
+                                        .push<bool>(
+                                          MaterialPageRoute(
+                                            builder: (_) => UlasanScreen(
+                                              productName: prod.name,
+                                              orderId: order.id.toString(),
+                                              productId: prod.id,
+                                              existingRating:
+                                                  item.existingRating,
+                                              existingComment:
+                                                  item.existingComment,
+                                              existingTags: item.existingTags,
+                                              isPickup:
+                                                  order.metodePembayaran ==
+                                                      'COD' &&
+                                                  order.jenisCod ==
+                                                      'AMBIL_TEMPAT',
+                                            ),
+                                          ),
+                                        );
                                     if (refresh == true) {
                                       onRefresh();
                                     }
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(color: AppColors.green500),
+                                    side: const BorderSide(
+                                      color: AppColors.green500,
+                                    ),
                                     foregroundColor: AppColors.green500,
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                   child: const Text(
                                     'Lihat',
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 )
                               : ElevatedButton(
                                   onPressed: () async {
                                     Navigator.of(subCtx).pop();
-                                    final refresh = await Navigator.of(context).push<bool>(
-                                      MaterialPageRoute(
-                                        builder: (_) => UlasanScreen(
-                                          productName: prod.name,
-                                          orderId: order.id.toString(),
-                                          productId: prod.id,
-                                          isPickup: order.metodePembayaran == 'COD' && order.jenisCod == 'AMBIL_TEMPAT',
-                                        ),
-                                      ),
-                                    );
+                                    final refresh = await Navigator.of(context)
+                                        .push<bool>(
+                                          MaterialPageRoute(
+                                            builder: (_) => UlasanScreen(
+                                              productName: prod.name,
+                                              orderId: order.id.toString(),
+                                              productId: prod.id,
+                                              isPickup:
+                                                  order.metodePembayaran ==
+                                                      'COD' &&
+                                                  order.jenisCod ==
+                                                      'AMBIL_TEMPAT',
+                                            ),
+                                          ),
+                                        );
                                     if (refresh == true) {
                                       onRefresh();
                                     }
@@ -937,12 +1104,20 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                                     backgroundColor: AppColors.green500,
                                     foregroundColor: Colors.white,
                                     elevation: 0,
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                   child: const Text(
                                     'Beri',
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                         ],
@@ -957,158 +1132,178 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
       },
     );
   }
+}
+
+void _showBuyAgainSheet(BuildContext context, OrderModel order) {
+  if (order.items.length == 1) {
+    final product = order.items.first.product;
+    if (product != null) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (_) => PurchaseBottomSheet(
+          product: product,
+          initialQty: order.items.first.quantity,
+        ),
+      );
+    }
+    return;
   }
 
-  void _showBuyAgainSheet(BuildContext context, OrderModel order) {
-    if (order.items.length == 1) {
-      final product = order.items.first.product;
-      if (product != null) {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          builder: (_) => PurchaseBottomSheet(product: product, initialQty: order.items.first.quantity),
-        );
-      }
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (subCtx) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4.5,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (subCtx) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4.5,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              const Text(
-                'Pilih Produk untuk Dibeli Lagi',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.text1,
-                ),
+            ),
+            const Text(
+              'Pilih Produk untuk Dibeli Lagi',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppColors.text1,
               ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: order.items.length,
-                  separatorBuilder: (_, __) => const Divider(color: AppColors.divider),
-                  itemBuilder: (ctx, idx) {
-                    final item = order.items[idx];
-                    final prod = item.product;
-                    if (prod == null) return const SizedBox.shrink();
-                    final imageUrl = prod.image.isNotEmpty
-                        ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
-                        : null;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              color: AppColors.green50,
-                              child: imageUrl != null
-                                  ? Image.network(
-                                      imageUrl,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(
-                                        Icons.image_outlined,
-                                        color: AppColors.green500,
-                                      ),
-                                    )
-                                  : const Icon(
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                itemCount: order.items.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(color: AppColors.divider),
+                itemBuilder: (ctx, idx) {
+                  final item = order.items[idx];
+                  final prod = item.product;
+                  if (prod == null) return const SizedBox.shrink();
+                  final imageUrl = prod.image.isNotEmpty
+                      ? 'https://undergo-refill-bonehead.ngrok-free.dev/gambar/produk/${prod.image.split('/').last}'
+                      : null;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            color: AppColors.green50,
+                            child: imageUrl != null
+                                ? Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Icon(
                                       Icons.image_outlined,
                                       color: AppColors.green500,
                                     ),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  prod.name,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.text1,
+                                  )
+                                : const Icon(
+                                    Icons.image_outlined,
+                                    color: AppColors.green500,
                                   ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                prod.name,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.text1,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${item.quantity} x ${formatPrice(item.price)}',
-                                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${item.quantity} x ${formatPrice(item.price)}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[500],
                                 ),
-                              ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(subCtx).pop();
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                              ),
+                              builder: (_) => PurchaseBottomSheet(
+                                product: prod,
+                                initialQty: item.quantity,
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.green500,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(subCtx).pop();
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                                ),
-                                builder: (_) => PurchaseBottomSheet(product: prod, initialQty: item.quantity),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.green500,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: const Text(
-                              'Beli',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                          child: const Text(
+                            'Beli',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
-  class _InfoRow extends StatelessWidget {
+class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
   final bool isBold;
@@ -1144,7 +1339,8 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
             style: TextStyle(
               fontSize: isBold ? 15 : 13,
               fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-              color: valueColor ?? (isBold ? AppColors.green500 : AppColors.text1),
+              color:
+                  valueColor ?? (isBold ? AppColors.green500 : AppColors.text1),
             ),
           ),
         ),

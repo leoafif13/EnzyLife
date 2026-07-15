@@ -45,14 +45,20 @@ class CartItemTile extends StatelessWidget {
             SizedBox(height: 4),
             Text(
               'Hapus',
-              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
       ),
       child: GestureDetector(
         onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
+          ),
         ),
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -61,7 +67,9 @@ class CartItemTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: AppColors.cardShadow,
             border: Border.all(
-              color: checked ? AppColors.green500.withAlpha(120) : AppColors.border.withAlpha(80),
+              color: checked
+                  ? AppColors.green500.withAlpha(120)
+                  : AppColors.border.withAlpha(80),
               width: checked ? 1.5 : 1.0,
             ),
           ),
@@ -78,7 +86,9 @@ class CartItemTile extends StatelessWidget {
                     value: checked,
                     onChanged: onToggleCheck,
                     activeColor: AppColors.green500,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -87,7 +97,7 @@ class CartItemTile extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(
-                    'http://127.0.0.1:8000/gambar/produk/${product.image.split('/').last}',
+                    'https://undergo-refill-bonehead.ngrok-free.dev/gambar/produk/${product.image.split('/').last}',
                     width: 64,
                     height: 64,
                     fit: BoxFit.cover,
@@ -111,12 +121,20 @@ class CartItemTile extends StatelessWidget {
                     children: [
                       Text(
                         product.name,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text1,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         fmtPrice(product.price),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.green500),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.green500,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -126,12 +144,19 @@ class CartItemTile extends StatelessWidget {
                           Flexible(
                             child: Text(
                               'Subtotal: ${fmtPrice(product.price * qty)}',
-                              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[500],
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           // Qty control
-                          QtyControl(qty: qty, onAdd: onAdd, onRemove: onRemove),
+                          QtyControl(
+                            qty: qty,
+                            onAdd: onAdd,
+                            onRemove: onRemove,
+                          ),
                         ],
                       ),
                     ],

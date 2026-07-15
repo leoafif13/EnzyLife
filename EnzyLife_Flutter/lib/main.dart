@@ -33,18 +33,13 @@ void main() async {
     await CartState.instance.loadCartForUser();
   }
 
-  runApp(MyApp(
-    isLoggedIn: token != null,
-  ));
+  runApp(MyApp(isLoggedIn: token != null));
 }
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
 
-  const MyApp({
-    super.key,
-    required this.isLoggedIn,
-  });
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -58,13 +53,12 @@ class MyApp extends StatelessWidget {
 
       // Splash screen dulu, baru ke login/main
       home: SplashScreen(
-        nextScreen: isLoggedIn
-            ? const MainScreen()
-            : const LoginScreen(),
+        nextScreen: isLoggedIn ? const MainScreen() : const LoginScreen(),
       ),
     );
   }
 }
+
 //  MainScreen
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -91,8 +85,9 @@ class _MainScreenState extends State<MainScreen> {
 
   // Buka keranjang dari mana saja
   void _openCart() {
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const CartScreen()));
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const CartScreen()));
   }
 
   // Titik 3 — menu kontekstual per tab
@@ -105,10 +100,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
-      appBar: AppHeader(
-        onCartTap: _openCart,
-        onMenuTap: _openMenu,
-      ),
+      appBar: AppHeader(onCartTap: _openCart, onMenuTap: _openMenu),
       body: Stack(
         // clipBehavior none agar popup chatbot bisa muncul
         // melampaui batas body tanpa terpotong
@@ -120,12 +112,16 @@ class _MainScreenState extends State<MainScreen> {
             child: IndexedStack(
               index: _selectedIndex,
               children: [
-                HomeScreen(
-                  onTabSelected: _onTabTap,
-                ),
-                _activatedPages[1] ? const EducationScreen() : const SizedBox.shrink(),
-                _activatedPages[2] ? const BelanjaScreen() : const SizedBox.shrink(),
-                _activatedPages[3] ? const ProfilScreen() : const SizedBox.shrink(),
+                HomeScreen(onTabSelected: _onTabTap),
+                _activatedPages[1]
+                    ? const EducationScreen()
+                    : const SizedBox.shrink(),
+                _activatedPages[2]
+                    ? const BelanjaScreen()
+                    : const SizedBox.shrink(),
+                _activatedPages[3]
+                    ? const ProfilScreen()
+                    : const SizedBox.shrink(),
               ],
             ),
           ),
@@ -169,7 +165,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (user != null) {
       final rawName = user['name']?.toString().trim() ?? '';
       setState(() {
-        userName = (rawName.isEmpty || rawName == '-') ? 'Pengguna Baru' : rawName;
+        userName = (rawName.isEmpty || rawName == '-')
+            ? 'Pengguna Baru'
+            : rawName;
       });
     }
   }
@@ -195,11 +193,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _candidateFavorites = [
     _FavoriteData(label: 'Artikel', icon: Icons.article_outlined),
-    _FavoriteData(label: 'Kalkulator',   icon: Icons.calculate_outlined),
-    _FavoriteData(label: 'FAQ',   icon: Icons.help_outline_rounded),
-    _FavoriteData(label: 'Belanja',  icon: Icons.eco_outlined),
-    _FavoriteData(label: 'Riwayat',  icon: Icons.history_rounded),
-    _FavoriteData(label: 'Profil',   icon: Icons.person_outline),
+    _FavoriteData(label: 'Kalkulator', icon: Icons.calculate_outlined),
+    _FavoriteData(label: 'FAQ', icon: Icons.help_outline_rounded),
+    _FavoriteData(label: 'Belanja', icon: Icons.eco_outlined),
+    _FavoriteData(label: 'Riwayat', icon: Icons.history_rounded),
+    _FavoriteData(label: 'Profil', icon: Icons.person_outline),
   ];
 
   List<_FavoriteData> _favorites = _candidateFavorites.take(4).toList();
@@ -223,7 +221,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (countA != countB) {
         return countB.compareTo(countA); // Descending
       }
-      return _candidateFavorites.indexOf(a).compareTo(_candidateFavorites.indexOf(b));
+      return _candidateFavorites
+          .indexOf(a)
+          .compareTo(_candidateFavorites.indexOf(b));
     });
 
     if (mounted) {
@@ -257,7 +257,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: PageHeaderCard(
               badge: '👋  Selamat datang',
               title: '$userName!',
-              subtitle: 'Hidup sehat dimulai dari sini. Mari berkontribusi untuk bumi dengan menggunakan eco enzim.',
+              subtitle:
+                  'Hidup sehat dimulai dari sini. Mari berkontribusi untuk bumi dengan menggunakan eco enzim.',
               rightWidget: Padding(
                 padding: const EdgeInsets.all(10),
                 child: Image.asset(
@@ -281,40 +282,53 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: _favorites.map((f) => Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: _FavoriteItem(
-                        data: f,
-                        onTap: () async {
-                          await _incrementVisit(f.label);
-                          if (!context.mounted) return;
-                          
-                          if (f.label == 'Artikel') {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const ArtikelScreen()),
-                            );
-                          } else if (f.label == 'Kalkulator') {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const KalkulatorScreen()),
-                            );
-                          } else if (f.label == 'FAQ') {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const FaqScreen()),
-                            );
-                          } else if (f.label == 'Belanja') {
-                            widget.onTabSelected?.call(2);
-                          } else if (f.label == 'Riwayat') {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()),
-                            );
-                          } else if (f.label == 'Profil') {
-                            widget.onTabSelected?.call(3);
-                          }
-                        },
-                      ),
-                    ),
-                  )).toList(),
+                  children: _favorites
+                      .map(
+                        (f) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: _FavoriteItem(
+                              data: f,
+                              onTap: () async {
+                                await _incrementVisit(f.label);
+                                if (!context.mounted) return;
+
+                                if (f.label == 'Artikel') {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const ArtikelScreen(),
+                                    ),
+                                  );
+                                } else if (f.label == 'Kalkulator') {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const KalkulatorScreen(),
+                                    ),
+                                  );
+                                } else if (f.label == 'FAQ') {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const FaqScreen(),
+                                    ),
+                                  );
+                                } else if (f.label == 'Belanja') {
+                                  widget.onTabSelected?.call(2);
+                                } else if (f.label == 'Riwayat') {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const RiwayatBelanjaScreen(),
+                                    ),
+                                  );
+                                } else if (f.label == 'Profil') {
+                                  widget.onTabSelected?.call(3);
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             ),
@@ -331,11 +345,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(child: _SectionTitle(title: 'Artikel Terbaru')),
+                    const Expanded(
+                      child: _SectionTitle(title: 'Artikel Terbaru'),
+                    ),
                     TextButton(
                       onPressed: () {
                         // Navigate ke tab Edukasi (index 1)
-                        final mainState = context.findAncestorStateOfType<_MainScreenState>();
+                        final mainState = context
+                            .findAncestorStateOfType<_MainScreenState>();
                         mainState?._onTabTap(1);
                       },
                       style: TextButton.styleFrom(
@@ -346,7 +363,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: const Text(
                         'Lihat semua',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -360,22 +380,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       )
                     : _artikelList.isEmpty
-                        ? const _EmptyContentCard(
-                            icon: Icons.article_outlined,
-                            message: 'Belum ada artikel tersedia',
-                          )
-                        : GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    ? const _EmptyContentCard(
+                        icon: Icons.article_outlined,
+                        message: 'Belum ada artikel tersedia',
+                      )
+                    : GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
                               childAspectRatio: 0.82,
                             ),
-                            itemCount: _artikelList.length,
-                            itemBuilder: (_, i) => _ArtikelCard(artikel: _artikelList[i]),
-                          ),
+                        itemCount: _artikelList.length,
+                        itemBuilder: (_, i) =>
+                            _ArtikelCard(artikel: _artikelList[i]),
+                      ),
               ],
             ),
           ),
@@ -391,10 +413,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(child: _SectionTitle(title: 'Infografik Terbaru')),
+                    const Expanded(
+                      child: _SectionTitle(title: 'Infografik Terbaru'),
+                    ),
                     TextButton(
                       onPressed: () {
-                        final mainState = context.findAncestorStateOfType<_MainScreenState>();
+                        final mainState = context
+                            .findAncestorStateOfType<_MainScreenState>();
                         mainState?._onTabTap(1);
                       },
                       style: TextButton.styleFrom(
@@ -405,7 +430,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: const Text(
                         'Lihat semua',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -414,19 +442,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 _isLoadingContent
                     ? const SizedBox.shrink()
                     : _infografikList.isEmpty
-                        ? const _EmptyContentCard(
-                            icon: Icons.image_outlined,
-                            message: 'Belum ada infografik tersedia',
-                          )
-                        : SizedBox(
-                            height: 200,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: _infografikList.length,
-                              separatorBuilder: (_, __) => const SizedBox(width: 12),
-                              itemBuilder: (_, i) => _InfografikCard(infografik: _infografikList[i]),
-                            ),
-                          ),
+                    ? const _EmptyContentCard(
+                        icon: Icons.image_outlined,
+                        message: 'Belum ada infografik tersedia',
+                      )
+                    : SizedBox(
+                        height: 200,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _infografikList.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (_, i) =>
+                              _InfografikCard(infografik: _infografikList[i]),
+                        ),
+                      ),
               ],
             ),
           ),
@@ -492,13 +522,20 @@ class _FavoriteItem extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                color: AppColors.green50,
+                shape: BoxShape.circle,
+              ),
               child: Icon(data.icon, color: AppColors.green500, size: 22),
             ),
             const SizedBox(height: 8),
             Text(
               data.label,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF1A1A1A)),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF1A1A1A),
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -527,12 +564,19 @@ class _EmptyContentCard extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 56, height: 56,
-            decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+            width: 56,
+            height: 56,
+            decoration: const BoxDecoration(
+              color: AppColors.green50,
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, size: 28, color: AppColors.green500),
           ),
           const SizedBox(height: 12),
-          Text(message, style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+          Text(
+            message,
+            style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+          ),
         ],
       ),
     );
@@ -561,18 +605,23 @@ class _ArtikelCard extends StatelessWidget {
           children: [
             // Thumbnail dari database
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: SizedBox(
                 height: 100,
                 width: double.infinity,
                 child: Image.network(
-                  'http://127.0.0.1:8000/gambar/${artikel.gambar}',
+                  'https://undergo-refill-bonehead.ngrok-free.dev/gambar/${artikel.gambar}',
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.green50,
                     child: Center(
-                      child: Icon(Icons.article_outlined, size: 36,
-                          color: AppColors.green500.withOpacity(0.4)),
+                      child: Icon(
+                        Icons.article_outlined,
+                        size: 36,
+                        color: AppColors.green500.withOpacity(0.4),
+                      ),
                     ),
                   ),
                 ),
@@ -586,15 +635,21 @@ class _ArtikelCard extends StatelessWidget {
                   children: [
                     // Badge kategori
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.green50,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         artikel.kategori,
-                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600,
-                            color: AppColors.green500),
+                        style: const TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.green500,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -613,7 +668,10 @@ class _ArtikelCard extends StatelessWidget {
                     const Text(
                       'Baca selengkapnya →',
                       style: TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.green500),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.green500,
+                      ),
                     ),
                   ],
                 ),
@@ -635,7 +693,9 @@ class _InfografikCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => DetailInfografikPage(item: infografik)),
+        MaterialPageRoute(
+          builder: (_) => DetailInfografikPage(item: infografik),
+        ),
       ),
       child: Container(
         width: 160,
@@ -649,18 +709,23 @@ class _InfografikCard extends StatelessWidget {
           children: [
             // Thumbnail dari database
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: SizedBox(
                 height: 120,
                 width: 160,
                 child: Image.network(
-                  'http://127.0.0.1:8000/gambar/${infografik.gambar}',
+                  'https://undergo-refill-bonehead.ngrok-free.dev/gambar/${infografik.gambar}',
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.green50,
                     child: Center(
-                      child: Icon(Icons.image_outlined, size: 36,
-                          color: AppColors.green500.withOpacity(0.4)),
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 36,
+                        color: AppColors.green500.withOpacity(0.4),
+                      ),
                     ),
                   ),
                 ),
@@ -698,4 +763,3 @@ class _InfografikCard extends StatelessWidget {
     );
   }
 }
-

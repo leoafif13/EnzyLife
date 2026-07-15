@@ -20,14 +20,15 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = CartState.instance;
-    final qty  = cart.qty(product.id);
+    final qty = cart.qty(product.id);
     final heroTag = 'list_prod_${product.id}';
 
     return AnimatedPressCard(
       // Tap card → detail produk
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => ProductDetailScreen(product: product, heroTag: heroTag),
+          builder: (_) =>
+              ProductDetailScreen(product: product, heroTag: heroTag),
         ),
       ),
       child: Container(
@@ -50,7 +51,7 @@ class ProductCard extends StatelessWidget {
                   child: Hero(
                     tag: heroTag,
                     child: Image.network(
-                      'http://127.0.0.1:8000/gambar/produk/${product.image.split('/').last}',
+                      'https://undergo-refill-bonehead.ngrok-free.dev/gambar/produk/${product.image.split('/').last}',
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) {
                         return Container(
@@ -69,18 +70,26 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       product.name,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text1),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text1,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
                         Flexible(
                           child: Text(
-                            product.stock > 0 ? 'Stok: ${product.stock}' : 'Stok Habis',
+                            product.stock > 0
+                                ? 'Stok: ${product.stock}'
+                                : 'Stok Habis',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: product.stock > 0 ? AppColors.green500 : Colors.red,
+                              color: product.stock > 0
+                                  ? AppColors.green500
+                                  : Colors.red,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -88,10 +97,17 @@ class ProductCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           '|',
-                          style: TextStyle(fontSize: 11, color: Colors.grey[300]),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[300],
+                          ),
                         ),
                         const SizedBox(width: 6),
-                        const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 14,
+                          color: Colors.amber,
+                        ),
                         const SizedBox(width: 2),
                         Text(
                           product.ratingAvg.toStringAsFixed(1),
@@ -134,7 +150,11 @@ class ProductCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             fmtPrice(product.price),
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text1),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.text1,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -151,7 +171,9 @@ class ProductCard extends StatelessWidget {
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Batas stok maksimum tercapai (${product.stock} item)'),
+                                        content: Text(
+                                          'Batas stok maksimum tercapai (${product.stock} item)',
+                                        ),
                                         behavior: SnackBarBehavior.floating,
                                         backgroundColor: Colors.orange[800],
                                       ),
@@ -167,21 +189,29 @@ class ProductCard extends StatelessWidget {
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.transparent,
-                                  builder: (_) => PurchaseBottomSheet(product: product),
+                                  builder: (_) =>
+                                      PurchaseBottomSheet(product: product),
                                 ),
                               ),
                             ] else ...[
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.red[50],
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   'Habis',
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.red[700]),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.red[700],
+                                  ),
                                 ),
-                              )
+                              ),
                             ],
                           ],
                         ),
@@ -192,11 +222,19 @@ class ProductCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.shopping_cart_outlined, size: 11, color: AppColors.green500),
+                          const Icon(
+                            Icons.shopping_cart_outlined,
+                            size: 11,
+                            color: AppColors.green500,
+                          ),
                           const SizedBox(width: 3),
                           Text(
                             '$qty item di keranjang',
-                            style: const TextStyle(fontSize: 10, color: AppColors.green500, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.green500,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -229,7 +267,11 @@ class _IconBtn extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.green200),
       ),
-      child: const Icon(Icons.shopping_cart_outlined, size: 16, color: AppColors.green500),
+      child: const Icon(
+        Icons.shopping_cart_outlined,
+        size: 16,
+        color: AppColors.green500,
+      ),
     ),
   );
 }
@@ -251,7 +293,11 @@ class _SmallBtn extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
       ),
     ),
   );

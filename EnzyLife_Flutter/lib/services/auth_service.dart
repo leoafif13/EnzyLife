@@ -4,7 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   // Emulator Android
-  static const String _baseUrl = 'http://127.0.0.1:8000/api';
+  static const String _baseUrl =
+      'https://undergo-refill-bonehead.ngrok-free.dev/api';
 
   // ── Token Storage ──────────────────────────
   static Future<String?> getToken() async {
@@ -44,15 +45,14 @@ class AuthService {
   static Future<void> removeToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
-    await prefs.remove('user'); 
+    await prefs.remove('user');
   }
 
   static Future<Map<String, dynamic>?> fetchUserProfile() async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/user'),
-        headers: await _headers(auth: true),
-      ).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(Uri.parse('$_baseUrl/user'), headers: await _headers(auth: true))
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -67,9 +67,7 @@ class AuthService {
   }
 
   // ── Headers ────────────────────────────────
-  static Future<Map<String, String>> _headers({
-    bool auth = false,
-  }) async {
+  static Future<Map<String, String>> _headers({bool auth = false}) async {
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -95,10 +93,7 @@ class AuthService {
       final response = await http.post(
         Uri.parse('$_baseUrl/login'),
         headers: await _headers(),
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       final data = jsonDecode(response.body);
@@ -106,16 +101,10 @@ class AuthService {
       if (response.statusCode == 200) {
         return data;
       } else {
-        return {
-          'success': false,
-          'message': data['message'] ?? 'Login gagal',
-        };
+        return {'success': false, 'message': data['message'] ?? 'Login gagal'};
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Tidak dapat terhubung ke server',
-      };
+      return {'success': false, 'message': 'Tidak dapat terhubung ke server'};
     }
   }
 
@@ -140,8 +129,7 @@ class AuthService {
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 ||
-          response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return data;
       } else {
         return {
@@ -150,10 +138,7 @@ class AuthService {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Tidak dapat terhubung ke server',
-      };
+      return {'success': false, 'message': 'Tidak dapat terhubung ke server'};
     }
   }
 
@@ -171,7 +156,8 @@ class AuthService {
       await removeToken();
     }
   }
-    static Future<Map<String, dynamic>> checkout({
+
+  static Future<Map<String, dynamic>> checkout({
     required String metodePembayaran,
     String? jenisCod,
     required List<Map<String, dynamic>> items,
@@ -189,10 +175,7 @@ class AuthService {
 
       return jsonDecode(response.body);
     } catch (e) {
-      return {
-        'success': false,
-        'message': e.toString(),
-      };
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -206,10 +189,7 @@ class AuthService {
       final data = jsonDecode(response.body);
       return data;
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal menghubungkan ke server.',
-      };
+      return {'success': false, 'message': 'Gagal menghubungkan ke server.'};
     }
   }
 
@@ -222,10 +202,7 @@ class AuthService {
       final data = jsonDecode(response.body);
       return data;
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal menghubungkan ke server.',
-      };
+      return {'success': false, 'message': 'Gagal menghubungkan ke server.'};
     }
   }
 
@@ -239,10 +216,7 @@ class AuthService {
       final data = jsonDecode(response.body);
       return data;
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal menghubungkan ke server.',
-      };
+      return {'success': false, 'message': 'Gagal menghubungkan ke server.'};
     }
   }
 
@@ -266,10 +240,7 @@ class AuthService {
       final data = jsonDecode(response.body);
       return data;
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal menghubungkan ke server.',
-      };
+      return {'success': false, 'message': 'Gagal menghubungkan ke server.'};
     }
   }
 
@@ -278,9 +249,7 @@ class AuthService {
       final response = await http.post(
         Uri.parse('$_baseUrl/login/google'),
         headers: await _headers(),
-        body: jsonEncode({
-          'id_token': idToken,
-        }),
+        body: jsonEncode({'id_token': idToken}),
       );
 
       final data = jsonDecode(response.body);
@@ -294,10 +263,7 @@ class AuthService {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Tidak dapat terhubung ke server',
-      };
+      return {'success': false, 'message': 'Tidak dapat terhubung ke server'};
     }
   }
 }
