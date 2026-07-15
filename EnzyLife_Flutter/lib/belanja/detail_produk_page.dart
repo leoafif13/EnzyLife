@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../models/product.dart';
 import '../app_color.dart';
 import 'belanja_page.dart';
@@ -198,9 +199,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   width: double.infinity,
                                   color: AppColors.green50,
                                   child: Hero(
-                                    tag: widget.heroTag ?? 'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
+                                    tag: widget.heroTag ?? '${AppConfig.webBaseUrl}/gambar/produk/${p.image.split('/').last}',
                                     child: Image.network(
-                                      'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
+                                      '${AppConfig.webBaseUrl}/gambar/produk/${p.image.split('/').last}',
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) {
                                         return const Icon(Icons.image_not_supported);
@@ -236,7 +237,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   right: 12,
                                   child: GestureDetector(
                                     onTap: () {
-                                      final imgUrl = 'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}';
+                                      final imgUrl = '${AppConfig.webBaseUrl}/gambar/produk/${p.image.split('/').last}';
                                       openFullscreenImage(context, imgUrl, isNetwork: true);
                                     },
                                     child: Container(
@@ -293,7 +294,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
+                                    '${AppConfig.webBaseUrl}/gambar/produk/${p.image.split('/').last}',
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) {
                                       return const Icon(Icons.image_not_supported);

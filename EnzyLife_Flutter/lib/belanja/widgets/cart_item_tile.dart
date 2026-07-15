@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/app_config.dart';
 import '../../app_color.dart';
 import '../../models/product.dart';
 import '../detail_produk_page.dart';
@@ -87,7 +88,7 @@ class CartItemTile extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(
-                    'http://127.0.0.1:8000/gambar/produk/${product.image.split('/').last}',
+                    '${AppConfig.webBaseUrl}/gambar/produk/${product.image.split('/').last}',
                     width: 64,
                     height: 64,
                     fit: BoxFit.cover,

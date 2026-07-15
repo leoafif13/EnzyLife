@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'config/app_config.dart';
 import 'app_color.dart';
 import 'widgets/app_header.dart';
 import 'widgets/bottom_navbar.dart';
@@ -566,7 +567,7 @@ class _ArtikelCard extends StatelessWidget {
                 height: 100,
                 width: double.infinity,
                 child: Image.network(
-                  'http://127.0.0.1:8000/gambar/${artikel.gambar}',
+                  '${AppConfig.webBaseUrl}/gambar/${artikel.gambar}',
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.green50,
@@ -654,7 +655,7 @@ class _InfografikCard extends StatelessWidget {
                 height: 120,
                 width: 160,
                 child: Image.network(
-                  'http://127.0.0.1:8000/gambar/${infografik.gambar}',
+                  '${AppConfig.webBaseUrl}/gambar/${infografik.gambar}',
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.green50,

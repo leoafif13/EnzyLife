@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/artikel.dart';
 import '../services/format_helper.dart';
@@ -54,9 +55,9 @@ class DetailArtikelPage extends StatelessWidget {
                 children: [
                   Positioned.fill(
                     child: Hero(
-                      tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                      tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                       child: Image.network(
-                        'http://127.0.0.1:8000/gambar/${item.gambar}',
+                        '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) {
                           return Container(
@@ -100,7 +101,7 @@ class DetailArtikelPage extends StatelessWidget {
                     right: 12,
                     child: GestureDetector(
                       onTap: () {
-                        final imgUrl = 'http://127.0.0.1:8000/gambar/${item.gambar}';
+                        final imgUrl = '${AppConfig.webBaseUrl}/gambar/${item.gambar}';
                         openFullscreenImage(context, imgUrl, isNetwork: true);
                       },
                       child: Container(

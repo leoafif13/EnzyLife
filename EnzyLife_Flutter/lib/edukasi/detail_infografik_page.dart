@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../models/infografik.dart';
@@ -109,9 +110,9 @@ class DetailInfografikPage extends StatelessWidget {
                     child: Stack(
                       children: [
                         Hero(
-                          tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                          tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                           child: Image.network(
-                            'http://127.0.0.1:8000/gambar/${item.gambar}',
+                            '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
@@ -121,7 +122,7 @@ class DetailInfografikPage extends StatelessWidget {
                           right: 12,
                           child: GestureDetector(
                             onTap: () {
-                              final imgUrl = 'http://127.0.0.1:8000/gambar/${item.gambar}';
+                              final imgUrl = '${AppConfig.webBaseUrl}/gambar/${item.gambar}';
                               openFullscreenImage(context, imgUrl, isNetwork: true);
                             },
                             child: Container(
@@ -203,7 +204,7 @@ class _RekomendasiCard extends StatelessWidget {
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
               child: Image.network(
-                      'http://127.0.0.1:8000/gambar/${item.gambar}',
+                      '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                       width: 90,
                       height: 90,
                       fit: BoxFit.cover,

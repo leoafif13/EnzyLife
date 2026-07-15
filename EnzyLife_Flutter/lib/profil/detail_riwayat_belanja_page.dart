@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../models/order.dart';
@@ -612,7 +613,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                       final item = _order.items[idx];
                       final prod = item.product;
                       final imageUrl = (prod?.image != null && prod!.image.isNotEmpty)
-                          ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
+                          ? '${AppConfig.webBaseUrl}/gambar/produk/${prod.image.split('/').last}'
                           : null;
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -827,7 +828,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                     final prod = item.product;
                     if (prod == null) return const SizedBox.shrink();
                     final imageUrl = prod.image.isNotEmpty
-                        ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
+                        ? '${AppConfig.webBaseUrl}/gambar/produk/${prod.image.split('/').last}'
                         : null;
 
                     return Padding(
@@ -1019,7 +1020,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                     final prod = item.product;
                     if (prod == null) return const SizedBox.shrink();
                     final imageUrl = prod.image.isNotEmpty
-                        ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
+                        ? '${AppConfig.webBaseUrl}/gambar/produk/${prod.image.split('/').last}'
                         : null;
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),

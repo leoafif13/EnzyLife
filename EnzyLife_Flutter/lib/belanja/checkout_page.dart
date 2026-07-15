@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../models/product.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
@@ -454,7 +455,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         try { p = widget.allProducts.firstWhere((x) => x.id == e.key); } catch (_) {}
                         if (p == null) return const SizedBox.shrink();
                         final imageUrl = p.image.isNotEmpty
-                            ? 'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}'
+                            ? '${AppConfig.webBaseUrl}/gambar/produk/${p.image.split('/').last}'
                             : null;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10),

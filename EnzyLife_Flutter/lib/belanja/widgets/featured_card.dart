@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/app_config.dart';
 import '../../app_color.dart';
 import '../../models/product.dart';
 import '../../widgets/animated_press_card.dart';
@@ -62,7 +63,7 @@ class FeaturedCard extends StatelessWidget {
                       child: Hero(
                         tag: heroTag,
                         child: Image.network(
-                          'http://127.0.0.1:8000/gambar/produk/${product.image.split('/').last}',
+                          '${AppConfig.webBaseUrl}/gambar/produk/${product.image.split('/').last}',
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) {
                             return const Icon(Icons.image_not_supported, color: Colors.white);

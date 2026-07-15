@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/page_header_card.dart';
@@ -310,9 +311,9 @@ class _ArtikelCard extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Hero(
-                  tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                  tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                   child: Image.network(
-                    'http://127.0.0.1:8000/gambar/${item.gambar}',
+                    '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
@@ -449,9 +450,9 @@ class _InfografikCard extends StatelessWidget {
                 width: 105,
                 height: 135,
                 child: Hero(
-                  tag: 'http://127.0.0.1:8000/gambar/${item.gambar}',
+                  tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                   child: Image.network(
-                    'http://127.0.0.1:8000/gambar/${item.gambar}',
+                    '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) {
                       return Container(

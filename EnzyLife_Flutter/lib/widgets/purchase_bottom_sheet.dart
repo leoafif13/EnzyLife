@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../models/product.dart';
 import '../app_color.dart';
 import '../belanja/checkout_page.dart';
@@ -80,7 +81,7 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
                   height: 88,
                   color: AppColors.green50,
                   child: Image.network(
-                    'http://127.0.0.1:8000/gambar/produk/${p.image.split('/').last}',
+                    '${AppConfig.webBaseUrl}/gambar/produk/${p.image.split('/').last}',
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) {
                       return const Icon(Icons.image_not_supported, color: AppColors.green500);

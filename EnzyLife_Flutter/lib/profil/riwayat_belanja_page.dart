@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import 'ulasan_page.dart';
@@ -228,7 +229,7 @@ class _OrderCard extends StatelessWidget {
         : 'Pesanan #${order.id}';
     
     final imageUrl = (firstItem?.product?.image != null && firstItem!.product!.image.isNotEmpty)
-        ? 'http://127.0.0.1:8000/gambar/produk/${firstItem.product!.image.split('/').last}'
+        ? '${AppConfig.webBaseUrl}/gambar/produk/${firstItem.product!.image.split('/').last}'
         : null;
 
     final dateStr = formatDate(order.createdAt);
@@ -641,7 +642,7 @@ class _OrderActions extends StatelessWidget {
                     final prod = item.product;
                     if (prod == null) return const SizedBox.shrink();
                     final imageUrl = prod.image.isNotEmpty
-                        ? 'http://127.0.0.1:8000/gambar/produk/${prod.image.split('/').last}'
+                        ? '${AppConfig.webBaseUrl}/gambar/produk/${prod.image.split('/').last}'
                         : null;
 
                     return Padding(
