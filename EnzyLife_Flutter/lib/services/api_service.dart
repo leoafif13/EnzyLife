@@ -250,7 +250,7 @@ class ApiService {
           'phone': phone ?? '',
           'address': address ?? '',
           'postal_code': postalCode ?? '',
-        },
+        }, 
       );
 
       return response.statusCode == 200;
