@@ -257,6 +257,7 @@ class _CartScreenState extends State<CartScreen> {
                               MaterialPageRoute(builder: (_) => CheckoutPage(
                                 items: selectedItems,
                                 allProducts: _products,
+                                fromCart: true, // Checkout dari keranjang — hapus item yang di-checkout
                               )),
                             );
                           },

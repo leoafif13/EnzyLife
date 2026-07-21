@@ -577,6 +577,7 @@ class _OrderActions extends StatelessWidget {
                           productName: item.product?.name ?? 'Eco Enzim',
                           orderId: order.id.toString(),
                           productId: item.product?.id ?? 0,
+                          productImage: item.product?.image,
                           existingRating: item.existingRating,
                           existingComment: item.existingComment,
                           existingTags: item.existingTags,
@@ -825,6 +826,7 @@ class _OrderActions extends StatelessWidget {
                                               productName: prod.name,
                                               orderId: order.id.toString(),
                                               productId: prod.id,
+                                              productImage: prod.image,
                                               existingRating:
                                                   item.existingRating,
                                               existingComment:
@@ -873,6 +875,7 @@ class _OrderActions extends StatelessWidget {
                                               productName: prod.name,
                                               orderId: order.id.toString(),
                                               productId: prod.id,
+                                              productImage: prod.image,
                                               isPickup:
                                                   order.metodePembayaran ==
                                                       'COD' &&

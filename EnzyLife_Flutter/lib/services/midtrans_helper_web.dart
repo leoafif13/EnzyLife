@@ -2,13 +2,13 @@
 
 import 'dart:js' as js;
 import 'dart:async';
+import 'package:flutter/material.dart';
 
 class MidtransPayHelper {
-  static Future<bool> pay(String snapToken) {
+  static Future<bool> pay(String snapToken, {BuildContext? context}) {
     final completer = Completer<bool>();
-    
+
     try {
-      // Call the JS function window.snapPay which handles the popup overlay
       js.context.callMethod('snapPay', [
         snapToken,
         js.allowInterop((success) {
@@ -18,12 +18,13 @@ class MidtransPayHelper {
         })
       ]);
     } catch (e) {
+      // ignore: avoid_print
       print('Error calling snapPay in JS: $e');
       if (!completer.isCompleted) {
         completer.complete(false);
       }
     }
-    
+
     return completer.future;
   }
 }

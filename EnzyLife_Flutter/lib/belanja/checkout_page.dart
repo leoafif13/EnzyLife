@@ -16,11 +16,15 @@ import '../profil/edit_profil_page.dart';
 class CheckoutPage extends StatefulWidget {
   final Map<int, int> items;
   final List<Product> allProducts;
+  /// true  → checkout dari keranjang belanja (hapus semua item checkout dari cart)
+  /// false → checkout langsung / "Beli Sekarang" (cart tidak disentuh)
+  final bool fromCart;
 
   const CheckoutPage({
     super.key,
     required this.items,
     required this.allProducts,
+    this.fromCart = false,
   });
 
   @override
@@ -135,10 +139,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
         return;
       }
 
-      if (_alamatController.text.trim().length < 10) {
+      if (_alamatController.text.trim().length < 30) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Alamat minimal 10 karakter'),
+            content: const Text('Alamat minimal 30 karakter'),
             backgroundColor: Colors.red[400],
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -358,7 +362,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
       if (!mounted) return;
 
       if (res != null && res['success'] == true) {
-        CartState.instance.clear();
+        // Hapus hanya item yang di-checkout dari keranjang.
+        // Kalau fromCart=true, hapus item yang dicentang.
+        // Kalau fromCart=false (Beli Sekarang), cart tidak disentuh sama sekali.
+        if (widget.fromCart) {
+          for (final id in widget.items.keys) {
+            CartState.instance.removeAll(id);
+          }
+        }
 
         void showSuccess() {
           showDialog(
@@ -444,8 +455,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
           setState(() => _isLoading = true);
 
-          // Open Midtrans Snap directly (inline on web)
-          await MidtransPayHelper.pay(snapToken);
+          // Open Midtrans Snap (WebView di mobile, JS popup di web)
+          await MidtransPayHelper.pay(snapToken, context: context);
 
           // After Snap closes, check status from backend
           final verifyRes = await ApiService.payOrder(orderId, simulate: false);

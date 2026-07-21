@@ -227,6 +227,7 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
                             builder: (_) => CheckoutPage(
                               items: {p.id: _qty},
                               allProducts: [p],
+                              fromCart: false, // Beli Sekarang — cart tidak disentuh
                             ),
                           ),
                         );

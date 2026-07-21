@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+
 class MidtransPayHelper {
-  static Future<bool> pay(String snapToken) async {
-    // Fallback/stub returns false on non-web platforms.
+  static Future<bool> pay(String snapToken, {BuildContext? context}) async {
+    // Fallback/stub — tidak dipakai di platform manapun secara normal
     return false;
   }
 }

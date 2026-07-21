@@ -354,6 +354,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                               productName: item.product?.name ?? 'Eco Enzim',
                               orderId: _order.id.toString(),
                               productId: item.product?.id ?? 0,
+                              productImage: item.product?.image,
                               existingRating: item.existingRating,
                               existingComment: item.existingComment,
                               existingTags: item.existingTags,
@@ -485,7 +486,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                             final messenger = ScaffoldMessenger.of(context);
                             if (_order.snapToken != null) {
                               setState(() => _isLoading = true);
-                              await MidtransPayHelper.pay(_order.snapToken!);
+                              await MidtransPayHelper.pay(_order.snapToken!, context: context);
                               final verifyRes = await ApiService.payOrder(
                                 _order.id,
                                 simulate: false,
@@ -1041,6 +1042,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                                               productName: prod.name,
                                               orderId: order.id.toString(),
                                               productId: prod.id,
+                                              productImage: prod.image,
                                               existingRating:
                                                   item.existingRating,
                                               existingComment:
@@ -1089,6 +1091,7 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                                               productName: prod.name,
                                               orderId: order.id.toString(),
                                               productId: prod.id,
+                                              productImage: prod.image,
                                               isPickup:
                                                   order.metodePembayaran ==
                                                       'COD' &&

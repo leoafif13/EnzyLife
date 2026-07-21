@@ -70,11 +70,11 @@ class AuthService {
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
     };
 
     if (auth) {
       final token = await getToken();
-
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
       }

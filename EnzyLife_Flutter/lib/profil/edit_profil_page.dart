@@ -120,10 +120,10 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
     }
 
     final cleanAddress = _alamatController.text.trim();
-    if (cleanAddress.isNotEmpty && cleanAddress.length < 10) {
+    if (cleanAddress.isNotEmpty && cleanAddress.length < 30) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Alamat minimal 10 karakter'),
+          content: const Text('Alamat minimal 30 karakter'),
           backgroundColor: Colors.red[400],
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../app_color.dart';
+import '../config/app_config.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../services/api_service.dart';
 
@@ -7,6 +8,7 @@ class UlasanScreen extends StatefulWidget {
   final String productName;
   final String orderId;
   final int productId;
+  final String? productImage;
   final int? existingRating;
   final String? existingComment;
   final String? existingTags;
@@ -17,6 +19,7 @@ class UlasanScreen extends StatefulWidget {
     required this.productName,
     required this.orderId,
     required this.productId,
+    this.productImage,
     this.existingRating,
     this.existingComment,
     this.existingTags,
@@ -239,9 +242,18 @@ class _UlasanScreenState extends State<UlasanScreen> {
                           child: Container(
                             width: 56, height: 56,
                             color: AppColors.green50,
-                            child: Icon(Icons.image_outlined, size: 24,
-                                color: AppColors.green500.withOpacity(0.3)),
-                            // TODO: gambar produk
+                            child: widget.productImage != null && widget.productImage!.isNotEmpty
+                                ? Image.network(
+                                    '${AppConfig.webBaseUrl}/gambar/produk/${widget.productImage!.split('/').last}',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Icon(
+                                      Icons.image_outlined,
+                                      size: 24,
+                                      color: AppColors.green500.withOpacity(0.3),
+                                    ),
+                                  )
+                                : Icon(Icons.image_outlined, size: 24,
+                                    color: AppColors.green500.withOpacity(0.3)),
                           ),
                         ),
                         const SizedBox(width: 12),
