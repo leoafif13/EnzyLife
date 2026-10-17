@@ -11,7 +11,6 @@ import '../services/format_helper.dart';
 import '../widgets/search_bar_field.dart';
 import '../widgets/page_header_card.dart';
 import '../widgets/purchase_bottom_sheet.dart';
-import '../widgets/chatbot_widget.dart';
 
 // ── Status pesanan ────────────────────────────
 enum OrderStatus { dipesan, dikirim, selesai }
@@ -212,7 +211,6 @@ class _RiwayatBelanjaScreenState extends State<RiwayatBelanjaScreen> {
               ),
             ],
           ),
-          const ChatbotWidget(),
         ],
       ),
     );

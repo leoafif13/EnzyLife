@@ -11,7 +11,6 @@ import '../models/infografik.dart';
 import '../services/api_service.dart';
 import '../services/format_helper.dart';
 import '../services/auth_service.dart';
-import '../widgets/chatbot_widget.dart';
 
 // ══════════════════════════════════════════════
 //  Filter enum
@@ -294,7 +293,6 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
               ),
             ],
           ),
-          const ChatbotWidget(),
         ],
       ),
     );
@@ -331,8 +329,7 @@ class _ArtikelCard extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Hero(
-                  tag:
-                      '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
+                  tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                   child: Image.network(
                     '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                     width: double.infinity,
@@ -481,8 +478,7 @@ class _InfografikCard extends StatelessWidget {
                 width: 105,
                 height: 135,
                 child: Hero(
-                  tag:
-                      '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
+                  tag: '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                   child: Image.network(
                     '${AppConfig.webBaseUrl}/gambar/${item.gambar}',
                     fit: BoxFit.cover,

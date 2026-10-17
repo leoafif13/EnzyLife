@@ -21,7 +21,6 @@ import 'edukasi/faq_page.dart';
 import 'profil/riwayat_belanja_page.dart';
 import 'widgets/page_header_card.dart';
 import 'splash_screen.dart';
-import 'widgets/chatbot_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -126,7 +125,6 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
           ),
-          const ChatbotWidget(),
         ],
       ),
       bottomNavigationBar: AppBottomNavBar(

@@ -6,7 +6,6 @@ import '../models/infografik.dart';
 import '../services/api_service.dart';
 import '../services/format_helper.dart';
 import '../widgets/zoomable_image_dialog.dart';
-import '../widgets/chatbot_widget.dart';
 
 // ══════════════════════════════════════════════
 //  DetailInfografikPage
@@ -221,7 +220,6 @@ class DetailInfografikPage extends StatelessWidget {
               ],
             ),
           ),
-          const ChatbotWidget(),
         ],
       ),
     );

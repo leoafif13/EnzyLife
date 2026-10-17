@@ -6,7 +6,6 @@ import '../services/format_helper.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/zoomable_image_dialog.dart';
-import '../widgets/chatbot_widget.dart';
 
 class DetailArtikelPage extends StatelessWidget {
   final ArtikelModel item;
@@ -288,7 +287,6 @@ class DetailArtikelPage extends StatelessWidget {
               ],
             ),
           ),
-          const ChatbotWidget(),
         ],
       ),
     );

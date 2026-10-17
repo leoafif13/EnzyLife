@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/page_header_card.dart';
-import '../widgets/chatbot_widget.dart';
 import '../services/auth_service.dart';
 
 class KalkulatorScreen extends StatefulWidget {
@@ -104,7 +103,6 @@ class _KalkulatorScreenState extends State<KalkulatorScreen>
           ),
         ],
       ),
-      const ChatbotWidget(),
     ],
   ),
 );

@@ -3,7 +3,6 @@ import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/page_header_card.dart';
 import '../widgets/search_bar_field.dart';
-import '../widgets/chatbot_widget.dart';
 import '../services/auth_service.dart';
 import '../widgets/expandable_tile.dart';
 
@@ -67,7 +66,8 @@ class _FaqScreenState extends State<FaqScreen> {
     ),
     _FaqItem(
       category: 'masalah',
-      question: 'Apa yang harus dilakukan jika muncul lapisan putih di permukaan?',
+      question:
+          'Apa yang harus dilakukan jika muncul lapisan putih di permukaan?',
       answer:
           'Lapisan putih tipis biasanya merupakan mikroorganisme alami yang tidak berbahaya dan masih tergolong normal dalam proses fermentasi. Lapisan tersebut dapat diaduk atau disaring saat panen Eco Enzim.',
     ),
@@ -127,7 +127,8 @@ class _FaqScreenState extends State<FaqScreen> {
     ),
     _FaqItem(
       category: 'penggunaan',
-      question: 'Apakah eco enzim dapat digunakan untuk membersihkan saluran air?',
+      question:
+          'Apakah eco enzim dapat digunakan untuk membersihkan saluran air?',
       answer:
           'Ya. Eco Enzim dapat dituangkan ke saluran air secara berkala untuk membantu mengurangi bau dan membantu menguraikan sisa bahan organik yang menumpuk.',
     ),
@@ -160,8 +161,10 @@ class _FaqScreenState extends State<FaqScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredFaq = _faqItems.where((item) {
-      final matchesCategory = _selectedCategory == 'semua' || item.category == _selectedCategory;
-      final matchesQuery = _query.isEmpty ||
+      final matchesCategory =
+          _selectedCategory == 'semua' || item.category == _selectedCategory;
+      final matchesQuery =
+          _query.isEmpty ||
           item.question.toLowerCase().contains(_query.toLowerCase()) ||
           item.answer.toLowerCase().contains(_query.toLowerCase());
       return matchesCategory && matchesQuery;
@@ -174,107 +177,110 @@ class _FaqScreenState extends State<FaqScreen> {
         clipBehavior: Clip.none,
         children: [
           Column(
-        children: [
-          // ── Sticky Header Card ──────────────────
-          Container(
-            color: AppColors.bgPage,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: const PageHeaderCard(
-              badge: '❓  FAQ',
-              title: 'FAQ',
-              subtitle: 'Daftar tanya jawab seputar Eco Enzim',
-              icon: Icons.help_outline_rounded,
-            ),
-          ),
-
-          // ── Sticky Search Bar ───────────────────
-          Container(
-            color: AppColors.bgPage,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            child: SearchBarField(
-              controller: _search,
-              hintText: 'Cari pertanyaan atau jawaban...',
-              onChanged: (v) => setState(() => _query = v),
-              showClearButton: _query.isNotEmpty,
-              onClear: () {
-                setState(() => _query = '');
-                _search.clear();
-              },
-            ),
-          ),
-
-          // ── Sticky Category Chips ────────────────
-          Container(
-            color: AppColors.bgPage,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: [
-                  _FaqCategoryChip(
-                    label: 'Semua',
-                    icon: Icons.all_inclusive,
-                    active: _selectedCategory == 'semua',
-                    onTap: () => setState(() => _selectedCategory = 'semua'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FaqCategoryChip(
-                    label: 'Umum',
-                    icon: Icons.info_outline_rounded,
-                    active: _selectedCategory == 'umum',
-                    onTap: () => setState(() => _selectedCategory = 'umum'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FaqCategoryChip(
-                    label: 'Pembuatan',
-                    icon: Icons.build_circle_outlined,
-                    active: _selectedCategory == 'pembuatan',
-                    onTap: () => setState(() => _selectedCategory = 'pembuatan'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FaqCategoryChip(
-                    label: 'Penggunaan',
-                    icon: Icons.settings_suggest_outlined,
-                    active: _selectedCategory == 'penggunaan',
-                    onTap: () => setState(() => _selectedCategory = 'penggunaan'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FaqCategoryChip(
-                    label: 'Masalah',
-                    icon: Icons.report_problem_outlined,
-                    active: _selectedCategory == 'masalah',
-                    onTap: () => setState(() => _selectedCategory = 'masalah'),
-                  ),
-                ],
+            children: [
+              // ── Sticky Header Card ──────────────────
+              Container(
+                color: AppColors.bgPage,
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: const PageHeaderCard(
+                  badge: '❓  FAQ',
+                  title: 'FAQ',
+                  subtitle: 'Daftar tanya jawab seputar Eco Enzim',
+                  icon: Icons.help_outline_rounded,
+                ),
               ),
-            ),
-          ),
 
-          // ── List FAQ ─────────────────────────────
-          Expanded(
-            child: filteredFaq.isEmpty
-                ? _EmptyState(query: _query, category: _selectedCategory)
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: filteredFaq.length,
-                    itemBuilder: (context, index) {
-                      return ExpandableTile(
-                        key: ValueKey(filteredFaq[index].question),
-                        title: filteredFaq[index].question,
-                        content: filteredFaq[index].answer,
-                        leading: const QBadge(),
-                      );
-                    },
+              // ── Sticky Search Bar ───────────────────
+              Container(
+                color: AppColors.bgPage,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: SearchBarField(
+                  controller: _search,
+                  hintText: 'Cari pertanyaan atau jawaban...',
+                  onChanged: (v) => setState(() => _query = v),
+                  showClearButton: _query.isNotEmpty,
+                  onClear: () {
+                    setState(() => _query = '');
+                    _search.clear();
+                  },
+                ),
+              ),
+
+              // ── Sticky Category Chips ────────────────
+              Container(
+                color: AppColors.bgPage,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: [
+                      _FaqCategoryChip(
+                        label: 'Semua',
+                        icon: Icons.all_inclusive,
+                        active: _selectedCategory == 'semua',
+                        onTap: () =>
+                            setState(() => _selectedCategory = 'semua'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FaqCategoryChip(
+                        label: 'Umum',
+                        icon: Icons.info_outline_rounded,
+                        active: _selectedCategory == 'umum',
+                        onTap: () => setState(() => _selectedCategory = 'umum'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FaqCategoryChip(
+                        label: 'Pembuatan',
+                        icon: Icons.build_circle_outlined,
+                        active: _selectedCategory == 'pembuatan',
+                        onTap: () =>
+                            setState(() => _selectedCategory = 'pembuatan'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FaqCategoryChip(
+                        label: 'Penggunaan',
+                        icon: Icons.settings_suggest_outlined,
+                        active: _selectedCategory == 'penggunaan',
+                        onTap: () =>
+                            setState(() => _selectedCategory = 'penggunaan'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FaqCategoryChip(
+                        label: 'Masalah',
+                        icon: Icons.report_problem_outlined,
+                        active: _selectedCategory == 'masalah',
+                        onTap: () =>
+                            setState(() => _selectedCategory = 'masalah'),
+                      ),
+                    ],
                   ),
+                ),
+              ),
+
+              // ── List FAQ ─────────────────────────────
+              Expanded(
+                child: filteredFaq.isEmpty
+                    ? _EmptyState(query: _query, category: _selectedCategory)
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: filteredFaq.length,
+                        itemBuilder: (context, index) {
+                          return ExpandableTile(
+                            key: ValueKey(filteredFaq[index].question),
+                            title: filteredFaq[index].question,
+                            content: filteredFaq[index].answer,
+                            leading: const QBadge(),
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         ],
       ),
-      const ChatbotWidget(),
-    ],
-  ),
-);
+    );
   }
 }
 
@@ -349,10 +355,7 @@ class _EmptyState extends StatelessWidget {
   final String query;
   final String category;
 
-  const _EmptyState({
-    required this.query,
-    required this.category,
-  });
+  const _EmptyState({required this.query, required this.category});
 
   @override
   Widget build(BuildContext context) {
@@ -390,10 +393,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'Coba kata kunci lain atau pilih kategori yang berbeda',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
           ],

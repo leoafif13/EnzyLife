@@ -148,5 +148,10 @@
         "question": "berapa lama waktu fermentasi eco enzym?",
         "answer": "Waktu fermentasi Eco Enzyme adalah minimal 3 bulan.",
         "created_at": "2026-07-20 16:46:56.313836"
+    },
+    {
+        "question": "Cara membuat Eco Enzyme?",
+        "answer": "Eco Enzyme dibuat dengan memfermentasi limbah organik seperti kulit buah dan sayuran menggunakan gula merah atau molase dan air.\n\nBerikut adalah langkah-langkah pembuatannya:\n1.  **Rasio Bahan:** Gunakan perbandingan berikut:\n    *   1 bagian gula merah/molase\n    *   3 bagian limbah organik (kulit buah dan sayuran)\n    *   10 bagian air\n2.  **Pencampuran:** Campurkan semua bahan tersebut dalam wadah.\n3.  **Fermentasi:** Biarkan campuran berfermentasi selama minimal 3 bulan.",
+        "created_at": "2026-10-17 09:56:13.641999"
     }
 ]
