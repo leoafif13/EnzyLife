@@ -16,6 +16,7 @@ import 'models/infografik.dart';
 import 'edukasi/detail_artikel_page.dart';
 import 'edukasi/detail_infografik_page.dart';
 import 'edukasi/artikel_page.dart';
+import 'ai/ai_percakapan_page.dart';
 import 'edukasi/kalkulator_page.dart';
 import 'edukasi/faq_page.dart';
 import 'profil/riwayat_belanja_page.dart';
@@ -69,19 +70,26 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  final List<bool> _activatedPages = [true, false, false, false];
+  final List<bool> _activatedPages = [
+  true,  // Beranda
+  false, // Edukasi
+  false, // AI
+  false, // Belanja
+  false, // Profil
+];
 
   void _onTabTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-      _activatedPages[index] = true;
-    });
-    if (index == 2) {
-      AuthService.incrementMenuVisit('Belanja');
-    } else if (index == 3) {
-      AuthService.incrementMenuVisit('Profil');
-    }
+  setState(() {
+    _selectedIndex = index;
+    _activatedPages[index] = true;
+  });
+
+  if (index == 3) {
+    AuthService.incrementMenuVisit('Belanja');
+  } else if (index == 4) {
+    AuthService.incrementMenuVisit('Profil');
   }
+}
 
   // Buka keranjang dari mana saja
   void _openCart() {
@@ -113,13 +121,20 @@ class _MainScreenState extends State<MainScreen> {
               index: _selectedIndex,
               children: [
                 HomeScreen(onTabSelected: _onTabTap),
+
                 _activatedPages[1]
                     ? const EducationScreen()
                     : const SizedBox.shrink(),
+
                 _activatedPages[2]
+                    ? const AiPercakapanPage()
+                    : const SizedBox.shrink(),
+
+                _activatedPages[3]
                     ? const BelanjaScreen()
                     : const SizedBox.shrink(),
-                _activatedPages[3]
+
+                _activatedPages[4]
                     ? const ProfilScreen()
                     : const SizedBox.shrink(),
               ],
@@ -311,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   );
                                 } else if (f.label == 'Belanja') {
-                                  widget.onTabSelected?.call(2);
+                                  widget.onTabSelected?.call(3);
                                 } else if (f.label == 'Riwayat') {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -320,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   );
                                 } else if (f.label == 'Profil') {
-                                  widget.onTabSelected?.call(3);
+                                  widget.onTabSelected?.call(4);
                                 }
                               },
                             ),

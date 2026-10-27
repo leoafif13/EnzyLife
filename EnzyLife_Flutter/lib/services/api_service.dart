@@ -460,4 +460,182 @@ class ApiService {
       return null;
     }
   }
+
+  // =====================================================
+  // AI PERCAKAPAN
+  // =====================================================
+
+  static Future<Map<String, dynamic>?> getAiConversations() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/percakapan'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      print('Get AI conversations: ${response.statusCode} ${response.body}');
+      return null;
+    } catch (e) {
+      print('Error getAiConversations: $e');
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> createAiConversation() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/percakapan'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      print('Create AI conversation: ${response.statusCode} ${response.body}');
+      return null;
+    } catch (e) {
+      print('Error createAiConversation: $e');
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> sendAiMessage({
+    required int conversationId,
+    required String pertanyaan,
+  }) async {
+    try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/percakapan/$conversationId/pesan'),
+        headers: headers,
+        body: jsonEncode({
+          'pertanyaan': pertanyaan,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      print('Send AI message: ${response.statusCode} ${response.body}');
+      return null;
+    } catch (e) {
+      print('Error sendAiMessage: $e');
+      return null;
+    }
+  }
+
+  
+  // Ambil detail percakapan beserta riwayat pesan.
+  static Future<Map<String, dynamic>?> getAiConversationDetail(
+    int conversationId,
+  ) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/percakapan/$conversationId'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      print('Detail AI error: ${response.statusCode} ${response.body}');
+      return null;
+    } catch (e) {
+      print('Error getAiConversationDetail: $e');
+      return null;
+    }
+  }
+
+  // Simpan percakapan.
+  static Future<Map<String, dynamic>?> saveAiConversation(
+    int conversationId,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/percakapan/$conversationId/simpan'),
+        headers: await _authHeaders(),
+      );
+
+      final data = jsonDecode(response.body);
+      if (data is Map<String, dynamic>) {
+        return {
+          ...data,
+          'success': response.statusCode >= 200 &&
+              response.statusCode < 300,
+        };
+      }
+
+      return null;
+    } catch (e) {
+      print('Error saveAiConversation: $e');
+      return null;
+    }
+  }
+
+  // Kirim feedback untuk percakapan.
+  static Future<Map<String, dynamic>?> sendAiFeedback({
+    required int conversationId,
+    required bool membantu,
+  }) async {
+    try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.put(
+        Uri.parse('$_baseUrl/percakapan/$conversationId/feedback'),
+        headers: headers,
+        body: jsonEncode({
+          'feedback': membantu ? 'membantu' : 'tidak_membantu',
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      if (data is Map<String, dynamic>) {
+        return {
+          ...data,
+          'success': response.statusCode >= 200 &&
+              response.statusCode < 300,
+        };
+      }
+
+      return null;
+    } catch (e) {
+      print('Error sendAiFeedback: $e');
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> deleteAiConversation(
+  int conversationId,
+    ) async {
+      try {
+        final response = await http.delete(
+          Uri.parse('$_baseUrl/percakapan/$conversationId'),
+          headers: await _authHeaders(),
+        );
+
+        final dynamic data = jsonDecode(response.body);
+
+        if (data is Map<String, dynamic>) {
+          return {
+            ...data,
+            'success': response.statusCode >= 200 &&
+                response.statusCode < 300,
+          };
+        }
+
+        return null;
+      } catch (e) {
+        print('Error deleteAiConversation: $e');
+        return null;
+      }
+    }
 }
