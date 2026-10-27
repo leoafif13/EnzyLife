@@ -44,4 +44,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
+
+    public function aiPercakapan()
+    {
+        return $this->hasMany(
+            AiPercakapan::class,
+            'id_pelanggan'
+        );
+    }
 }
