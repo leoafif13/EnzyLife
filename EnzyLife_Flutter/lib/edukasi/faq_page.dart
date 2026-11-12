@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+
 import '../app_color.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../widgets/page_header_card.dart';
@@ -6,9 +8,6 @@ import '../widgets/search_bar_field.dart';
 import '../services/auth_service.dart';
 import '../widgets/expandable_tile.dart';
 
-// ══════════════════════════════════════════════
-//  FAQ Screen
-// ══════════════════════════════════════════════
 class FaqScreen extends StatefulWidget {
   const FaqScreen({super.key});
 
@@ -19,7 +18,10 @@ class FaqScreen extends StatefulWidget {
 class _FaqScreenState extends State<FaqScreen> {
   String _query = '';
   String _selectedCategory = 'semua';
-  final _search = TextEditingController();
+  int _currentPage = 0;
+
+  final TextEditingController _search = TextEditingController();
+  final PageController _pageController = PageController();
 
   static const List<_FaqItem> _faqItems = [
     _FaqItem(
@@ -38,113 +40,170 @@ class _FaqScreenState extends State<FaqScreen> {
       category: 'pembuatan',
       question: 'Berapa lama waktu fermentasi eco enzim?',
       answer:
-          'Proses fermentasi Eco Enzim umumnya memerlukan waktu sekitar 3 bulan atau 90 hari. Selama proses tersebut, wadah harus disimpan di tempat yang teduh dan sesekali dibuka pada bulan pertama untuk mengeluarkan gas hasil fermentasi.',
+          'Proses fermentasi Eco Enzim umumnya memerlukan waktu sekitar 3 bulan atau 90 hari. Wadah perlu disimpan di tempat teduh dan tekanan gas perlu ditangani dengan aman sesuai prosedur fermentasi.',
     ),
     _FaqItem(
       category: 'penggunaan',
       question: 'Apakah aman digunakan untuk kulit?',
       answer:
-          'Eco Enzim yang telah matang umumnya aman digunakan setelah diencerkan dengan air. Namun, karena tingkat keasaman setiap hasil fermentasi bisa berbeda, disarankan untuk melakukan uji coba pada area kecil kulit terlebih dahulu dan menghindari penggunaan pada kulit yang sensitif atau luka terbuka.',
+          'Tingkat keasaman setiap hasil fermentasi dapat berbeda. Hindari penggunaan pada kulit sensitif atau luka terbuka. Jangan menganggap Eco Enzim aman untuk kulit tanpa pengujian dan petunjuk penggunaan yang sesuai.',
     ),
     _FaqItem(
       category: 'umum',
       question: 'Berapa lama eco enzim dapat disimpan?',
       answer:
-          'Eco Enzim dapat disimpan dalam jangka waktu yang sangat lama selama disimpan dalam wadah tertutup dengan baik dan tidak terkontaminasi. Bahkan kualitasnya cenderung semakin baik seiring waktu karena proses fermentasi alami masih terus berlangsung.',
+          'Masa simpan dipengaruhi oleh kondisi penyimpanan dan kualitas hasil fermentasi. Simpan dalam wadah yang sesuai dan periksa kondisi cairan sebelum digunakan. Lama penyimpanan saja tidak menjamin kualitas atau keamanannya.',
     ),
     _FaqItem(
       category: 'umum',
       question: 'Apa manfaat eco enzim bagi lingkungan?',
       answer:
-          'Eco Enzim membantu mengurangi jumlah sampah organik yang berakhir di tempat pembuangan akhir. Selain itu, penggunaan Eco Enzim juga dapat mengurangi ketergantungan pada bahan kimia pembersih yang berpotensi mencemari lingkungan.',
+          'Eco Enzim membantu memanfaatkan limbah organik sehingga sebagian sampah dapat diolah kembali. Pemanfaatannya dapat mendukung upaya pengurangan sampah rumah tangga.',
     ),
     _FaqItem(
       category: 'pembuatan',
       question: 'Mengapa wadah fermentasi tidak boleh diisi penuh?',
       answer:
-          'Selama proses fermentasi akan terbentuk gas alami. Jika wadah diisi terlalu penuh, tekanan gas dapat meningkat dan menyebabkan wadah menggelembung atau bahkan rusak. Sisakan sekitar 20% ruang kosong di dalam wadah.',
-    ),
-    _FaqItem(
-      category: 'masalah',
-      question:
-          'Apa yang harus dilakukan jika muncul lapisan putih di permukaan?',
-      answer:
-          'Lapisan putih tipis biasanya merupakan mikroorganisme alami yang tidak berbahaya dan masih tergolong normal dalam proses fermentasi. Lapisan tersebut dapat diaduk atau disaring saat panen Eco Enzim.',
+          'Gas dapat terbentuk selama fermentasi. Sisakan ruang kosong sesuai panduan pembuatan agar tekanan tidak berlebihan. Jangan menyimpan hasil fermentasi dalam wadah tertutup rapat tanpa prosedur penanganan gas yang sesuai.',
     ),
     _FaqItem(
       category: 'penggunaan',
       question: 'Bisakah eco enzim digunakan sebagai pupuk tanaman?',
       answer:
-          'Ya. Eco Enzim dapat digunakan sebagai pupuk cair organik setelah diencerkan dengan air. Kandungan hasil fermentasinya dapat membantu menyuburkan tanah dan mendukung pertumbuhan tanaman.',
+          'Eco Enzim terkadang dimanfaatkan sebagai larutan pendukung perawatan tanaman setelah diencerkan. Ikuti panduan pengenceran yang sesuai dan uji pada sebagian kecil tanaman terlebih dahulu.',
     ),
     _FaqItem(
       category: 'penggunaan',
       question: 'Bagaimana cara menggunakan eco enzim sebagai pembersih?',
       answer:
-          'Eco Enzim dapat dicampur dengan air sesuai kebutuhan lalu digunakan untuk membersihkan lantai, kamar mandi, dapur, kaca, maupun permukaan rumah lainnya. Pengenceran dapat disesuaikan tergantung tingkat kotoran yang akan dibersihkan.',
+          'Penggunaan dan pengenceran bergantung pada tujuan serta permukaan yang akan dibersihkan. Ikuti panduan produk yang sesuai, uji pada area kecil, dan hindari mencampurnya dengan bahan pembersih lain.',
     ),
     _FaqItem(
       category: 'pembuatan',
       question: 'Apakah semua jenis kulit buah bisa digunakan?',
       answer:
-          'Sebagian besar kulit buah dan sayuran dapat digunakan untuk membuat Eco Enzim. Namun, sebaiknya hindari bahan yang berminyak, mengandung banyak garam, atau sudah membusuk karena dapat mengganggu proses fermentasi.',
-    ),
-    _FaqItem(
-      category: 'masalah',
-      question: 'Apakah eco enzim memiliki bau yang menyengat?',
-      answer:
-          'Eco Enzim yang berhasil difermentasi biasanya memiliki aroma asam manis khas fermentasi. Jika muncul bau busuk yang sangat menyengat, kemungkinan terjadi kesalahan dalam proses pembuatan atau kontaminasi.',
+          'Kulit buah dan sebagian sisa sayuran dapat digunakan sebagai bahan organik. Pilih bahan sesuai panduan fermentasi dan hindari bahan yang tercampur minyak, bahan kimia, atau kontaminan lain.',
     ),
     _FaqItem(
       category: 'pembuatan',
       question: 'Mengapa botol fermentasi menghasilkan gas?',
       answer:
-          'Gas terbentuk karena aktivitas mikroorganisme yang menguraikan bahan organik selama proses fermentasi. Hal ini merupakan proses yang normal terutama pada bulan pertama fermentasi.',
+          'Gas dapat terbentuk akibat aktivitas mikroorganisme selama fermentasi. Jumlah gas dipengaruhi oleh bahan dan kondisi proses. Tekanan wadah harus ditangani dengan hati-hati.',
     ),
     _FaqItem(
       category: 'penggunaan',
       question: 'Apakah eco enzim bisa diminum?',
       answer:
-          'Tidak. Eco Enzim tidak dirancang untuk dikonsumsi sebagai makanan atau minuman. Penggunaannya ditujukan untuk kebutuhan rumah tangga, kebersihan, pertanian, dan lingkungan.',
+          'Tidak. Eco Enzim untuk keperluan rumah tangga bukan produk pangan dan tidak boleh diminum.',
     ),
     _FaqItem(
       category: 'pembuatan',
       question: 'Bagaimana cara mengetahui eco enzim sudah matang?',
       answer:
-          'Eco Enzim yang matang biasanya berwarna cokelat gelap, memiliki aroma asam segar khas fermentasi, dan tidak menghasilkan gas berlebih seperti pada awal proses fermentasi.',
+          'Waktu fermentasi, aroma, warna, dan kondisi permukaan dapat menjadi bahan pemeriksaan, tetapi tidak satu pun tanda tersebut menjamin keamanan. Ikuti panduan pembuatan dan penilaian dari praktisi yang berpengalaman.',
     ),
     _FaqItem(
       category: 'penggunaan',
       question: 'Apa yang dilakukan dengan ampas setelah panen eco enzim?',
       answer:
-          'Ampas hasil fermentasi dapat dimanfaatkan sebagai kompos organik atau dicampurkan ke tanah sebagai bahan penyubur tanaman.',
+          'Ampas yang tidak menunjukkan tanda kontaminasi dapat dipertimbangkan untuk pengomposan sesuai panduan pengolahan limbah organik.',
     ),
     _FaqItem(
       category: 'penggunaan',
       question: 'Bisakah eco enzim digunakan untuk menghilangkan bau?',
       answer:
-          'Ya. Eco Enzim sering digunakan sebagai penghilang bau alami pada tempat sampah, saluran air, kandang hewan, maupun area lain yang memiliki aroma tidak sedap.',
+          'Eco Enzim kadang digunakan untuk membantu mengurangi bau pada area tertentu. Hasilnya dapat berbeda dan tidak menggantikan pembersihan sumber bau.',
     ),
     _FaqItem(
       category: 'penggunaan',
-      question:
-          'Apakah eco enzim dapat digunakan untuk membersihkan saluran air?',
+      question: 'Apakah eco enzim dapat digunakan untuk membersihkan saluran air?',
       answer:
-          'Ya. Eco Enzim dapat dituangkan ke saluran air secara berkala untuk membantu mengurangi bau dan membantu menguraikan sisa bahan organik yang menumpuk.',
+          'Eco Enzim tidak menjamin saluran air menjadi bersih atau bebas sumbatan. Untuk saluran tersumbat, gunakan metode pembersihan yang sesuai dan jangan mencampur Eco Enzim dengan bahan kimia pembersih.',
     ),
     _FaqItem(
       category: 'umum',
       question: 'Apakah warna eco enzim selalu sama?',
       answer:
-          'Tidak. Warna Eco Enzim dapat berbeda tergantung bahan yang digunakan. Umumnya berwarna cokelat muda hingga cokelat tua setelah proses fermentasi selesai.',
+          'Tidak. Warna dapat berbeda tergantung bahan yang digunakan dan proses fermentasi.',
     ),
     _FaqItem(
       category: 'umum',
       question: 'Mengapa eco enzim disebut ramah lingkungan?',
       answer:
-          'Karena Eco Enzim dibuat dari limbah organik yang didaur ulang dan dapat menggantikan sebagian penggunaan bahan kimia rumah tangga sehingga membantu mengurangi pencemaran lingkungan.',
+          'Eco Enzim memanfaatkan limbah organik sebagai bahan baku sehingga dapat mendukung pengurangan sampah. Dampak lingkungannya tetap bergantung pada proses pembuatan dan penggunaannya.',
     ),
   ];
+
+  static const List<_FaqItem> _troubleshootingItems = [
+    _FaqItem(
+      category: 'fermentasi',
+      question: 'Fermentasi tidak menghasilkan gas',
+      answer:
+          'Produksi gas dapat berbeda bergantung pada bahan dan kondisi fermentasi. Periksa komposisi bahan, tanggal pembuatan, dan kondisi wadah. Tidak adanya gas saja belum cukup untuk menyimpulkan bahwa fermentasi gagal.',
+    ),
+    _FaqItem(
+      category: 'fermentasi',
+      question: 'Wadah fermentasi menggembung',
+      answer:
+          'Gas dapat terbentuk selama fermentasi. Wadah yang menggembung menandakan tekanan mungkin meningkat. Tangani dengan hati-hati, jangan arahkan tutup ke wajah, dan ikuti prosedur pelepasan gas yang aman.',
+    ),
+    _FaqItem(
+      category: 'bau',
+      question: 'Eco Enzyme berbau busuk',
+      answer:
+          'Bau busuk yang kuat dapat mengindikasikan masalah atau kontaminasi. Jangan mencicipi atau menggunakan cairan tersebut. Minta penilaian praktisi Eco Enzyme yang berpengalaman.',
+    ),
+    _FaqItem(
+      category: 'jamur',
+      question: 'Muncul lapisan putih di permukaan',
+      answer:
+          'Lapisan putih dapat memiliki penyebab berbeda. Warna saja tidak cukup untuk memastikan apakah lapisan tersebut aman. Jangan langsung mengaduknya ke dalam cairan. Minta penilaian praktisi berpengalaman.',
+    ),
+    _FaqItem(
+      category: 'jamur',
+      question: 'Muncul jamur berbulu atau berwarna',
+      answer:
+          'Pertumbuhan berbulu atau berwarna mencolok perlu diwaspadai sebagai dugaan kontaminasi. Hindari menyentuh atau menggunakan cairannya. Jangan mencoba menyelamatkan hasil hanya dengan menyaring permukaannya.',
+    ),
+    _FaqItem(
+      category: 'panen',
+      question: 'Warna Eco Enzyme berubah',
+      answer:
+          'Warna dapat berbeda bergantung pada bahan yang digunakan. Periksa juga aroma, kondisi permukaan, dan catatan fermentasi. Jika disertai bau busuk atau pertumbuhan mencurigakan, jangan gunakan sebelum diperiksa.',
+    ),
+    _FaqItem(
+      category: 'panen',
+      question: 'Cairan keruh atau memiliki endapan',
+      answer:
+          'Endapan dapat berasal dari sisa bahan organik, tetapi perlu dinilai bersama tanda lainnya. Periksa aroma dan kondisi permukaan. Jangan menyimpulkan hasil aman hanya karena waktu fermentasinya sudah cukup.',
+    ),
+    _FaqItem(
+      category: 'panen',
+      question: 'Bagaimana menangani ampas setelah panen?',
+      answer:
+          'Ampas yang tidak menunjukkan tanda kontaminasi dapat dipertimbangkan untuk pengomposan. Jika terdapat dugaan kontaminasi atau pembusukan, jangan langsung mencampurkannya ke kompos atau tanah sebelum mendapat saran penanganan yang tepat.',
+    ),
+  ];
+
+  List<_FaqItem> get _currentItems {
+    return _currentPage == 0 ? _faqItems : _troubleshootingItems;
+  }
+
+  List<_FaqItem> get _filteredItems {
+    return _currentItems.where((item) {
+      final matchesCategory =
+          _selectedCategory == 'semua' ||
+          item.category == _selectedCategory;
+
+      final query = _query.toLowerCase().trim();
+      final matchesQuery =
+          query.isEmpty ||
+          item.question.toLowerCase().contains(query) ||
+          item.answer.toLowerCase().contains(query);
+
+      return matchesCategory && matchesQuery;
+    }).toList();
+  }
 
   @override
   void initState() {
@@ -155,136 +214,235 @@ class _FaqScreenState extends State<FaqScreen> {
   @override
   void dispose() {
     _search.dispose();
+    _pageController.dispose();
     super.dispose();
+  }
+
+  void _changePage(int index) {
+    if (_currentPage == index) return;
+
+    setState(() {
+      _currentPage = index;
+      _selectedCategory = 'semua';
+    });
+
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  List<Widget> _buildCategoryChips() {
+    final categories = _currentPage == 0
+        ? <(String, String, IconData)>[
+            ('semua', 'Semua', Icons.all_inclusive),
+            ('umum', 'Umum', Icons.info_outline_rounded),
+            ('pembuatan', 'Pembuatan', Icons.build_circle_outlined),
+            ('penggunaan', 'Penggunaan', Icons.settings_suggest_outlined),
+          ]
+        : <(String, String, IconData)>[
+            ('semua', 'Semua', Icons.all_inclusive),
+            ('fermentasi', 'Fermentasi', Icons.autorenew_rounded),
+            ('bau', 'Bau', Icons.air_rounded),
+            ('jamur', 'Jamur', Icons.grass_outlined),
+            ('panen', 'Panen', Icons.water_drop_outlined),
+          ];
+
+    return categories.map((category) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: _FaqCategoryChip(
+          label: category.$2,
+          icon: category.$3,
+          active: _selectedCategory == category.$1,
+          onTap: () {
+            setState(() => _selectedCategory = category.$1);
+          },
+        ),
+      );
+    }).toList();
+  }
+
+  Widget _buildQuestionList() {
+    final items = _filteredItems;
+
+    if (items.isEmpty) {
+      return _EmptyState(
+        query: _query,
+        category: _selectedCategory,
+      );
+    }
+
+    return ListView.builder(
+      key: PageStorageKey('help-$_currentPage-$_selectedCategory-$_query'),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+      physics: const BouncingScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return ExpandableTile(
+          key: ValueKey('${_currentPage}-${items[index].question}'),
+          title: items[index].question,
+          content: items[index].answer,
+          leading: const QBadge(),
+        );
+      },
+    );
+  }
+
+  Widget _buildTab(String title, int index) {
+    final isSelected = _currentPage == index;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _changePage(index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.bgCard : Colors.transparent,
+            borderRadius: BorderRadius.circular(11),
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected
+                  ? AppColors.green500
+                  : AppColors.text2,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredFaq = _faqItems.where((item) {
-      final matchesCategory =
-          _selectedCategory == 'semua' || item.category == _selectedCategory;
-      final matchesQuery =
-          _query.isEmpty ||
-          item.question.toLowerCase().contains(_query.toLowerCase()) ||
-          item.answer.toLowerCase().contains(_query.toLowerCase());
-      return matchesCategory && matchesQuery;
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.bgPage,
-      appBar: const SubPageAppBar(title: 'FAQ'),
-      body: Stack(
-        clipBehavior: Clip.none,
+      appBar: const SubPageAppBar(title: 'Pusat Bantuan'),
+      body: Column(
         children: [
-          Column(
-            children: [
-              // ── Sticky Header Card ──────────────────
-              Container(
-                color: AppColors.bgPage,
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: const PageHeaderCard(
-                  badge: '❓  FAQ',
-                  title: 'FAQ',
-                  subtitle: 'Daftar tanya jawab seputar Eco Enzim',
-                  icon: Icons.help_outline_rounded,
-                ),
-              ),
+          Container(
+            color: AppColors.bgPage,
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: PageHeaderCard(
+              badge: _currentPage == 0
+                  ? '❓ FAQ'
+                  : '🛠️ TROUBLESHOOTING',
+              title: _currentPage == 0 ? 'FAQ' : 'Troubleshooting',
+              subtitle: _currentPage == 0
+                  ? 'Daftar tanya jawab seputar Eco Enzim'
+                  : 'Bantuan untuk masalah selama pembuatan dan penggunaan Eco Enzim',
+              icon: _currentPage == 0
+                  ? Icons.help_outline_rounded
+                  : Icons.build_circle_outlined,
+            ),
+          ),
 
-              // ── Sticky Search Bar ───────────────────
-              Container(
-                color: AppColors.bgPage,
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: SearchBarField(
-                  controller: _search,
-                  hintText: 'Cari pertanyaan atau jawaban...',
-                  onChanged: (v) => setState(() => _query = v),
-                  showClearButton: _query.isNotEmpty,
-                  onClear: () {
-                    setState(() => _query = '');
-                    _search.clear();
-                  },
-                ),
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+            child: SearchBarField(
+              controller: _search,
+              hintText: 'Cari pertanyaan atau jawaban...',
+              onChanged: (value) => setState(() => _query = value),
+              showClearButton: _query.isNotEmpty,
+              onClear: () {
+                setState(() => _query = '');
+                _search.clear();
+              },
+            ),
+          ),
 
-              // ── Sticky Category Chips ────────────────
-              Container(
-                color: AppColors.bgPage,
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      _FaqCategoryChip(
-                        label: 'Semua',
-                        icon: Icons.all_inclusive,
-                        active: _selectedCategory == 'semua',
-                        onTap: () =>
-                            setState(() => _selectedCategory = 'semua'),
-                      ),
-                      const SizedBox(width: 8),
-                      _FaqCategoryChip(
-                        label: 'Umum',
-                        icon: Icons.info_outline_rounded,
-                        active: _selectedCategory == 'umum',
-                        onTap: () => setState(() => _selectedCategory = 'umum'),
-                      ),
-                      const SizedBox(width: 8),
-                      _FaqCategoryChip(
-                        label: 'Pembuatan',
-                        icon: Icons.build_circle_outlined,
-                        active: _selectedCategory == 'pembuatan',
-                        onTap: () =>
-                            setState(() => _selectedCategory = 'pembuatan'),
-                      ),
-                      const SizedBox(width: 8),
-                      _FaqCategoryChip(
-                        label: 'Penggunaan',
-                        icon: Icons.settings_suggest_outlined,
-                        active: _selectedCategory == 'penggunaan',
-                        onTap: () =>
-                            setState(() => _selectedCategory = 'penggunaan'),
-                      ),
-                      const SizedBox(width: 8),
-                      _FaqCategoryChip(
-                        label: 'Masalah',
-                        icon: Icons.report_problem_outlined,
-                        active: _selectedCategory == 'masalah',
-                        onTap: () =>
-                            setState(() => _selectedCategory = 'masalah'),
-                      ),
-                    ],
-                  ),
-                ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(14),
               ),
+              child: Row(
+                children: [
+                  _buildTab('FAQ', 0),
+                  _buildTab('Troubleshooting', 1),
+                ],
+              ),
+            ),
+          ),
 
-              // ── List FAQ ─────────────────────────────
-              Expanded(
-                child: filteredFaq.isEmpty
-                    ? _EmptyState(query: _query, category: _selectedCategory)
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: filteredFaq.length,
-                        itemBuilder: (context, index) {
-                          return ExpandableTile(
-                            key: ValueKey(filteredFaq[index].question),
-                            title: filteredFaq[index].question,
-                            content: filteredFaq[index].answer,
-                            leading: const QBadge(),
-                          );
-                        },
-                      ),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(children: _buildCategoryChips()),
+            ),
+          ),
+
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                  _selectedCategory = 'semua';
+                });
+              },
+              children: [
+                _buildQuestionListForPage(0),
+                _buildQuestionListForPage(1),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildQuestionListForPage(int pageIndex) {
+    final items = (pageIndex == 0 ? _faqItems : _troubleshootingItems)
+        .where((item) {
+          final matchesCategory =
+              _selectedCategory == 'semua' ||
+              item.category == _selectedCategory;
+
+          final query = _query.toLowerCase().trim();
+          final matchesQuery =
+              query.isEmpty ||
+              item.question.toLowerCase().contains(query) ||
+              item.answer.toLowerCase().contains(query);
+
+          return matchesCategory && matchesQuery;
+        }).toList();
+
+    if (items.isEmpty) {
+      return _EmptyState(
+        query: _query,
+        category: _selectedCategory,
+      );
+    }
+
+    return ListView.builder(
+      key: PageStorageKey('help-page-$pageIndex'),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+      physics: const BouncingScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return ExpandableTile(
+          key: ValueKey('${pageIndex}-${items[index].question}'),
+          title: items[index].question,
+          content: items[index].answer,
+          leading: const QBadge(),
+        );
+      },
+    );
+  }
 }
 
-// ── FAQ Item Model ────────────────────────────
 class _FaqItem {
   final String category;
   final String question;
@@ -297,7 +455,6 @@ class _FaqItem {
   });
 }
 
-// ── Category Chip Widget ───────────────────────
 class _FaqCategoryChip extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -318,7 +475,10 @@ class _FaqCategoryChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 7,
+        ),
         decoration: BoxDecoration(
           color: active ? AppColors.green500 : AppColors.bgCard,
           borderRadius: BorderRadius.circular(20),
@@ -350,12 +510,14 @@ class _FaqCategoryChip extends StatelessWidget {
   }
 }
 
-// ── Empty State Widget ─────────────────────────
 class _EmptyState extends StatelessWidget {
   final String query;
   final String category;
 
-  const _EmptyState({required this.query, required this.category});
+  const _EmptyState({
+    required this.query,
+    required this.category,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -393,7 +555,10 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'Coba kata kunci lain atau pilih kategori yang berbeda',
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[500],
+              ),
               textAlign: TextAlign.center,
             ),
           ],

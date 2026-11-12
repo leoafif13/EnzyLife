@@ -25,12 +25,13 @@ class AppBottomNavBar extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _items = [
-    _NavItem(icon: Icons.home_outlined,       label: 'Beranda'),
-    _NavItem(icon: Icons.menu_book_outlined,  label: 'Edukasi'),
-    _NavItem(icon: Icons.shopping_bag_outlined, label: 'Produk'),
-    _NavItem(icon: Icons.person_outline,      label: 'Akun'),
-  ];
+static const _items = [
+  _NavItem(icon: Icons.home_outlined, label: 'Beranda'),
+  _NavItem(icon: Icons.menu_book_outlined, label: 'Edukasi'),
+  _NavItem(icon: Icons.chat_bubble_outline_rounded, label: 'AI'),
+  _NavItem(icon: Icons.shopping_bag_outlined, label: 'Produk'),
+  _NavItem(icon: Icons.person_outline, label: 'Akun'),
+];
 
   static const _navBg      = Color(0xFFF0F0F0);
   static const _pillHeight = 44.0;

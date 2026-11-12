@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TrackerController;
 use App\Http\Controllers\Api\RoutineTrackerController;
+use App\Http\Controllers\Api\AiPercakapanController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/google', [AuthController::class, 'loginGoogle']);
@@ -23,6 +24,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/resend', [AuthController::class, 'resendVerificationOtp']);
 
     Route::middleware('verified.api')->group(function () {
+
+        Route::get('/percakapan', [AiPercakapanController::class, 'index']);
+        Route::get('/percakapan/{id}', [AiPercakapanController::class, 'show']);
+        Route::post('/percakapan', [AiPercakapanController::class, 'store']);
+        Route::post('/percakapan/{id}/pesan', [AiPercakapanController::class, 'sendMessage']);
+        Route::post('/percakapan/{id}/simpan', [AiPercakapanController::class, 'save']);
+        Route::delete('/percakapan/{id}', [AiPercakapanController::class, 'destroy']);
+        Route::put('/percakapan/{id}/feedback', [AiPercakapanController::class, 'feedback']);
+        
         Route::apiResource('products', ProductController::class);
 
         Route::get('/artikel', [ArtikelController::class, 'index']);
