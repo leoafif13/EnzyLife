@@ -4,15 +4,18 @@ import '../config/app_config.dart';
 import '../widgets/sub_page_appbar.dart';
 import '../services/api_service.dart';
 
+typedef UlasanPage = UlasanScreen;
+
 class UlasanScreen extends StatefulWidget {
   final String productName;
-  final String orderId;
+  final dynamic orderId;
   final int productId;
   final String? productImage;
   final int? existingRating;
   final String? existingComment;
   final String? existingTags;
   final bool isPickup;
+  final int? trackerId;
 
   const UlasanScreen({
     super.key,
@@ -24,6 +27,7 @@ class UlasanScreen extends StatefulWidget {
     this.existingComment,
     this.existingTags,
     this.isPickup = false,
+    this.trackerId,
   });
 
   @override
@@ -130,7 +134,7 @@ class _UlasanScreenState extends State<UlasanScreen> {
 
     setState(() => _isLoading = true);
 
-    final orderIdInt = int.tryParse(widget.orderId);
+    final orderIdInt = int.tryParse(widget.orderId.toString());
     if (orderIdInt == null) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -150,6 +154,7 @@ class _UlasanScreenState extends State<UlasanScreen> {
       rating: _rating,
       komentarAroma: finalAroma,
       komentarPengiriman: finalPengiriman.isNotEmpty ? finalPengiriman : null,
+      trackerId: widget.trackerId,
     );
 
     setState(() => _isLoading = false);
@@ -226,6 +231,33 @@ class _UlasanScreenState extends State<UlasanScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+                  if (widget.trackerId != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.green200),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.verified_rounded, color: AppColors.green900, size: 20),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Ulasan Terverifikasi Tracker Selesai ✅',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.green900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   // ── Info produk ─────────────────────
                   Container(

@@ -31,6 +31,18 @@ class ProductForm
                     ->maxLength(255)
                     ->helperText('Minimal 30 karakter agar informasi produk cukup jelas.'),
 
+                Forms\Components\CheckboxList::make('kategori')
+                    ->label('Kategori Penggunaan Produk')
+                    ->helperText('Pilih kegunaan yang didukung produk ini. Pembeli akan memilih dari kategori ini saat menjalankan tracker pemakaian.')
+                    ->options(\App\Models\Product::KATEGORI_OPTIONS)
+                    ->columns(2)
+                    ->required()
+                    ->minItems(1)
+                    ->validationMessages([
+                        'required' => 'Kategori produk tidak boleh kosong.',
+                        'min' => 'Pilih minimal satu kategori penggunaan.',
+                    ]),
+
                 Section::make('Spesifikasi Detail Produk')
                     ->description('Masukkan spesifikasi khusus untuk produk ini.')
                     ->schema([

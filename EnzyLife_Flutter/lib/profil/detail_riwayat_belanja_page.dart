@@ -10,6 +10,7 @@ import '../widgets/purchase_bottom_sheet.dart';
 import '../services/invoice_helper.dart';
 import 'ulasan_page.dart';
 import 'riwayat_belanja_page.dart';
+import '../tracker/tracker_detail_page.dart';
 
 class DetailRiwayatBelanjaPage extends StatefulWidget {
   final OrderModel order;
@@ -34,7 +35,304 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
 
   static String _fmt(int price) => formatPrice(price);
 
-  Future<void> _processPayment() async {
+  Future<void> _startTrackerForProduct(int productId, String productName) async {
+    setState(() => _isLoading = true);
+    final res = await ApiService.startTracker(
+      pemesananId: _order.id,
+      productId: productId,
+    );
+    setState(() => _isLoading = false);
+
+    if (res != null) {
+      final trackerData = res['data'];
+      final trackerId = trackerData != null ? trackerData['id'] : null;
+
+      if (trackerId != null) {
+        if (mounted) {
+          final isAlreadyTracked = res['already_tracked'] == true;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                isAlreadyTracked
+                    ? 'Anda sudah memiliki tracker untuk produk ini. Mengalihkan... 🧪'
+                    : (res['message'] ?? 'Tracker pemakaian dimulai! 🧪'),
+              ),
+              backgroundColor: AppColors.green700,
+            ),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TrackerDetailPage(trackerId: trackerId),
+            ),
+          ).then((_) => _reloadOrder());
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(res['message'] ?? 'Gagal memulai tracker'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  void _handleOpenOrStartTracker(BuildContext context) {
+    if (_order.items.length == 1) {
+      final item = _order.items.first;
+      final existingTrackerId = _order.getTrackerIdForProduct(item.product?.id ?? 0) ?? _order.firstTrackerId;
+      if (existingTrackerId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TrackerDetailPage(trackerId: existingTrackerId),
+          ),
+        ).then((_) => _reloadOrder());
+      } else if (item.product != null) {
+        _startTrackerForProduct(item.product!.id, item.product!.name);
+      }
+    } else {
+      // Jika pesanan memiliki lebih dari 1 produk, selalu tampilkan sheet pemilihan produk
+      _showTrackerProductSelection(context);
+    }
+  }
+
+  void _showTrackerProductSelection(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4.5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.green50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.track_changes_rounded,
+                    color: AppColors.green500,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'Pilih Produk untuk Tracker',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.text1,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppColors.text3, size: 20),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Setiap produk memiliki pemantauan tersendiri. Silakan pilih produk yang ingin Anda mulai atau buka trackernya:',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600], height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                itemCount: _order.items.length,
+                separatorBuilder: (_, __) => const Divider(color: AppColors.divider),
+                itemBuilder: (subCtx, idx) {
+                  final item = _order.items[idx];
+                  final prod = item.product;
+                  if (prod == null) return const SizedBox.shrink();
+
+                  // Cek apakah produk ini sudah memiliki tracker di pesanan ini
+                  final trackerMap = _order.trackers.firstWhere(
+                    (t) => (t['produk_id'] as num?)?.toInt() == prod.id,
+                    orElse: () => null,
+                  );
+                  final trackerId = (trackerMap?['id'] as num?)?.toInt() ?? _order.getTrackerIdForProduct(prod.id);
+                  final status = trackerMap?['status'] as String?;
+                  final bool hasTracker = trackerId != null;
+
+                  String statusText;
+                  Color statusColor;
+                  Color statusBg;
+                  if (hasTracker) {
+                    if (status == 'DIBATALKAN') {
+                      statusText = 'Tracking Dibatalkan';
+                      statusColor = Colors.red[700]!;
+                      statusBg = const Color(0xFFFFEBEE);
+                    } else if (status == 'SELESAI') {
+                      statusText = 'Tracking Selesai ✅';
+                      statusColor = const Color(0xFF2E7D32);
+                      statusBg = const Color(0xFFE8F5E9);
+                    } else if (status == 'PERPANJANGAN') {
+                      statusText = 'Diperpanjang (Hari ke-${trackerMap?['hari_ke'] ?? 1})';
+                      statusColor = const Color(0xFF1976D2);
+                      statusBg = const Color(0xFFE3F2FD);
+                    } else {
+                      statusText = 'Sedang Aktif (Hari ke-${trackerMap?['hari_ke'] ?? 1})';
+                      statusColor = AppColors.green700;
+                      statusBg = AppColors.green50;
+                    }
+                  } else {
+                    statusText = 'Belum Ditracking';
+                    statusColor = Colors.orange[800]!;
+                    statusBg = Colors.orange[50]!;
+                  }
+
+                  final imageUrl = prod.image.isNotEmpty
+                      ? '${AppConfig.webBaseUrl}/gambar/produk/${prod.image.split('/').last}'
+                      : null;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            color: AppColors.green50,
+                            child: imageUrl != null
+                                ? Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.image_outlined,
+                                      color: AppColors.green500,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.image_outlined,
+                                    color: AppColors.green500,
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                prod.name,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.text1,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                                decoration: BoxDecoration(
+                                  color: statusBg,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  statusText,
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        hasTracker
+                            ? OutlinedButton(
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => TrackerDetailPage(trackerId: trackerId),
+                                    ),
+                                  ).then((_) => _reloadOrder());
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: AppColors.green500),
+                                  foregroundColor: AppColors.green500,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Buka',
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                ),
+                              )
+                            : ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  _startTrackerForProduct(prod.id, prod.name);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.green500,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Mulai',
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+    Future<void> _processPayment() async {
     setState(() => _isLoading = true);
     try {
       final res = await ApiService.payOrder(_order.id);
@@ -426,6 +724,29 @@ class _DetailRiwayatBelanjaPageState extends State<DetailRiwayatBelanjaPage> {
                 label: const Text(
                   'Cetak Invoice',
                   style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.green500,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _handleOpenOrStartTracker(context),
+                icon: const Icon(Icons.track_changes_rounded, size: 18),
+                label: Text(
+                  _order.hasTrackers
+                      ? 'Cek Tracker Penggunaan'
+                      : 'Mulai Tracker Pemakaian (3 Minggu)',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green500,

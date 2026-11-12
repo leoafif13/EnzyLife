@@ -6,6 +6,9 @@ import '../models/artikel.dart';
 import '../models/infografik.dart';
 import '../models/user.dart';
 import '../models/order.dart';
+import '../models/product_tracker.dart';
+import '../models/user_routine.dart';
+import '../models/weekly_recap.dart';
 import '../config/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -68,6 +71,7 @@ class ApiService {
     String? sortOrder,
     String? search,
     int? rating,
+    List<String>? kategori,
   }) async {
     try {
       String url = '$_baseUrl/products?page=$page&per_page=$perPage';
@@ -78,6 +82,9 @@ class ApiService {
       }
       if (rating != null) {
         url += '&rating=$rating';
+      }
+      if (kategori != null && kategori.isNotEmpty) {
+        url += '&kategori=${Uri.encodeComponent(kategori.join(','))}';
       }
 
       final response = await http.get(
@@ -406,24 +413,32 @@ class ApiService {
   // =====================================================
   // SUBMIT REVIEW / ULASAN
   // =====================================================
+  // SUBMIT REVIEW / ULASAN
+  // =====================================================
   static Future<Map<String, dynamic>?> submitReview({
     required int orderId,
     required int productId,
     required int rating,
     required String komentarAroma,
     String? komentarPengiriman,
+    int? trackerId,
   }) async {
     try {
+      final body = <String, String>{
+        'pemesanan_id': orderId.toString(),
+        'produk_id': productId.toString(),
+        'rating': rating.toString(),
+        'komentar_aroma': komentarAroma,
+        'komentar_pengiriman': komentarPengiriman ?? '',
+      };
+      if (trackerId != null) {
+        body['tracker_id'] = trackerId.toString();
+      }
+
       final response = await http.post(
         Uri.parse('$_baseUrl/review'),
         headers: await _authHeaders(),
-        body: {
-          'pemesanan_id': orderId.toString(),
-          'produk_id': productId.toString(),
-          'rating': rating.toString(),
-          'komentar_aroma': komentarAroma,
-          'komentar_pengiriman': komentarPengiriman ?? '',
-        },
+        body: body,
       );
 
       if (response.statusCode == 200 ||
@@ -457,6 +472,396 @@ class ApiService {
       return null;
     } catch (e) {
       print('Error getProductReviewSummary: $e');
+      return null;
+    }
+  }
+
+  // =====================================================
+  // PRODUCT TRACKER
+  // =====================================================
+
+  /// Mulai tracking baru untuk produk dalam pesanan selesai
+  static Future<Map<String, dynamic>?> startTracker({
+    required int pemesananId,
+    required int productId,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/tracker'),
+        headers: await _authHeaders(),
+        body: {
+          'pemesanan_id': pemesananId.toString(),
+          'produk_id': productId.toString(),
+        },
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error startTracker: $e');
+      return null;
+    }
+  }
+
+  /// List semua tracker milik user (aktif & riwayat selesai)
+  static Future<List<ProductTracker>> getTrackers() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/tracker'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded['success'] == true && decoded['data'] is List) {
+          return (decoded['data'] as List)
+              .map((item) => ProductTracker.fromJson(item))
+              .toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error getTrackers: $e');
+      return [];
+    }
+  }
+
+  /// Detail tracker beserta riwayat log dan stats
+  static Future<ProductTracker?> getTrackerDetail(int trackerId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/tracker/$trackerId'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded['success'] == true && decoded['data'] != null) {
+          return ProductTracker.fromJson(
+            decoded['data'],
+            statsJson: decoded['stats'] is Map<String, dynamic> ? decoded['stats'] : null,
+          );
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error getTrackerDetail: $e');
+      return null;
+    }
+  }
+
+  /// Tambah log pemakaian harian
+  static Future<Map<String, dynamic>?> addTrackerLog({
+    required int trackerId,
+    required String tanggal,
+    required String waktu,
+    String? catatan,
+  }) async {
+    try {
+      final body = <String, String>{
+        'tanggal': tanggal,
+        'waktu': waktu,
+      };
+      if (catatan != null && catatan.isNotEmpty) {
+        body['catatan'] = catatan;
+      }
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/tracker/$trackerId/log'),
+        headers: await _authHeaders(),
+        body: body,
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error addTrackerLog: $e');
+      return null;
+    }
+  }
+
+  /// Hapus log pemakaian tertentu
+  static Future<bool> deleteTrackerLog({
+    required int trackerId,
+    required int logId,
+  }) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/tracker/$trackerId/log/$logId'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return decoded['success'] == true;
+      }
+      return false;
+    } catch (e) {
+      print('Error deleteTrackerLog: $e');
+      return false;
+    }
+  }
+
+  /// Perpanjang tracker (1 atau 2 minggu tambahan)
+  static Future<Map<String, dynamic>?> perpanjangTracker({
+    required int trackerId,
+    required int durasiTambahanMinggu,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl/tracker/$trackerId/perpanjang'),
+        headers: await _authHeaders(),
+        body: {
+          'durasi_tambahan_minggu': durasiTambahanMinggu.toString(),
+        },
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error perpanjangTracker: $e');
+      return null;
+    }
+  }
+
+  /// Selesaikan tracking + catatan hasil akhir
+  static Future<Map<String, dynamic>?> selesaiTracker({
+    required int trackerId,
+    String? catatanHasil,
+  }) async {
+    try {
+      final body = <String, String>{};
+      if (catatanHasil != null && catatanHasil.isNotEmpty) {
+        body['catatan_hasil'] = catatanHasil;
+      }
+
+      final response = await http.put(
+        Uri.parse('$_baseUrl/tracker/$trackerId/selesai'),
+        headers: await _authHeaders(),
+        body: body,
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error selesaiTracker: $e');
+      return null;
+    }
+  }
+
+  /// Batalkan tracker
+  static Future<Map<String, dynamic>?> batalkanTracker(int trackerId) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl/tracker/$trackerId/batalkan'),
+        headers: await _authHeaders(),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error batalkanTracker: $e');
+      return null;
+    }
+  }
+
+  /// Ambil statistik chart tracker
+  static Future<Map<String, dynamic>?> getTrackerStats(int trackerId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/tracker/$trackerId/stats'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error getTrackerStats: $e');
+      return null;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  ROUTINE TRACKER (SIKLUS 7 HARI)
+  // ═══════════════════════════════════════════════════
+
+  /// Dapatkan template kategori rutinitas
+  static Future<List<Map<String, dynamic>>> getRoutineCategories() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/routines/categories'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error getRoutineCategories: $e');
+      return [];
+    }
+  }
+
+  /// Setup rutinitas awal
+  static Future<Map<String, dynamic>?> setupRoutines({
+    required List<String> kategori,
+    int? trackerId,
+    String? jamPengingat,
+    double? stokAwalMl,
+    int? pemesananId,
+    int? produkId,
+  }) async {
+    try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/routines/setup'),
+        headers: headers,
+        body: jsonEncode({
+          'kategori': kategori,
+          if (trackerId != null) 'tracker_id': trackerId,
+          'jam_pengingat': jamPengingat ?? '19:00',
+          'stok_awal_ml': stokAwalMl ?? 1000,
+          if (pemesananId != null) 'pemesanan_id': pemesananId,
+          if (produkId != null) 'produk_id': produkId,
+        }),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error setupRoutines: $e');
+      return null;
+    }
+  }
+
+  /// Dashboard rutinitas hari ini
+  static Future<RoutineDashboardData?> getRoutineDashboard({int? trackerId}) async {
+    try {
+      final url = trackerId != null
+          ? '$_baseUrl/routines/dashboard?tracker_id=$trackerId'
+          : '$_baseUrl/routines/dashboard';
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return RoutineDashboardData.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error getRoutineDashboard: $e');
+      return null;
+    }
+  }
+
+  /// 1-Tap Checkin pemakaian hari ini
+  static Future<Map<String, dynamic>?> routineCheckin(int routineId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/routines/$routineId/checkin'),
+        headers: await _authHeaders(),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error routineCheckin: $e');
+      return null;
+    }
+  }
+
+  /// Batalkan checkin hari ini
+  static Future<Map<String, dynamic>?> routineUncheckin(int routineId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/routines/$routineId/checkin'),
+        headers: await _authHeaders(),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error routineUncheckin: $e');
+      return null;
+    }
+  }
+
+  /// Ambil data rekap hari ke-7
+  static Future<WeeklyRecapData?> getWeeklyRecap({int? trackerId}) async {
+    try {
+      final url = trackerId != null
+          ? '$_baseUrl/routines/weekly-recap?tracker_id=$trackerId'
+          : '$_baseUrl/routines/weekly-recap';
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return WeeklyRecapData.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error getWeeklyRecap: $e');
+      return null;
+    }
+  }
+
+  /// Submit feedback rekap hari ke-7 & mulai siklus berikutnya
+  static Future<Map<String, dynamic>?> submitWeeklyRecap({
+    int? trackerId,
+    String? chipFeedback,
+    String? catatanRefleksi,
+    bool tandaiSelesai = false,
+  }) async {
+    try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/routines/weekly-recap/submit'),
+        headers: headers,
+        body: jsonEncode({
+          if (trackerId != null) 'tracker_id': trackerId,
+          'chip_feedback': chipFeedback,
+          'catatan_refleksi': catatanRefleksi,
+          'tandai_selesai': tandaiSelesai,
+        }),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error submitWeeklyRecap: $e');
+      return null;
+    }
+  }
+
+  /// Simulasi waktu / progres siklus tracker untuk pengujian (Hari 7, Minggu 2, Minggu 3, Minggu 4, Reset)
+  static Future<Map<String, dynamic>?> simulateRoutineProgress({
+    required int trackerId,
+    required String target,
+  }) async {
+    try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/routines/simulate-progress'),
+        headers: headers,
+        body: jsonEncode({
+          'tracker_id': trackerId,
+          'target': target,
+        }),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error simulateRoutineProgress: $e');
       return null;
     }
   }

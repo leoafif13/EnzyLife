@@ -103,4 +103,9 @@ class Pemesanan extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    public function trackers()
+    {
+        return $this->hasMany(ProductTracker::class, 'pemesanan_id');
+    }
 }

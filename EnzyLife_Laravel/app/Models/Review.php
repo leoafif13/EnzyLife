@@ -17,6 +17,12 @@ class Review extends Model
         'komentar_pengiriman',
         'sentiment_score',
         'sentiment_label',
+        'is_verified',
+        'tracker_id',
+    ];
+
+    protected $casts = [
+        'is_verified' => 'boolean',
     ];
 
     public function user()
@@ -32,6 +38,11 @@ class Review extends Model
     public function pemesanan()
     {
         return $this->belongsTo(Pemesanan::class);
+    }
+
+    public function tracker()
+    {
+        return $this->belongsTo(ProductTracker::class, 'tracker_id');
     }
 
     public function sentimentByProduct($produkId)

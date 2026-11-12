@@ -18,6 +18,11 @@ class ProductsTable
             ->columns([
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('kategori')
+                    ->label('Kategori')
+                    ->badge()
+                    ->separator(',')
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('harga')
                     ->money('IDR'),
                 Tables\Columns\TextColumn::make('deskripsi')

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:math' as math;
 import '../app_color.dart';
 import '../auth/register_page.dart';
@@ -152,7 +153,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
     try {
       final googleSignIn = GoogleSignIn(
-        clientId: '446261249929-lrlmjp2qmsieej3vbgd9r0pc44vfi1gf.apps.googleusercontent.com',
+        clientId: kIsWeb ? '446261249929-lrlmjp2qmsieej3vbgd9r0pc44vfi1gf.apps.googleusercontent.com' : null,
+        serverClientId: '446261249929-lrlmjp2qmsieej3vbgd9r0pc44vfi1gf.apps.googleusercontent.com',
         scopes: ['email', 'profile'],
       );
 

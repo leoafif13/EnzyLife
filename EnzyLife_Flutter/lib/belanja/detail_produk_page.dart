@@ -130,6 +130,58 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Icons.info_outline_rounded;
   }
 
+  IconData _getCategoryIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('kompor') || lower.contains('dapur')) return Icons.kitchen_rounded;
+    if (lower.contains('pel') || lower.contains('lantai')) return Icons.cleaning_services_rounded;
+    if (lower.contains('piring')) return Icons.local_dining_rounded;
+    if (lower.contains('pakaian') || lower.contains('baju')) return Icons.local_laundry_service_rounded;
+    if (lower.contains('kamar mandi') || lower.contains('toilet')) return Icons.bathtub_rounded;
+    if (lower.contains('saluran') || lower.contains('got') || lower.contains('pipa')) return Icons.plumbing_rounded;
+    if (lower.contains('bau')) return Icons.air_rounded;
+    if (lower.contains('pupuk')) return Icons.eco_rounded;
+    if (lower.contains('pestisida') || lower.contains('sayur')) return Icons.yard_rounded;
+    if (lower.contains('kompos')) return Icons.recycling_rounded;
+    if (lower.contains('purifier') || lower.contains('diffuser')) return Icons.filter_drama_rounded;
+    return Icons.spa_rounded;
+  }
+
+  String _getCategoryTip(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('kompor') || lower.contains('dapur')) {
+      return 'Ampuh melarutkan kerak lemak & minyak tanpa bahan kimia keras.';
+    } else if (lower.contains('pel') || lower.contains('lantai')) {
+      return 'Membasmi bakteri lantai, ramah anak & hewan peliharaan.';
+    } else if (lower.contains('piring')) {
+      return 'Campur 1:1 dengan sabun cuci piring untuk hasil kesat & irit sabun.';
+    } else if (lower.contains('pakaian')) {
+      return 'Menghilangkan bau apek & melembutkan serat pakaian alami.';
+    } else if (lower.contains('kamar mandi')) {
+      return 'Membersihkan noda kuning kloset & kerak dinding kamar mandi.';
+    } else if (lower.contains('saluran')) {
+      return 'Mengurai endapan minyak saluran wastafel & mencegah mampet.';
+    } else if (lower.contains('bau')) {
+      return 'Menetralkan aroma organik di kotak sampah, kandang & sepatu.';
+    } else if (lower.contains('pupuk')) {
+      return 'Kaya enzim bio-aktif untuk menyuburkan tanah dan daun.';
+    } else if (lower.contains('pestisida')) {
+      return 'Pengusir hama alami yang ramah lingkungan untuk tanaman.';
+    } else if (lower.contains('kompos')) {
+      return 'Mempercepat proses pembusukan dan fermentasi sampah organik.';
+    } else if (lower.contains('purifier')) {
+      return 'Segarkan kualitas udara ruangan melalui diffuser (rasio 1:1000).';
+    }
+    return 'Diformulasikan khusus untuk pemanfaatan eco enzyme secara optimal.';
+  }
+
+  String _getCategoryTipe(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('kompor') || lower.contains('piring')) return 'Rutin Harian';
+    if (lower.contains('pel') || lower.contains('pakaian') || lower.contains('kamar mandi') || lower.contains('pupuk') || lower.contains('pestisida') || lower.contains('kompos')) return 'Rutin Mingguan';
+    return 'Fleksibel';
+  }
+
+
   // Dummy gambar carousel (placeholder)
   static const _imageCount = 1;
 
@@ -510,6 +562,48 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ],
                         ),
+
+                        if (p.kategoriList.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: p.kategoriList.map((cat) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.green50,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: AppColors.green200.withAlpha(160),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _getCategoryIcon(cat),
+                                      size: 13,
+                                      color: AppColors.green700,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      cat,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.green700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                         const SizedBox(height: 16),
                         const Divider(height: 1, color: Color(0xFFF0F0F0)),
                         const SizedBox(height: 16),
@@ -530,6 +624,180 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             height: 1.6,
                           ),
                         ),
+
+                        if (p.kategoriList.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.green50,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.eco_rounded,
+                                  size: 16,
+                                  color: AppColors.green500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'Kategori & Area Penggunaan',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF1A1A1A),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.green50,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${p.kategoriList.length} Area',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.green700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Eco Enzyme ini diformulasikan efektif untuk ${p.kategoriList.length} area penggunaan berikut:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Column(
+                            children: p.kategoriList.map((cat) {
+                              final icon = _getCategoryIcon(cat);
+                              final tip = _getCategoryTip(cat);
+                              final tipe = _getCategoryTipe(cat);
+
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.bgPage,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.border.withAlpha(50),
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.green50,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: AppColors.green200.withAlpha(120),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        icon,
+                                        size: 20,
+                                        color: AppColors.green500,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  cat,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: AppColors.text1,
+                                                  ),
+                                                ),
+                                              ),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  border: Border.all(color: AppColors.border),
+                                                ),
+                                                child: Text(
+                                                  tipe,
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.grey[700],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            tip,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppColors.green50.withAlpha(160),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.green200.withAlpha(140)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.track_changes_rounded,
+                                  size: 18,
+                                  color: AppColors.green700,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Dapat dipantau di Tracker Rutinitas untuk pengingat takaran & jadwal pemakaian rutin.',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.green700,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                         Builder(
                           builder: (context) {
                             final Map<String, dynamic> activeSpecs = {};

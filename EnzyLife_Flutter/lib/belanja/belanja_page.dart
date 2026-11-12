@@ -31,6 +31,21 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
   bool _isLoading = true;
   final List<MapEntry<String, String>> _activeSorts = [];
   int? _selectedRating;
+  final List<String> _selectedCategories = [];
+
+  static const List<String> _availableCategories = [
+    'Kompor & Area Dapur',
+    'Pel Lantai',
+    'Cuci Piring',
+    'Cuci Pakaian',
+    'Kamar Mandi',
+    'Saluran Air',
+    'Penghilang Bau',
+    'Pupuk Organik',
+    'Pestisida Sayuran',
+    'Kompos',
+    'Air Purifier',
+  ];
 
   int _page = 1;
   final int _perPage = 6;
@@ -122,12 +137,17 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateSheet) {
+            final hasActiveFilter = _activeSorts.isNotEmpty || _selectedRating != null || _selectedCategories.isNotEmpty;
+
             return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+              ),
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 28,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -141,103 +161,166 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
                     child: Container(
                       width: 40,
                       height: 4.5,
-                      margin: const EdgeInsets.only(bottom: 20),
+                      margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
-                  const Text(
-                    'Filter & Urutkan',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.text1,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Urutkan & Prioritaskan (Bisa Multi-Sort)',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.text2,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildSortChip(
-                        field: 'default',
-                        label: 'Default',
-                        activeSorts: _activeSorts,
-                        onTap: () {
-                          setStateSheet(() {
-                            _activeSorts.clear();
-                          });
-                        },
+                      const Text(
+                        'Filter & Urutkan',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.text1,
+                        ),
                       ),
-                      _buildSortChip(
-                        field: 'sales',
-                        label: 'Terlaris',
-                        activeSorts: _activeSorts,
-                        onTap: () => _toggleSort('sales', setStateSheet),
-                      ),
-                      _buildSortChip(
-                        field: 'price',
-                        label: 'Harga',
-                        activeSorts: _activeSorts,
-                        onTap: () => _toggleSort('price', setStateSheet),
-                      ),
-                      _buildSortChip(
-                        field: 'rating',
-                        label: 'Rating',
-                        activeSorts: _activeSorts,
-                        onTap: () => _toggleSort('rating', setStateSheet),
-                      ),
+                      if (hasActiveFilter)
+                        TextButton(
+                          onPressed: () {
+                            setStateSheet(() {
+                              _activeSorts.clear();
+                              _selectedRating = null;
+                              _selectedCategories.clear();
+                            });
+                          },
+                          child: const Text(
+                            'Reset Semua',
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Rating Bintang',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.text2,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip(
-                          label: 'Semua',
-                          selected: _selectedRating == null,
-                          onTap: () {
-                            setStateSheet(() => _selectedRating = null);
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        ...[5, 4, 3, 2, 1].map((stars) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: _buildFilterChip(
-                              label: stars == 5 ? '5 ⭐' : '$stars ⭐ Keatas',
-                              selected: _selectedRating == stars,
-                              onTap: () {
-                                setStateSheet(() => _selectedRating = stars);
-                              },
+                  const SizedBox(height: 12),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Urutkan & Prioritaskan',
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.text2,
                             ),
-                          );
-                        }),
-                      ],
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _buildSortChip(
+                                field: 'default',
+                                label: 'Default',
+                                activeSorts: _activeSorts,
+                                onTap: () {
+                                  setStateSheet(() {
+                                    _activeSorts.clear();
+                                  });
+                                },
+                              ),
+                              _buildSortChip(
+                                field: 'sales',
+                                label: 'Terlaris',
+                                activeSorts: _activeSorts,
+                                onTap: () => _toggleSort('sales', setStateSheet),
+                              ),
+                              _buildSortChip(
+                                field: 'price',
+                                label: 'Harga',
+                                activeSorts: _activeSorts,
+                                onTap: () => _toggleSort('price', setStateSheet),
+                              ),
+                              _buildSortChip(
+                                field: 'rating',
+                                label: 'Rating',
+                                activeSorts: _activeSorts,
+                                onTap: () => _toggleSort('rating', setStateSheet),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Kegunaan / Kategori Produk',
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.text2,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _availableCategories.map((cat) {
+                              final isSelected = _selectedCategories.contains(cat);
+                              return _buildFilterChip(
+                                label: cat,
+                                selected: isSelected,
+                                onTap: () {
+                                  setStateSheet(() {
+                                    if (isSelected) {
+                                      _selectedCategories.remove(cat);
+                                    } else {
+                                      _selectedCategories.add(cat);
+                                    }
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Rating Bintang',
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.text2,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _buildFilterChip(
+                                  label: 'Semua',
+                                  selected: _selectedRating == null,
+                                  onTap: () {
+                                    setStateSheet(() => _selectedRating = null);
+                                  },
+                                ),
+                                const SizedBox(width: 10),
+                                ...[5, 4, 3, 2, 1].map((stars) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: _buildFilterChip(
+                                      label: stars == 5 ? '5 ⭐' : '$stars ⭐ Keatas',
+                                      selected: _selectedRating == stars,
+                                      onTap: () {
+                                        setStateSheet(() => _selectedRating = stars);
+                                      },
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -255,7 +338,7 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
                         ),
                       ),
                       child: const Text(
-                        'Terapkan',
+                        'Terapkan Filter',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -375,6 +458,7 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
         sortOrder: sortOrderParam,
         search: _query,
         rating: _selectedRating,
+        kategori: _selectedCategories.isNotEmpty ? _selectedCategories : null,
       );
 
       final products = res['products'] as List<Product>;
@@ -418,6 +502,7 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
           sortOrder: sortOrderParam,
           search: _query,
           rating: _selectedRating,
+          kategori: _selectedCategories.isNotEmpty ? _selectedCategories : null,
         );
 
         final newProducts = res['products'] as List<Product>;
@@ -581,10 +666,21 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
                     GestureDetector(
                       onTap: _showFilterBottomSheet,
                       child: Container(
-                        width: 44, height: 44,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                            color: AppColors.green50, borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.tune_rounded, color: AppColors.green500, size: 20),
+                          color: (_activeSorts.isNotEmpty || _selectedRating != null || _selectedCategories.isNotEmpty)
+                              ? AppColors.green500
+                              : AppColors.green50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.tune_rounded,
+                          color: (_activeSorts.isNotEmpty || _selectedRating != null || _selectedCategories.isNotEmpty)
+                              ? Colors.white
+                              : AppColors.green500,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ],
@@ -592,6 +688,76 @@ class _BelanjaScreenState extends State<BelanjaScreen> {
               ),
             ),
           ),
+
+          // Active Category Filters Strip
+          if (_selectedCategories.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      ..._selectedCategories.map(
+                        (cat) => Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: AppColors.green50,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.green500),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                cat,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.green700,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedCategories.remove(cat);
+                                  });
+                                  fetchProducts();
+                                },
+                                child: const Icon(
+                                  Icons.close_rounded,
+                                  size: 14,
+                                  color: AppColors.green700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategories.clear();
+                          });
+                          fetchProducts();
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Hapus Filter',
+                          style: TextStyle(fontSize: 11, color: Colors.redAccent, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
           // Body content - Popular carousel
           if (_getPopularProducts().isNotEmpty && _query.isEmpty)

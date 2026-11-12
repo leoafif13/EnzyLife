@@ -50,6 +50,8 @@ extension OrderStatusExt on OrderStatus {
   }
 }
 
+typedef RiwayatBelanjaPage = RiwayatBelanjaScreen;
+
 class RiwayatBelanjaScreen extends StatefulWidget {
   const RiwayatBelanjaScreen({super.key});
 

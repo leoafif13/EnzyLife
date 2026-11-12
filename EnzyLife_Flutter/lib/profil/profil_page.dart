@@ -14,6 +14,7 @@ import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
 import '../belanja/belanja_page.dart';
+import '../tracker/tracker_list_page.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -65,6 +66,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
             _MenuItem(icon: Icons.person_outline_rounded,   label: 'Edit Profil',        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfilScreen()))),
             _MenuItem(icon: Icons.lock_outline_rounded,     label: 'Ubah Password',      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UbahPasswordScreen()))),
             _MenuItem(icon: Icons.shopping_bag_outlined,    label: 'Riwayat Belanja',  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RiwayatBelanjaScreen()))),
+            _MenuItem(icon: Icons.track_changes_rounded,    label: 'Tracker Penggunaan Produk', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrackerListPage()))),
           ]),
           const SizedBox(height: 12),
           _MenuSection(title: 'Lainnya', items: [

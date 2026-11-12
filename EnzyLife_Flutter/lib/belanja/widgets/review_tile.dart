@@ -5,6 +5,7 @@ class Review {
   final String? shippingComment;
   final int rating;
   final String? sentiment; // 'positif', 'netral', or 'negatif'
+  final bool isVerified;
 
   const Review({
     required this.name,
@@ -13,6 +14,7 @@ class Review {
     this.shippingComment,
     required this.date,
     this.sentiment,
+    this.isVerified = false,
   });
 
   factory Review.fromJson(Map<String, dynamic> json, {String? sentiment}) {
@@ -23,6 +25,7 @@ class Review {
       shippingComment: json['komentar_pengiriman'],
       date: json['tanggal'] ?? '',
       sentiment: sentiment ?? json['sentiment'],
+      isVerified: json['is_verified'] == true,
     );
   }
 }
@@ -84,7 +87,44 @@ class ReviewTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(review.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A))),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          review.name,
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (review.isVerified) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: const Color(0xFFA5D6A7), width: 0.8),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.verified_rounded, size: 11, color: Color(0xFF2E7D32)),
+                              SizedBox(width: 3),
+                              Text(
+                                'Terverifikasi',
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2E7D32),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
                   Row(children: [
                     ...List.generate(5, (i) => Icon(
                       i < review.rating ? Icons.star_rounded : Icons.star_outline_rounded,

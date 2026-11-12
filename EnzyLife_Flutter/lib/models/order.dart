@@ -59,6 +59,7 @@ class OrderModel {
   final int? existingRating;
   final String? existingComment;
   final String? existingTags;
+  final List<dynamic> trackers;
 
   OrderModel({
     required this.id,
@@ -73,6 +74,7 @@ class OrderModel {
     this.existingRating,
     this.existingComment,
     this.existingTags,
+    this.trackers = const [],
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -115,7 +117,21 @@ class OrderModel {
       existingRating: existingRating,
       existingComment: existingComment,
       existingTags: existingTags,
+      trackers: json['trackers'] is List ? (json['trackers'] as List) : [],
     );
+  }
+
+  bool get hasTrackers => trackers.isNotEmpty;
+  bool get hasActiveTracker => trackers.any((t) => t['status'] == 'AKTIF' || t['status'] == 'PERPANJANGAN');
+  int? get firstTrackerId => trackers.isNotEmpty ? (trackers.first['id'] as num?)?.toInt() : null;
+
+  int? getTrackerIdForProduct(int productId) {
+    for (var t in trackers) {
+      if (t['produk_id'] == productId) {
+        return (t['id'] as num?)?.toInt();
+      }
+    }
+    return null;
   }
 
   OrderStatus get orderStatus {

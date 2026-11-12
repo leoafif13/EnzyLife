@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\InfografikController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\TrackerController;
+use App\Http\Controllers\Api\RoutineTrackerController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/google', [AuthController::class, 'loginGoogle']);
@@ -43,7 +45,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/produk/{produk}/review-summary', [ReviewController::class, 'reviewSummary']);
         Route::post('/reviews/reanalyze', [ReviewController::class, 'reanalyze']);
 
+        // Tracker Produk
+        Route::post('/tracker', [TrackerController::class, 'store']);
+        Route::get('/tracker', [TrackerController::class, 'index']);
+        Route::get('/tracker/{id}', [TrackerController::class, 'show']);
+        Route::put('/tracker/{id}/perpanjang', [TrackerController::class, 'perpanjang']);
+        Route::put('/tracker/{id}/selesai', [TrackerController::class, 'selesai']);
+        Route::put('/tracker/{id}/batalkan', [TrackerController::class, 'batalkan']);
+        Route::post('/tracker/{id}/log', [TrackerController::class, 'storeLog']);
+        Route::get('/tracker/{id}/logs', [TrackerController::class, 'getLogs']);
+        Route::delete('/tracker/{id}/log/{logId}', [TrackerController::class, 'deleteLog']);
+        Route::get('/tracker/{id}/stats', [TrackerController::class, 'stats']);
 
+        // Routine Tracker (Siklus 7 Hari)
+        Route::get('/routines/categories', [RoutineTrackerController::class, 'getCategories']);
+        Route::post('/routines/setup', [RoutineTrackerController::class, 'setup']);
+        Route::get('/routines/dashboard', [RoutineTrackerController::class, 'dashboard']);
+        Route::post('/routines/{id}/checkin', [RoutineTrackerController::class, 'checkin']);
+        Route::delete('/routines/{id}/checkin', [RoutineTrackerController::class, 'uncheckin']);
+        Route::get('/routines/weekly-recap', [RoutineTrackerController::class, 'weeklyRecap']);
+        Route::post('/routines/weekly-recap/submit', [RoutineTrackerController::class, 'submitRecap']);
+        Route::post('/routines/simulate-progress', [RoutineTrackerController::class, 'simulateProgress']);
     });
 });
 

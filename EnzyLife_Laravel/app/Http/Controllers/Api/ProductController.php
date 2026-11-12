@@ -34,6 +34,22 @@ class ProductController extends Controller
             $query->whereRaw('(SELECT AVG(rating) FROM reviews WHERE reviews.produk_id = products.id) >= ?', [$rating]);
         }
 
+        // Apply kategori / kegunaan filter
+        $kategoriParam = $request->query('kategori');
+        if ($kategoriParam) {
+            $categories = is_array($kategoriParam)
+                ? $kategoriParam
+                : array_filter(array_map('trim', explode(',', $kategoriParam)));
+
+            if (!empty($categories)) {
+                $query->where(function ($q) use ($categories) {
+                    foreach ($categories as $cat) {
+                        $q->orWhere('kategori', 'like', "%{$cat}%");
+                    }
+                });
+            }
+        }
+
         // 1. Stock = 0 goes to the bottom
         $query->orderByRaw('CASE WHEN stok = 0 THEN 1 ELSE 0 END ASC');
 

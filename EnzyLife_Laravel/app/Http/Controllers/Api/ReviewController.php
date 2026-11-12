@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Pemesanan;
 use App\Models\Review;
+use App\Models\ProductTracker;
 
 class ReviewController extends Controller
 {
@@ -18,6 +19,7 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'komentar_aroma' => 'required|string|min:3',
             'komentar_pengiriman' => 'nullable|string',
+            'tracker_id' => 'nullable|exists:product_trackers,id',
         ]);
 
         $pemesanan = Pemesanan::findOrFail(
@@ -70,18 +72,38 @@ class ReviewController extends Controller
             $sentimentScore = null;
         }
 
+        $isVerified = false;
+        $trackerId = null;
+
+        if ($request->filled('tracker_id')) {
+            $tracker = ProductTracker::where('id', $request->tracker_id)
+                ->where('user_id', auth()->id())
+                ->where('produk_id', $request->produk_id)
+                ->first();
+
+            if ($tracker && $tracker->status === 'SELESAI') {
+                $isVerified = true;
+                $trackerId = $tracker->id;
+            }
+        }
+
         $review = Review::where('pemesanan_id', $pemesanan->id)
             ->where('produk_id', $request->produk_id)
             ->first();
 
         if ($review) {
-            $review->update([
+            $updateData = [
                 'rating' => $request->rating,
                 'komentar_aroma' => $request->komentar_aroma,
                 'komentar_pengiriman' => $request->komentar_pengiriman,
                 'sentiment_score' => $sentimentScore,
                 'sentiment_label' => $sentimentLabel,
-            ]);
+            ];
+            if ($isVerified) {
+                $updateData['is_verified'] = true;
+                $updateData['tracker_id'] = $trackerId;
+            }
+            $review->update($updateData);
         } else {
             $review = Review::create([
                 'user_id' => auth()->id(),
@@ -92,6 +114,8 @@ class ReviewController extends Controller
                 'komentar_pengiriman' => $request->komentar_pengiriman,
                 'sentiment_score' => $sentimentScore,
                 'sentiment_label' => $sentimentLabel,
+                'is_verified' => $isVerified,
+                'tracker_id' => $trackerId,
             ]);
         }
 
@@ -146,6 +170,7 @@ class ReviewController extends Controller
                         'komentar' => $review->komentar_aroma,
                         'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
+                        'is_verified' => (bool) $review->is_verified,
                     ])
                     ->values(),
 
@@ -157,6 +182,7 @@ class ReviewController extends Controller
                         'komentar' => $review->komentar_aroma,
                         'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
+                        'is_verified' => (bool) $review->is_verified,
                     ])
                     ->values(),
 
@@ -168,6 +194,7 @@ class ReviewController extends Controller
                         'komentar' => $review->komentar_aroma,
                         'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
+                        'is_verified' => (bool) $review->is_verified,
                     ])
                     ->values(),
             ]
@@ -225,6 +252,7 @@ class ReviewController extends Controller
                         'komentar' => $review->komentar_aroma,
                         'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
+                        'is_verified' => (bool) $review->is_verified,
                     ])
                     ->values(),
 
@@ -236,6 +264,7 @@ class ReviewController extends Controller
                         'komentar' => $review->komentar_aroma,
                         'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
+                        'is_verified' => (bool) $review->is_verified,
                     ])
                     ->values(),
 
@@ -247,6 +276,7 @@ class ReviewController extends Controller
                         'komentar' => $review->komentar_aroma,
                         'komentar_pengiriman' => $review->komentar_pengiriman,
                         'tanggal' => $review->created_at->format('d-m-Y'),
+                        'is_verified' => (bool) $review->is_verified,
                     ])
                     ->values(),
             ]

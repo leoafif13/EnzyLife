@@ -127,7 +127,7 @@ public function history()
 {
     Pemesanan::expireUnpaidOrders();
 
-    $orders = Pemesanan::with(['detailPemesanan.produk', 'pembayaran', 'review', 'reviews'])
+    $orders = Pemesanan::with(['detailPemesanan.produk', 'pembayaran', 'review', 'reviews', 'trackers'])
         ->where('user_id', auth()->id())
         ->orderBy('created_at', 'desc')
         ->get();
